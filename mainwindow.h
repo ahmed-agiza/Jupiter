@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "syntaxhl.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,6 +22,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    SyntaxHL *SHL;
 
     //Menus
 };

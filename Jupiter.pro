@@ -13,9 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    syntaxhl.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    syntaxhl.h \
+    globalRegex.h
 
 FORMS    += \
     mainwindow.ui
