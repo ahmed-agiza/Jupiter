@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "syntaxhl.h"
+#include <QCompleter>
 
 namespace Ui {
 class MainWindow;
@@ -17,12 +18,15 @@ public:
     ~MainWindow();
 
 private slots:
-
     void on_textCodeEditor_textChanged();
+    void insertCompletion(QString completion);
+
+    void on_textCodeEditor_selectionChanged();
 
 private:
     Ui::MainWindow *ui;
     SyntaxHL *SHL;
+    QCompleter *codeCompleter;
 
     //Menus
 };
