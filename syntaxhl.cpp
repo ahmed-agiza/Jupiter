@@ -7,7 +7,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    //Syntax formats:
    instructionFormat.setForeground(QColor(Qt::red).lighter(120));
    instructionFormat.setFontWeight(QFont::Bold);
-   registerFormat.setForeground(Qt::darkCyan);
+   registerFormat.setForeground(Qt::yellow);
    registerFormat.setFontWeight(QFont::Bold);
    commentFormat.setForeground(Qt::darkGreen);
    stringFormat.setForeground(Qt::green);

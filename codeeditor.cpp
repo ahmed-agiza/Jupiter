@@ -37,7 +37,7 @@ void CodeEditor::highlightLine()
 {
     QList<QTextEdit::ExtraSelection> linesHL;
     QTextEdit::ExtraSelection lineHL;
-    lineHL.format.setBackground(QColor(180,35, 160));
+    lineHL.format.setBackground(QColor(Qt::lightGray).darker(180));
     lineHL.format.setProperty(QTextFormat::FullWidthSelection, true);
     lineHL.cursor = textCursor();
     lineHL.cursor.clearSelection();
@@ -49,13 +49,16 @@ void CodeEditor::highlightLine()
 void CodeEditor::updateCounter()
 {
     //Line count.
-   lCounter->clear();
-   lCounter->setAlignment(Qt::AlignCenter);
-    int numLines = this->toPlainText().count("\n");
-    for (int i = 0; i <= numLines; i++)
-       lCounter->append(QString::number(i));
-}
+   if(lCounter)
+   {
+       lCounter->clear();
+       lCounter->setAlignment(Qt::AlignCenter);
+        int numLines = this->toPlainText().count("\n");
+        for (int i = 0; i <= numLines; i++)
+           lCounter->append(QString::number(i));
 
+   }
+}
 void CodeEditor::completerPop()
 {
     QTextCursor sel = textCursor();

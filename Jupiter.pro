@@ -15,12 +15,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     syntaxhl.cpp \
-    codeeditor.cpp
+    codeeditor.cpp \
+    instruction.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
     globalRegex.h \
-    codeeditor.h
+    codeeditor.h \
+    instruction.h
 
 FORMS    += \
     mainwindow.ui
