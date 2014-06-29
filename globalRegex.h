@@ -5,11 +5,24 @@
 //Regex will be moved here.
 
 
-
+// matches valid register names
 QString registerRegex = "\\$((?:[12]?[\\d])|(?:3[012])|(?:zero)|(?:at)|(?:v[01])|(?:a[0-3])|(?:t\\d)|(?:s[0-7])|(?:k[01])|gp|fp|ra|sp)";
+// invalid register name: matches $str where the str is not a valid register name
+QString InvalidRegisterRegex = "\\$(?!(?:[12]?[\\d])|(?:3[012])|(?:zero)|(?:at)|(?:v[01])|(?:a[0-3])|(?:t\\d)|(?:s[0-7])|(?:k[01])|gp|fp|ra|sp)";
+// Matches comments
 QString commentRegex = "#.+";
-QString labelRegex = "\\b[a-zA-z_]\\w*:\\b";
-
+// Matches labels
+QString labelRegex = "\\b[a-zA-Z_]\\w*:";
+// Matches invalid labels (start with a number or an invalid character)
+QString invalidLabelRegex = "\\b[^a-zA-Z_]\\w*:\\b";
+// Matches valid directives' names
+QString directivesRegex = "\\.(align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
+// Matches invalid directives
+QString invalidDirectivesRegex = "\\.(?!align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
+// Matches strings
+QString cstringsRegex = "\".*?[^\\\\]\"";
+// Matches strings
+QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 
 //  instruction $register, $register, $register
 //    add
@@ -27,7 +40,7 @@ QString labelRegex = "\\b[a-zA-z_]\\w*:\\b";
 //    sltu
 
 QString registerInstructions = "(add|addu|sub|subu|and|or|nor|xor|srlv|sllv|srav|slt|sltu)";
-QString registerFormat = registerInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex;
+QString registerFormat = "(" + labelRegex + "[ \t]*)?" + registerInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, imm($register)
@@ -47,7 +60,7 @@ QString registerFormat = registerInstructions + "[ \\t]+" + registerRegex + "[ \
 //      sc
 
 QString memoryInstructions = "(sb|lb|lbu|sh|lh|lhu|sw|lw|lwl|lwr|swl|swr|ll|sc)";
-QString memoryFormat = memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)";
+QString memoryFormat = "(" + labelRegex + "[ \t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, immediate
@@ -66,7 +79,7 @@ QString memoryFormat = memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*
 //    bne
 
 QString immInstructions = "(addi|addiu|andi|ori|nori|xori|srl|sll|sra|slti|sltiu|beq|bne)";
-QString immFormat = immInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)";
+QString immFormat = "(" + labelRegex + "[ \t]*)?" + immInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, label
@@ -74,14 +87,14 @@ QString immFormat = immInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t
 //      bne
 
 QString labelInstructions = "(beq|bne)";
-QString labelFormat = labelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*[a-zA-z_]\\w*";
+QString labelFormat = "(" + labelRegex + "[ \t]*)?" + labelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, immediate
 //      lui
 
 QString singleimmInstructions = "(lui)";
-QString singleimmFormat = singleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)";
+QString singleimmFormat = "(" + labelRegex + "[ \t]*)?" + singleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register
@@ -93,7 +106,7 @@ QString singleimmFormat = singleimmInstructions + "[ \\t]+" + registerRegex + "[
 //      mthi
 
 QString singleRegisterInstructions = "(jr|jalr|mfhi|mflo|mtlo|mthi)";
-QString singleRegisterFormat = singleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex;
+QString singleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + singleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register
@@ -103,7 +116,7 @@ QString singleRegisterFormat = singleRegisterInstructions + "[ \\t]+" + register
 //      divu
 
 QString doubleRegisterInstructions = "(mult|multu|div|divu)";
-QString doubleRegisterFormat = doubleRegisterInstructions + "[ \\t]+" + registerRegex;
+QString doubleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + doubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction label
@@ -111,14 +124,14 @@ QString doubleRegisterFormat = doubleRegisterInstructions + "[ \\t]+" + register
 //      jal
 
 QString jumpInstructions = "(j|jal)";
-QString jumpFormat = jumpInstructions + "[ \\t]+[a-zA-z_]\\w*";
+QString jumpFormat = "(" + labelRegex + "[ \t]*)?" + jumpInstructions + "[ \\t]+([a-zA-Z_]\\w*)" + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction
 //      syscall
 //      nop
 
-QString standaloneInstructions = "(syscall|nop)";
+QString standaloneInstructions = "(" + labelRegex + "[ \t]*)?" + "(syscall|nop)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #endif // GLOBALREGEX_H
