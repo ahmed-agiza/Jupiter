@@ -5,9 +5,10 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
     QSyntaxHighlighter(parent)
 {
    //Syntax formats:
-   instructionFormat.setForeground(Qt::darkRed);
+   instructionFormat.setForeground(QColor(Qt::red).lighter(120));
    instructionFormat.setFontWeight(QFont::Bold);
-   registerFormat.setForeground(Qt::blue);
+   registerFormat.setForeground(Qt::darkCyan);
+   registerFormat.setFontWeight(QFont::Bold);
    commentFormat.setForeground(Qt::darkGreen);
    stringFormat.setForeground(Qt::green);
    labelFormat.setForeground(Qt::darkBlue);

@@ -37,7 +37,7 @@ void CodeEditor::highlightLine()
 {
     QList<QTextEdit::ExtraSelection> linesHL;
     QTextEdit::ExtraSelection lineHL;
-    lineHL.format.setBackground(QColor(242,242, 242));
+    lineHL.format.setBackground(QColor(180,35, 160));
     lineHL.format.setProperty(QTextFormat::FullWidthSelection, true);
     lineHL.cursor = textCursor();
     lineHL.cursor.clearSelection();
