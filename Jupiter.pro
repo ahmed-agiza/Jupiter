@@ -17,14 +17,16 @@ SOURCES += main.cpp\
     syntaxhl.cpp \
     codeeditor.cpp \
     instruction.cpp \
-    assembler.cpp
+    assembler.cpp \
+    memory.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
     globalRegex.h \
     codeeditor.h \
     instruction.h \
-    assembler.h
+    assembler.h \
+    memory.h
 
 FORMS    += \
     mainwindow.ui

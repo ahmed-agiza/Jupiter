@@ -2,7 +2,7 @@
 #include <QDebug>
 
 
-#define fParam2 QVector<int> *base, int rs, int rt, int rd, int imm, int shamt, int &PC
+#define fParam2 QVector<int> *base, int rs, int rt, int rd, int imm, int shamt, int &PC, memory *mem
 
 int add(fParam);
 int addu(fParam);
@@ -114,8 +114,9 @@ int nop(fParam);
 
 
 
-instruction::instruction(QString n, QVector<int> *b/*QVector<QBitArray> *b*/, int s, int t, int d, int im, int sh, instructionFormat f)
+instruction::instruction(QString n, QVector<int> *b/*QVector<QBitArray> *b*/, int o, int s, int t, int d, int im, int sh, instructionFormat f)
 {
+    opcode = o;
     registers = b;
     name = n;
     rs = s;
@@ -123,9 +124,10 @@ instruction::instruction(QString n, QVector<int> *b/*QVector<QBitArray> *b*/, in
     rt = t;
     imm = im;
     shamt = sh;
-    MIPSV = 1;
-    func = &add;
+    MIPSV = 1; //*
+    func = &add;//*
     format = f;
+
 
     for (int i = 0; i < 31; i++)
        registers->push_back(i);
@@ -150,6 +152,8 @@ int add(fParam2)
 {
     qDebug() << (*base)[rt] + (*base)[rs];
     (*base)[rd] = (*base)[rt] + (*base)[rs];
+
+    return 0;
 }
 
 void instruction::setRegisters(QVector<int> *b)
@@ -157,14 +161,25 @@ void instruction::setRegisters(QVector<int> *b)
     registers = b;
 }
 
-void instruction::setValues(QString n, int s, int d, int t, int im, int sh)
+void instruction::setMem(memory *m)
 {
+    mem = m;
+}
+
+void instruction::setValues(QString n, int o, int s, int d, int t, int im, int sh)
+{
+    opcode = o;
     name = n;
     rs = s;
     rd = d;
     rt = t;
     imm = im;
     shamt = sh;
+}
+
+void instruction::setOp(int o)
+{
+    opcode = o;
 }
 
 void instruction::setName(QString n)
@@ -214,6 +229,12 @@ QString instruction::getName() const
 {
     return name;
 }
+
+int instruction::getOp() const
+{
+    return opcode;
+}
+
 int instruction::getRs() const
 {
     return rs;
@@ -238,7 +259,7 @@ int instruction::getShamt() const
 
 void instruction::execute(int &inPC)
 {
-   int x = (*func)(registers, rs, rt, rd, imm, shamt, inPC);
+   int x = (*func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
    if(x != 0)
        emit raiseException(x);
 
