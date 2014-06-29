@@ -4,36 +4,52 @@
 #include <QBitArray>
 #include <QVector>
 #include <QString>
+#include <QObject>
+
+#define fParam QVector<int> *, int, int, int, int, int , int &
+
 enum instructionFormat {RFromat, IFormat, JFromat};
 
-class instruction
+class instruction : public QObject
 {
+    Q_OBJECT
 public:
-    instruction(QString, QVector<QBitArray> *, int, int, int, int, int, int, instructionFormat);
-    void setRegisters(QVector<QBitArray> *);
-    void setValues(QString, int, int, int, int);
+    instruction(QString n, QVector<int> *, int, int, int, int, int, instructionFormat);
+
+    ~instruction();
+
+    void setRegisters(QVector<int> *);
+    void setValues(QString, int, int, int, int, int);
     void setName(QString);
     void setRs(int);
     void setRd(int);
     void setRt(int);
     void setImm(int);
-    void setAddr(int);
-    void setPC(int*);
     void setShamt(int);
-    void execute(void);
-    void setFunc(void*);
+    QString getName() const;
+    int getRs() const;
+    int getRd() const;
+    int getRt() const;
+    int getImm() const;
+    int getShamt() const;
+
+    void execute(int &);
+    void setFunc(int (*sFunc)(fParam));
+
+signals:
+    void raiseException(int exceptionNumber);
 
 private:
-    QVector<QBitArray> *registers;
+    //QVector<QBitArray> *registers;
+    QVector <int> *registers;
     QString name;
-    int address;
-    int *PC;
     int rs;
     int rd;
     int rt;
     int imm;
     int shamt;
-    void (*func)(int, int, int, int, int, int, int);
+    int MIPSV;
+    int (*func)(fParam);
 
     instructionFormat format;
 
