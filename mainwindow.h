@@ -18,15 +18,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_textCodeEditor_textChanged();
-    void insertCompletion(QString completion);
-
-    void on_textCodeEditor_selectionChanged();
+    void on_actionNew_triggered();
 
 private:
     Ui::MainWindow *ui;
-    SyntaxHL *SHL;
-    QCompleter *codeCompleter;
 
     //Menus
 };

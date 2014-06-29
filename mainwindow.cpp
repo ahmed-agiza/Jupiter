@@ -4,6 +4,10 @@
 #include <QStringListModel>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QMdiSubWindow>
+#include <QMdiArea>
+#include "codeeditor.h"
+#include <QHBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,22 +16,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     ui->setupUi(this);
+    on_actionNew_triggered();
+    this->setCentralWidget(ui->dockCode);
 
 
-    ui->subwindowMain->showMaximized();
-    SHL = new SyntaxHL(ui->textCodeEditor); //Adding syntax highlighter.
-
-    //Auto-complete setup:
-    QStringList compList; //Completion list.
-    compList << "add" << "addu" << "addi" << "sub" << "sll" << "slt" << "slti";
-    codeCompleter = new QCompleter(compList, this);
-    codeCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    //qDebug() << "ff" << codeCompleter->widget();
-    codeCompleter->setWidget(ui->textCodeEditor);
-    codeCompleter->setCompletionMode(QCompleter::PopupCompletion);
-
-    //qDebug() << codeCompleter->widget();
-    QObject::connect(codeCompleter, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
 
 }
 
@@ -36,50 +28,34 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::insertCompletion(QString completion)
+
+
+
+
+
+void MainWindow::on_actionNew_triggered()
 {
-   // qDebug() << "Here.";
+    QWidget *newWidgets = new QWidget(this);
 
-    QTextCursor currentPos = ui->textCodeEditor->textCursor();
-    int compLength = completion.length() - codeCompleter->completionPrefix().length();
-    currentPos.movePosition(QTextCursor::Left);
-    currentPos.movePosition(QTextCursor::EndOfWord);
-    currentPos.insertText(completion.right(compLength));
-    ui->textCodeEditor->setTextCursor(currentPos);
+    CodeEditor *newCode = new CodeEditor(this);
+    QTextEdit *linesCount = new QTextEdit(this);
+    linesCount->setEnabled(false);
+    linesCount->setMinimumSize(10, 10);
+    linesCount->setMaximumSize(40, linesCount->maximumSize().height());
+    linesCount->setText("0");
+    newCode->setCounter(linesCount);
 
-}
+    QHBoxLayout *HL = new QHBoxLayout(newWidgets);
 
-void MainWindow::on_textCodeEditor_textChanged()
-{
-    QTextCursor sel = ui->textCodeEditor->textCursor();
-                sel.select(QTextCursor::WordUnderCursor);
-    codeCompleter->setCompletionPrefix(sel.selectedText());
+    HL->addWidget(linesCount);
+    HL->addWidget(newCode);
 
-    if(sel.selectedText().length() > 0)
-    {
-        if ((codeCompleter->completionCount() != 1) || ((codeCompleter->completionModel()->data(codeCompleter->model()->index(0, 0)).toString()) != sel.selectedText()))
-        {
-            QRect popRect = ui->textCodeEditor->cursorRect();
-            popRect.setWidth(50);
-            codeCompleter->complete(popRect);
-        }
-        else
-            codeCompleter->popup()->hide();
-    }
-    else
-        codeCompleter->popup()->hide();
+    newWidgets->setLayout(HL);
 
-
-    //Line count.
-    ui->codeLineNumber->clear();
-    ui->codeLineNumber->setAlignment(Qt::AlignCenter);
-    int numLines = ui->textCodeEditor->toPlainText().count("\n");
-    for (int i = 0; i <= numLines; i++)
-        ui->codeLineNumber->append(QString::number(i));
-
-}
-
-void MainWindow::on_textCodeEditor_selectionChanged()
-{
+    QMdiSubWindow *newWindow = new QMdiSubWindow(ui->mdiAreaCode);
+    newWindow->setWindowTitle("Untitled");
+    newWindow->setWidget(newWidgets);
+    ui->mdiAreaCode->addSubWindow(newWindow);
+    newWidgets->showMaximized();
 
 }
