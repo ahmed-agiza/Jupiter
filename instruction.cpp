@@ -1,5 +1,8 @@
 #include "instruction.h"
 
-instruction::instruction()
+
+void instruction::execute()
 {
+   (*func)(rs, rt, rd, imm, shamt);
+
 }

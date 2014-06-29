@@ -40,13 +40,10 @@ void MainWindow::on_actionNew_triggered()
 
     CodeEditor *newCode = new CodeEditor(this);
     QTextEdit *linesCount = new QTextEdit(this);
-    //linesCount->setEnabled(false);
+    linesCount->setEnabled(false);
     linesCount->setMinimumSize(10, 10);
     linesCount->setMaximumSize(40, linesCount->maximumSize().height());
     linesCount->setText("0");
-    QPalette pal =  linesCount->palette();
-    pal.setColor(QPalette::Active, QPalette::Active, Qt::blue);
-    linesCount->setPalette(pal);
     newCode->setCounter(linesCount);
 
     QHBoxLayout *HL = new QHBoxLayout(newWidgets);
