@@ -3,6 +3,6 @@
 
 void instruction::execute()
 {
-   (*func)(rs, rt, rd, imm, shamt);
+   (*func)(rs, rt, rd, imm, shamt, PC);
 
 }
