@@ -144,6 +144,7 @@ instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
     qDebug() << (*registers)[rd];
 
 
+
     int x;
     execute(x);
 
@@ -152,6 +153,50 @@ instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
     qDebug() << (*registers)[rt];
     qDebug() << (*registers)[rd];
 
+}
+
+instruction::instruction(const instruction &inst)
+{
+    registers = inst.registers;
+    name = inst.name;
+    rs = inst.rs;
+    rd = inst.rd;
+    rt = inst.rt;
+    imm = inst.imm;
+    shamt = inst.shamt;
+    MIPSV = inst.MIPSV;
+    func = inst.func;
+    opcode = inst.opcode;
+
+    mem = inst.mem;
+    format = inst.format;
+
+
+}
+
+instruction::instruction()
+{
+
+}
+
+instruction & instruction::operator = (const instruction &inst)
+{
+    registers = inst.registers;
+    name = inst.name;
+    rs = inst.rs;
+    rd = inst.rd;
+    rt = inst.rt;
+    imm = inst.imm;
+    shamt = inst.shamt;
+    MIPSV = inst.MIPSV;
+    func = inst.func;
+    opcode = inst.opcode;
+
+    mem = inst.mem;
+
+    format = inst.format;
+
+    return *this;
 }
 
 
@@ -248,6 +293,20 @@ int instruction::getRt() const
 {
     return rt;
 }
+
+int instruction::getRsData() const
+{
+    return (*registers)[rs];
+}
+int instruction::getRdData() const
+{
+    return (*registers)[rd];
+}
+int instruction::getRtData() const
+{
+    return (*registers)[rt];
+}
+
 __int16 instruction::getImm() const
 {
     return imm;
@@ -355,7 +414,7 @@ int slt(fParam2)
 
 int sltu(fParam2)
 {
-    Rdr = (((uint32)Rsr) < ((uint32) Rtr));
+    Rdr = (((uint)Rsr) < ((uint) Rtr));
     return 0;
 }
 
@@ -494,7 +553,7 @@ int slti(fParam2)
 }
 int sltiu(fParam2)
 {
-    Rdr = (((uint32)Rsr) < ((uint32) imm));
+    Rdr = (((uint)Rsr) < ((uint) imm));
     return 0;
 }
 int beq(fParam2)

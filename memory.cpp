@@ -12,6 +12,22 @@ memory::~memory()
 
 }
 
+
+void memory::storeByte(int addr, int data)
+{
+
+}
+
+int memory::loadByte(int addr) const
+{
+
+}
+
+int memory::loadByteU(int addr) const
+{
+
+}
+
 void memory::storeHWord(int addr, int data)
 {
 
@@ -63,7 +79,9 @@ int memory::storeConditional(int addr, int data)
 
 }
 
-void memory::loadLinked(int addr) const
+int memory::loadLinked(int addr) const
 {
 
 }
+
+

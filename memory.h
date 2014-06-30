@@ -10,7 +10,7 @@ class memory : public QObject
     Q_OBJECT
 public:
     memory (int s);
-    void storeBye(int, int);
+    void storeByte(int, int);
     int loadByte(int) const;
     int loadByteU(int) const;
 
@@ -26,7 +26,7 @@ public:
     int loadWordR(int) const;
 
     int storeConditional(int, int);
-    void loadLinked(int) const;
+    int loadLinked(int) const;
 
     ~memory();
 
