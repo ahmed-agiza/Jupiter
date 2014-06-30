@@ -1,4 +1,50 @@
-#include "assembler.h"
+#include "Assembler.h"
+
+
+Assembler::Assembler(QStringList* stringList)
+{
+    initializeRegisters();
+    int address = 0;
+    //QStringList stringList = Text.document()->toPlainText().split('\n');
+    QRegExp R(registerFormat), M(memoryFormat), I(immFormat), L(labelFormat), SR(singleRegisterFormat), SI(singleimmFormat), DR(doubleRegisterFormat), J(jumpFormat), SA(standaloneInstructions), LBL(labelRegex), CMT(commentRegex);
+    foreach (QString line, *stringList) {
+        if((R.indexIn(line, 0)) != -1){
+            instructions.push_back(instruction(R.cap(2),&registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
+            if(R.cap(1).size()) labels[R.cap(1)] = address;
+        }else if((M.indexIn(line, 0)) != -1){
+            instructions.push_back(instruction(M.cap(2),&registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
+            if(M.cap(1).size()) labels[M.cap(1)] = address;
+        }else if((I.indexIn(line, 0)) != -1){
+            instructions.push_back(instruction(I.cap(2),&registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),getNumber(I.cap(5)),IFormat));
+            if(I.cap(1).size()) labels[I.cap(1)] = address;
+        }else if((L.indexIn(line, 0)) != -1){
+            if(L.cap(1).size()) labels[L.cap(1)] = address;
+        }else if((SR.indexIn(line, 0)) != -1){
+            instructions.push_back(instruction(SR.cap(2),&registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,registerIndex[SR.cap(3)],0,0,RFormat));
+            if(SR.cap(1).size()) labels[SR.cap(1)] = address;
+        }else if((SI.indexIn(line, 0)) != -1){
+            instructions.push_back(instruction(SI.cap(2),&registers,opcode[SI.cap(2)],0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0,IFormat));
+            if(SI.cap(1).size()) labels[SI.cap(1)] = address;
+        }else if((DR.indexIn(line, 0)) != -1){
+            instructions.push_back(instruction(DR.cap(2),&registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex(DR.cap(4)),0,0,0,RFormat));
+            if(DR.cap(1).size()) labels[DR.cap(1)] = address;
+        }else if((J.indexIn(line, 0)) != -1){
+            if(J.cap(1).size()) labels[J.cap(1)] = address;
+        }else if((SA.indexIn(line, 0)) != -1){
+            instructions.push_back(instruction(SA.cap(2),&registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
+        }else if((LBL.indexIn(line, 0)) != -1){
+            labels[LBL.cap(1)] = address;
+            address--;
+        }else if((CMT.indexIn(line, 0)) != -1){
+            address--;
+        }
+        address++;
+    }
+}
+Assembler::~Assembler(){}
+
+Assembler::Assembler(){}
+
 
 int Assembler::getNumber(QString s)
 {
@@ -77,45 +123,31 @@ void Assembler::initializeRegisters()
     registerIndex["29"] = 29;
     registerIndex["30"] = 30;
     registerIndex["31"] = 31;
+    opcode["j"] = 2;
+    opcode["jal"] = 3;
+    opcode["beq"] = 4;
+    opcode["bne"] = 5;
+    opcode["addi"] = 8;
+    opcode["addiu"] = 9;
+    opcode["slti"] = 10;
+    opcode["sltiu"] = 11;
+    opcode["andi"] = 12;
+    opcode["ori"] = 13;
+    opcode["xori"] = 14;
+    opcode["lui"] = 15;
+    opcode["lb"] = 32;
+    opcode["lh"] = 33;
+    opcode["lwl"] = 34;
+    opcode["lw"] = 35;
+    opcode["lbu"] = 36;
+    opcode["lhu"] = 37;
+    opcode["lwr"] = 38;
+    opcode["sb"] = 40;
+    opcode["sh"] = 41;
+    opcode["swl"] = 42;
+    opcode["sw"] = 43;
+    opcode["swr"] = 46;
+    opcode["ll"] = 48;
+    opcode["sc"] = 56;
 }
 
-Assembler::Assembler(QTextEdit& Text)
-{
-    initializeRegisters();
-    int address = 0;
-    QStringList stringList = Text.document()->toPlainText().split('\n');
-    QRegExp R(registerFormat), M(memoryFormat), I(immFormat), L(labelFormat), SR(singleRegisterFormat), SI(singleimmFormat), DR(doubleRegisterFormat), J(jumpFormat), SA(standaloneInstructions), LBL(labelRegex), CMT(commentRegex);
-    foreach (QString line, stringList) {
-        if((R.indexIn(line, 0)) != -1){
-            instructions.push_back(instruction(R.cap(2),registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0));
-            if(R.cap(1).size()) labels[R.cap(1)] = address;
-        }else if((M.indexIn(line, 0)) != -1){
-            instructions.push_back(instruction(M.cap(2),registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0));
-            if(M.cap(1).size()) labels[M.cap(1)] = address;
-        }else if((I.indexIn(line, 0)) != -1){
-            instructions.push_back(instruction(I.cap(2),registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),getNumber(I.cap(5))));
-            if(I.cap(1).size()) labels[I.cap(1)] = address;
-        }else if((L.indexIn(line, 0)) != -1){
-            if(L.cap(1).size()) labels[L.cap(1)] = address;
-        }else if((SR.indexIn(line, 0)) != -1){
-            instructions.push_back(instruction(SR.cap(2),registerIndex[SR.cap(3)],0,registerIndex[SR.cap(3)],0,0));
-            if(SR.cap(1).size()) labels[SR.cap(1)] = address;
-        }else if((SI.indexIn(line, 0)) != -1){
-            instructions.push_back(instruction(SI.cap(2),0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0));
-            if(SI.cap(1).size()) labels[SI.cap(1)] = address;
-        }else if((DR.indexIn(line, 0)) != -1){
-            instructions.push_back(instruction(DR.cap(2),registerIndex[DR.cap(3)],registerIndex(DR.cap(4)),0,0,0));
-            if(DR.cap(1).size()) labels[DR.cap(1)] = address;
-        }else if((J.indexIn(line, 0)) != -1){
-            if(J.cap(1).size()) labels[J.cap(1)] = address;
-        }else if((SA.indexIn(line, 0)) != -1){
-            instructions.push_back(instruction(SA.cap(2),0,0,0,0,0));
-        }else if((LBL.indexIn(line, 0)) != -1){
-            labels[LBL.cap(1)] = address;
-            address--;
-        }else if((CMT.indexIn(line, 0)) != -1){
-            address--;
-        }
-        address++;
-    }
-}
