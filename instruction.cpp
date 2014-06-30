@@ -2,7 +2,7 @@
 #include <QDebug>
 
 
-#define fParam2 QVector<int> *base, int rs, int rt, int rd, int imm, int shamt, int &PC, memory *mem
+#define fParam2 QVector<__int32> *base, int rs, int rt, int rd, __int16 imm, int shamt, int &PC, memory *mem
 
 int add(fParam);
 int addu(fParam);
@@ -112,9 +112,15 @@ int nop(fParam);
 //      syscall
 //      nop
 
+#define Rdr (*base)[rd]
+#define Rtr (*base)[rt]
+#define Rsr (*base)[rs]
+
+#define OVExNo 1 //Overflow exception code.
 
 
-instruction::instruction(QString n, QVector<int> *b/*QVector<QBitArray> *b*/, int o, int s, int t, int d, int im, int sh, instructionFormat f)
+
+instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, int d, __int16 im, int sh, instructionFormat f)
 {
     opcode = o;
     registers = b;
@@ -148,15 +154,9 @@ instruction::instruction(QString n, QVector<int> *b/*QVector<QBitArray> *b*/, in
 
 }
 
-int add(fParam2)
-{
-    qDebug() << (*base)[rt] + (*base)[rs];
-    (*base)[rd] = (*base)[rt] + (*base)[rs];
 
-    return 0;
-}
 
-void instruction::setRegisters(QVector<int> *b)
+void instruction::setRegisters(QVector<__int32> *b)
 {
     registers = b;
 }
@@ -166,7 +166,7 @@ void instruction::setMem(memory *m)
     mem = m;
 }
 
-void instruction::setValues(QString n, int o, int s, int d, int t, int im, int sh)
+void instruction::setValues(QString n, int o, int s, int d, int t, __int16 im, int sh)
 {
     opcode = o;
     name = n;
@@ -207,7 +207,7 @@ void instruction::setRt(int t)
     rt = t;
 }
 
-void instruction::setImm(int im)
+void instruction::setImm(__int16 im)
 {
     imm = im;
 }
@@ -248,7 +248,7 @@ int instruction::getRt() const
 {
     return rt;
 }
-int instruction::getImm() const
+__int16 instruction::getImm() const
 {
     return imm;
 }
@@ -262,5 +262,307 @@ void instruction::execute(int &inPC)
    int x = (*func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
    if(x != 0)
        emit raiseException(x);
+
+}
+
+int add(fParam2)
+{
+
+    __int32 res = Rtr + Rsr;
+
+
+    if ((Rtr > 0 && Rsr > 0 && res <0) || (Rtr < 0 && Rsr < 0 && res > 0))
+        return OVExNo;
+
+    Rdr = res;
+    return 0;
+}
+
+
+int addu(fParam2)
+{
+    Rdr = Rtr + Rsr;
+    return 0;
+
+}
+
+int sub(fParam2)
+{
+    __int32 res = Rtr - Rsr;
+
+
+    if ((Rtr > 0 && Rsr < 0 && res <0) || (Rtr < 0 && Rsr > 0 && res > 0))
+        return OVExNo;
+
+    Rdr = res;
+    return 0;
+}
+
+int subu(fParam2)
+{
+    Rdr = Rtr - Rsr;
+    return 0;
+}
+
+int and_(fParam2)
+{
+    Rdr = Rtr & Rsr;
+    return 0;
+}
+int or_(fParam2)
+{
+    Rdr = Rtr | Rsr;
+    return 0;
+}
+
+int xor_(fParam2)
+{
+    Rdr = Rtr ^ Rsr;
+    return 0;
+}
+
+int nor_(fParam2)
+{
+    Rdr = ~(Rtr | Rsr);
+    return 0;
+}
+
+int srlv(fParam2)
+{
+    Rdr = Rtr >> Rsr;
+    if (Rtr < 0)
+        Rdr = Rdr * -1;
+    return 0;
+}
+
+int sllv(fParam2)
+{
+    Rdr = Rtr << Rsr;
+    return 0;
+}
+
+int srav(fParam2)
+{
+    Rdr = Rtr >> Rsr;
+    return 0;
+}
+
+int slt(fParam2)
+{
+    Rdr = (Rsr < Rtr);
+    return 0;
+}
+
+int sltu(fParam2)
+{
+    Rdr = (((uint32)Rsr) < ((uint32) Rtr));
+    return 0;
+}
+
+int sb(fParam2)
+{
+    mem->storeByte(Rsr + imm, Rtr);
+    return 0;
+}
+
+int lb(fParam2)
+{
+    Rtr = mem->loadByte(Rsr + imm) ;
+    return 0;
+}
+
+int lbu(fParam2)
+{
+    Rtr = mem->loadByteU(Rsr + imm) ;
+    return 0;
+}
+
+int sh(fParam2)
+{
+    mem->storeHWord(Rsr + imm, Rtr);
+    return 0;
+}
+int lh(fParam2)
+{
+    Rtr = mem->loadHWord(Rsr + imm) ;
+    return 0;
+}
+int lhu(fParam2)
+{
+    Rtr = mem->loadHWordU(Rsr + imm) ;
+    return 0;
+}
+int sw(fParam2)
+{
+    mem->storeWord(Rsr + imm, Rtr);
+    return 0;
+}
+int lw(fParam2)
+{
+    Rtr = mem->loadWord(Rsr + imm) ;
+    return 0;
+}
+int lwl(fParam2)
+{
+    Rtr = mem->loadWord(Rsr + imm) ;
+    return 0;
+}
+int lwr(fParam2)
+{
+    Rtr = mem->loadWordR(Rsr + imm) ;
+    return 0;
+}
+int swl(fParam2)
+{
+    mem->storeWordL(Rsr + imm, Rtr);
+    return 0;
+}
+int swr(fParam2)
+{
+    mem->storeWordR(Rsr + imm, Rtr);
+    return 0;
+}
+int ll(fParam2)
+{
+    Rtr = mem->loadLinked(Rsr + imm) ;
+    return 0;
+}
+int sc(fParam2)
+{
+    mem->storeConditional(Rsr + imm, Rtr);
+    return 0;
+}
+
+
+int addi(fParam2)
+{
+    __int32 res = Rtr + imm;
+
+    if ((Rtr > 0 && imm > 0 && res <0) || (Rtr < 0 && imm < 0 && res > 0))
+        return OVExNo;
+
+    Rdr = res;
+    return 0;
+}
+
+int addiu(fParam2)
+{
+    Rdr = Rtr - imm;
+    return 0;
+}
+int andi(fParam2)
+{
+    Rdr = Rtr & imm;
+    return 0;
+}
+int ori(fParam2)
+{
+    Rdr = Rtr | imm;
+    return 0;
+}
+int nori(fParam2)
+{
+    Rdr = !(Rtr | imm);
+    return 0;
+}
+int xori(fParam2)
+{
+    Rdr = Rtr ^ imm;
+    return 0;
+}
+int srl(fParam2)
+{
+    Rdr = Rtr >> shamt;
+    if (Rtr < 0)
+        Rdr = Rdr * -1;
+    return 0;
+}
+int sll(fParam2)
+{
+    Rdr = Rtr << shamt;
+    return 0;
+}
+int sra(fParam2)
+{
+    Rdr = Rtr >> shamt;
+    return 0;
+}
+int slti(fParam2)
+{
+    Rdr = (Rsr < imm);
+    return 0;
+}
+int sltiu(fParam2)
+{
+    Rdr = (((uint32)Rsr) < ((uint32) imm));
+    return 0;
+}
+int beq(fParam2)
+{
+
+}
+int bne(fParam2)
+{
+
+}
+int lui(fParam2)
+{
+
+}
+
+int jr(fParam2)
+{
+
+}
+int jalr(fParam2)
+{
+
+}
+int mfhi(fParam2)
+{
+
+}
+int mflo(fParam2)
+{
+
+}
+int mthi(fParam2)
+{
+
+}
+int mtlo(fParam2)
+{
+
+}
+int mult(fParam2)
+{
+
+}
+int multu(fParam2)
+{
+
+}
+int div(fParam2)
+{
+
+}
+int divu(fParam2)
+{
+
+}
+int j_(fParam2)
+{
+
+}
+int jal(fParam2)
+{
+
+}
+int syscall(fParam2)
+{
+
+}
+int nop(fParam2)
+{
 
 }

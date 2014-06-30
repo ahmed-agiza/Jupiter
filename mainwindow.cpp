@@ -9,6 +9,8 @@
 #include "codeeditor.h"
 #include <QHBoxLayout>
 #include <QPalette>
+#include "instruction.h"
+#include <QVector>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     on_actionNew_triggered();
     this->setCentralWidget(ui->dockCode);
+
+    QVector<__int32> regs;
+    for (int i = 0; i < 40; i++) regs.push_back(i);
+    instruction("add" , &regs, 0, 2, 3, 4, 0, 0, IFormat);
+
+    qDebug() << (-4 >> 1);
 
 
 

@@ -26,3 +26,7 @@ Makefile*
 # QtCreator
 
 *.autosave
+assembler.cpp
+assembler.h
+assembler.h
+assembler.cpp

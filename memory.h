@@ -2,12 +2,14 @@
 #define MEMORY_H
 
 #include <QMap>
+#include <QByteArray>
+#include <QObject>
 
-class memory
+class memory : public QObject
 {
+    Q_OBJECT
 public:
-    memory();
-
+    memory (int s);
     void storeBye(int, int);
     int loadByte(int) const;
     int loadByteU(int) const;
@@ -26,9 +28,17 @@ public:
     int storeConditional(int, int);
     void loadLinked(int) const;
 
+    ~memory();
+
+signals:
+    void outOfRange();
 
 private:
-    QMap <int, int> data;
+    QByteArray data;
+    int size;
+
+
+
 };
 
 #endif // MEMORY_H

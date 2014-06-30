@@ -15,11 +15,11 @@ class instruction : public QObject
 {
     Q_OBJECT
 public:
-    instruction(QString n, QVector<int> *, int, int, int, int, int, int, instructionFormat);
+    instruction(QString n, QVector<__int32> *, int, int, int, int, int, int, instructionFormat);
 
     ~instruction();
 
-    void setRegisters(QVector<int> *);
+    void setRegisters(QVector<__int32> *);
     void setValues(QString, int, int, int, int, int, int);
     void setName(QString);
     void setRs(int);
@@ -45,7 +45,7 @@ signals:
 
 private:
     //QVector<QBitArray> *registers;
-    QVector <int> *registers;
+    QVector <__int32> *registers;
     QString name;
     int rs;
     int rd;
