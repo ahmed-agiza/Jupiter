@@ -3,6 +3,8 @@
 
 Assembler::Assembler(QStringList* stringList)
 {
+    QVector< QPair<int,QString> > missingBranchLabels;
+    QVector< QPair<int,QString> > missingJumpLabels;
     initializeRegisters();
     int address = 0;
     //QStringList stringList = Text.document()->toPlainText().split('\n');
@@ -18,7 +20,12 @@ Assembler::Assembler(QStringList* stringList)
             instructions.push_back(instruction(I.cap(2),&registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),getNumber(I.cap(5)),IFormat));
             if(I.cap(1).size()) labels[I.cap(1)] = address;
         }else if((L.indexIn(line, 0)) != -1){
-            if(L.cap(1).size()) labels[L.cap(1)] = address;
+            if(labels.contains(L.cap(5))){
+                instructions.push_back(instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
+            }else{
+                missingBranchLabels.push_back(qMakePair(address,L.cap(5)));
+                instructions.push_back(instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
+            }if(L.cap(1).size()) labels[L.cap(1)] = address;
         }else if((SR.indexIn(line, 0)) != -1){
             instructions.push_back(instruction(SR.cap(2),&registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,registerIndex[SR.cap(3)],0,0,RFormat));
             if(SR.cap(1).size()) labels[SR.cap(1)] = address;
@@ -29,9 +36,15 @@ Assembler::Assembler(QStringList* stringList)
             instructions.push_back(instruction(DR.cap(2),&registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex(DR.cap(4)),0,0,0,RFormat));
             if(DR.cap(1).size()) labels[DR.cap(1)] = address;
         }else if((J.indexIn(line, 0)) != -1){
-            if(J.cap(1).size()) labels[J.cap(1)] = address;
+            if(labels.contains(J.cap(3))){
+                instructions.push_back(instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,labels[L.cap(5)],0,JFormat));
+            }else{
+                missingJumpLabels.push_back(qMakePair(address,J.cap(3)));
+                instructions.push_back(instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,0,0,JFormat));
+            }if(J.cap(1).size()) labels[J.cap(1)] = address;
         }else if((SA.indexIn(line, 0)) != -1){
             instructions.push_back(instruction(SA.cap(2),&registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
+            if(SA.cap(1).size()) labels[SA.cap(1)] = address;
         }else if((LBL.indexIn(line, 0)) != -1){
             labels[LBL.cap(1)] = address;
             address--;
@@ -39,6 +52,20 @@ Assembler::Assembler(QStringList* stringList)
             address--;
         }
         address++;
+    }
+    foreach (QPair<int,QString> lbl, missingBranchLabels){
+        if(labels.contains(lbl.second)){
+            instructions[lbl.first].setImm(labels[lbl.second]-lbl.first-1);
+        } else {
+            // missing label!!
+        }
+    }
+    foreach (QPair<int,QString> lbl, missingJumpLabels){
+        if(labels.contains(lbl.second)){
+            instructions[lbl.first].setImm(labels[lbl.second]);
+        } else {
+            // missing label!!
+        }
     }
 }
 Assembler::~Assembler(){}
