@@ -12,7 +12,7 @@ QString InvalidRegisterRegex = "\\$(?!(?:[12]?[\\d])|(?:3[012])|(?:zero)|(?:at)|
 // Matches comments
 QString commentRegex = "#.+";
 // Matches labels
-QString labelRegex = "\\b[a-zA-Z_]\\w*:";
+QString labelRegex = "\\b([a-zA-Z_]\\w*:)";
 // Matches invalid labels (start with a number or an invalid character)
 QString invalidLabelRegex = "\\b[^a-zA-Z_]\\w*:\\b";
 // Matches valid directives' names
