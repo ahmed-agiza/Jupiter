@@ -1,6 +1,70 @@
 #include "syntaxhl.h"
 #include <QDebug>
 
+//    add
+//    addu
+//    sub
+//    subu
+//    and
+//    or
+//    nor
+//    xor
+//    srlv
+//    sllv
+//    srav
+//    slt
+//    sltu
+
+
+//    addi
+//    addiu
+//    andi
+//    ori
+//    nori
+//    xori
+//    srl
+//    sll
+//    sra
+//    slti
+//    sltiu
+//    beq
+//    bne
+
+
+//  instruction $register, $register, label
+//      beq
+//      bne
+
+
+//  instruction $register, immediate
+//      lui
+
+
+//  instruction $register
+//      jr
+//      jalr
+//      mfhi
+//      mflo
+//      mtlo
+//      mthi
+
+
+//  instruction $register, $register
+//      mult
+//      multu
+//      div
+//      divu
+
+
+//  instruction label
+//      j
+//      jal
+
+
+//  instruction
+//      syscall
+//      nop
+
 SyntaxHL::SyntaxHL(QTextEdit *parent) :
     QSyntaxHighlighter(parent)
 {
@@ -14,14 +78,40 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    labelFormat.setForeground(Qt::darkBlue);
    macroFormat.setForeground(Qt::magenta);
 
+   //Instructions Syntax
 
-    //Instructions Syntax
-   instructionsList << "\\badd\\b" << "\\baddu\\b" << "\\bsub\\b";
    syntax tempSyn;
+   QStringList instructionsList;
+   instructionsList << "add" << "addu" << "sub" << "subu" << "and" << "or" << "xor"
+              << "srlv" << "sllv" << "srav" << "slt" << "sltu" << "addi" <<"addiu"
+              << "andi" << "ori" << "nori" << "xori" << "srl" << "sll" << "sra"
+              << "slti" << "sltiu" << "beq" << "bne" << "lui" << "sb" << "lb" << "lbu"
+              << "sh" << "lh" << "lhu" << "sw" << "lw" << "lwl" << "lwr" << "swl"
+              <<"swr" <<"ll" << "sc" << "jr" << "jalr" << "mfhi" << "mflo"
+              << "mthi" << "mtlo" << "mult" << "multu" << "div" << "divu"
+              << "j" << "jal" << "syscal" << "nop";
+
+
+   //      sb
+   //      lb
+   //      lbu
+   //      sh
+   //      lh
+   //      lhu
+   //      sw
+   //      lw
+   //      lwl
+   //      lwr
+   //      swl
+   //      swr
+   //      ll
+   //      sc
+
+
 
    foreach(QString pattern, instructionsList)
    {
-       tempSyn.pattern = QRegExp(pattern); tempSyn.format = instructionFormat;
+       tempSyn.pattern = QRegExp(QString("\\b" + pattern + "\\b")); tempSyn.format = instructionFormat;
        syntaxes.append(tempSyn);
    }
 
@@ -29,6 +119,11 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    //Registers syntax.
    for (int i = 0; i < 32; i++)
         registersList.append(QString("\\$" + QString::number(i)));
+   registersList << "\\$zero" << "\\$at" << "\\$v0" << "\\$v1" <<"\\$a0" << "\\$a1" << "\\$a2" << "\\$a3"
+                 << "\\$t0" << "\\$t1" << "\\$t2" << "\\$t3" << "\\$t4" << "\\$t5" << "\\$t6" << "\\$t7"
+                 << "\\$s0" << "\\$s1" << "\\$s2" << "\\$s3" << "\\$s4" << "\\$s5" << "\\$s6" << "\\$s7"
+                 << "\\$t8" << "\\$t9" << "\\$gp" << "\\$fp" << "\\$ra";
+
 
 
    foreach(QString pattern, registersList)

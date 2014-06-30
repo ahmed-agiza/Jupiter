@@ -1,6 +1,7 @@
 #include "codeeditor.h"
 #include <QDebug>
 #include <QAbstractItemView>
+#include <QKeyEvent>
 
 CodeEditor::CodeEditor(QWidget *parent) :
     QTextEdit(parent)
@@ -11,7 +12,25 @@ CodeEditor::CodeEditor(QWidget *parent) :
 
     //Auto-complete setup:
     QStringList compList; //Completion list.
-    compList << "add" << "addu" << "addi" << "sub" << "sll" << "slt" << "slti";
+    compList << "add" << "addu" << "sub" << "subu" << "and" << "or" << "xor"
+             << "srlv" << "sllv" << "srav" << "slt" << "sltu" << "addi" <<"addiu"
+             << "andi" << "ori" << "nori" << "xori" << "srl" << "sll" << "sra"
+             << "slti" << "sltiu" << "beq" << "bne" << "lui" << "sb" << "lb" << "lbu"
+             << "sh" << "lh" << "lhu" << "sw" << "lw" << "lwl" << "lwr" << "swl"
+             << "swr" <<"ll" << "sc" << "jr" << "jalr" << "mfhi" << "mflo"
+             << "mthi" << "mtlo" << "mult" << "multu" << "div" << "divu"
+             << "j" << "jal" << "syscal" << "nop";
+
+    for (int i = 0; i < 32; i++) compList.append(QString("$" + QString::number(i)));
+    compList << "$zero" << "$at" << "$v0" << "$v1" <<"$a0" << "$a1" << "$a2" << "$a3"
+             << "$t0" << "$t1" << "$t2" << "$t3" << "$t4" << "$t5" << "$t6" << "$t7"
+             << "$s0" << "$s1" << "$s2" << "$s3" << "$s4" << "$s5" << "$s6" << "$s7"
+             << "$t8" << "$t9" << "$gp" << "$fp" << "$ra";
+
+
+
+
+
     codeCompleter = new QCompleter(compList, this);
     codeCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     codeCompleter->setWidget(this);
@@ -59,15 +78,35 @@ void CodeEditor::updateCounter()
 
    }
 }
+
+void CodeEditor::keyPressEvent(QKeyEvent *e)
+{
+    /*if (e->key() == Qt::Key_Return)
+        if(codeCompleter->popup()->isVisible())
+            insertCompletion(codeCompleter->currentCompletion());*/
+    e->accept();
+}
+
 void CodeEditor::completerPop()
 {
+
     QTextCursor sel = textCursor();
                 sel.select(QTextCursor::WordUnderCursor);
-    codeCompleter->setCompletionPrefix(sel.selectedText());
+    QTextCursor sel2 = textCursor();
+                sel2.select(QTextCursor::LineUnderCursor);
 
-    if(sel.selectedText().length() > 0)
+    bool regS = (sel2.selectedText().mid(sel2.selectedText().lastIndexOf(QRegExp("( |,)+")) + 1, 1) == "$");
+    if (regS)
+        codeCompleter->setCompletionPrefix("$" + sel.selectedText());
+    else
+        codeCompleter->setCompletionPrefix(sel.selectedText());
+
+    QString currenCom = codeCompleter->completionModel()->data(codeCompleter->model()->index(0, 0)).toString();
+
+
+    if(sel.selectedText().length() > 0 || regS)
     {
-        if ((codeCompleter->completionCount() != 1) || ((codeCompleter->completionModel()->data(codeCompleter->model()->index(0, 0)).toString()) != sel.selectedText()))
+        if ((codeCompleter->completionCount() != 1) || (currenCom != sel.selectedText() && !regS) || (regS && currenCom != "$" + sel.selectedText()))
         {
             QRect popRect = this->cursorRect();
             popRect.setWidth(50);

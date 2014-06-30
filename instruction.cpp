@@ -559,7 +559,7 @@ int ori(fParam2)
 }
 int nori(fParam2)
 {
-    Rdr = !(Rtr | imm);
+    Rdr = ~(Rtr | imm);
     incPC;
     return 0;
 }
@@ -665,7 +665,7 @@ int mult(fParam2)
     long res = Rsr * Rtr;
     RLO = res & 0xFFFFFFFF;
     RHI = res >> 32;
-    incPc;
+    incPC;
     return 0;
 }
 int multu(fParam2)
@@ -673,21 +673,21 @@ int multu(fParam2)
     long res = ((unsigned int)Rsr) * ((unsigned int)Rtr);
     RLO = res & 0xFFFFFFFF;
     RHI = res >> 32;
-    incPc;
+    incPC;
     return 0;
 }
 int div(fParam2)
 {
     RLO = (Rsr / Rtr);
     RHI = (Rsr % Rtr);
-    incPc;
+    incPC;
     return 0;
 }
 int divu(fParam2)
 {
     RLO = ((unsigned int)Rsr) / ((unsigned int)Rtr);
     RHI = ((unsigned int)Rsr) % ((unsigned int)Rtr);
-    incPc;
+    incPC;
     return 0;
 }
 int j_(fParam2)

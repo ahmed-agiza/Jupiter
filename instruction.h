@@ -9,7 +9,7 @@
 
 #define fParam QVector<int> *, int, int, int, __int16, int , int &, memory *
 
-enum instructionFormat {RFormat, IFormat, JFromat};
+enum instructionFormat {RFormat, IFormat, JFormat};
 
 class instruction : public QObject
 {

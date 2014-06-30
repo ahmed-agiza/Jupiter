@@ -16,6 +16,7 @@ private:
     SyntaxHL *SHL;
     QCompleter *codeCompleter;
     QTextEdit *lCounter;
+    //void keyPressEvent(QKeyEvent *e);
 
 
 signals:
