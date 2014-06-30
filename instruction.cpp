@@ -749,7 +749,7 @@ int syscall(fParam2)
             break;
         default:
             incPC; //To be checked.
-            return UndefinedSyscall;
+            return UnknownSyscall;
             break;
     }
     incPC;
@@ -758,5 +758,6 @@ int syscall(fParam2)
 }
 int nop(fParam2)
 {
+    incPC;
     return 0;
 }
