@@ -115,8 +115,14 @@ int nop(fParam);
 #define Rdr (*base)[rd]
 #define Rtr (*base)[rt]
 #define Rsr (*base)[rs]
+#define RHI (*base)[32]
+#define RLO (*base)[33]
 
 #define OVExNo 1 //Overflow exception code.
+#define SyscallExNo 2 //Syscall exception code.
+#define UnknownSyscall 3
+
+#define incPC
 
 
 
@@ -331,9 +337,10 @@ int add(fParam2)
 
 
     if ((Rtr > 0 && Rsr > 0 && res <0) || (Rtr < 0 && Rsr < 0 && res > 0))
-        return OVExNo;
+        return OVExNo; //PC to be checked.
 
     Rdr = res;
+    incPC;
     return 0;
 }
 
@@ -341,6 +348,7 @@ int add(fParam2)
 int addu(fParam2)
 {
     Rdr = Rtr + Rsr;
+    incPC;
     return 0;
 
 }
@@ -351,38 +359,44 @@ int sub(fParam2)
 
 
     if ((Rtr > 0 && Rsr < 0 && res <0) || (Rtr < 0 && Rsr > 0 && res > 0))
-        return OVExNo;
+        return OVExNo; //PC to be checked.
 
     Rdr = res;
+    incPC;
     return 0;
 }
 
 int subu(fParam2)
 {
     Rdr = Rtr - Rsr;
+    incPC;
     return 0;
 }
 
 int and_(fParam2)
 {
     Rdr = Rtr & Rsr;
+    incPC;
     return 0;
 }
 int or_(fParam2)
 {
     Rdr = Rtr | Rsr;
+    incPC;
     return 0;
 }
 
 int xor_(fParam2)
 {
     Rdr = Rtr ^ Rsr;
+    incPC;
     return 0;
 }
 
 int nor_(fParam2)
 {
     Rdr = ~(Rtr | Rsr);
+    incPC;
     return 0;
 }
 
@@ -391,104 +405,123 @@ int srlv(fParam2)
     Rdr = Rtr >> Rsr;
     if (Rtr < 0)
         Rdr = Rdr * -1;
+    incPC;
     return 0;
 }
 
 int sllv(fParam2)
 {
     Rdr = Rtr << Rsr;
+    incPC;
     return 0;
 }
 
 int srav(fParam2)
 {
     Rdr = Rtr >> Rsr;
+    incPC;
     return 0;
 }
 
 int slt(fParam2)
 {
     Rdr = (Rsr < Rtr);
+    incPC;
     return 0;
 }
 
 int sltu(fParam2)
 {
     Rdr = (((uint)Rsr) < ((uint) Rtr));
+    incPC;
     return 0;
 }
 
 int sb(fParam2)
 {
     mem->storeByte(Rsr + imm, Rtr);
+    incPC;
     return 0;
 }
 
 int lb(fParam2)
 {
     Rtr = mem->loadByte(Rsr + imm) ;
+    incPC;
     return 0;
 }
 
 int lbu(fParam2)
 {
     Rtr = mem->loadByteU(Rsr + imm) ;
+    incPC;
     return 0;
 }
 
 int sh(fParam2)
 {
     mem->storeHWord(Rsr + imm, Rtr);
+    incPC;
     return 0;
 }
 int lh(fParam2)
 {
     Rtr = mem->loadHWord(Rsr + imm) ;
+    incPC;
     return 0;
 }
 int lhu(fParam2)
 {
     Rtr = mem->loadHWordU(Rsr + imm) ;
+    incPC;
     return 0;
 }
 int sw(fParam2)
 {
     mem->storeWord(Rsr + imm, Rtr);
+    incPC;
     return 0;
 }
 int lw(fParam2)
 {
     Rtr = mem->loadWord(Rsr + imm) ;
+    incPC;
     return 0;
 }
 int lwl(fParam2)
 {
     Rtr = mem->loadWord(Rsr + imm) ;
+    incPC;
     return 0;
 }
 int lwr(fParam2)
 {
     Rtr = mem->loadWordR(Rsr + imm) ;
+    incPC;
     return 0;
 }
 int swl(fParam2)
 {
     mem->storeWordL(Rsr + imm, Rtr);
+    incPC;
     return 0;
 }
 int swr(fParam2)
 {
     mem->storeWordR(Rsr + imm, Rtr);
+    incPC;
     return 0;
 }
 int ll(fParam2)
 {
     Rtr = mem->loadLinked(Rsr + imm) ;
+    incPC;
     return 0;
 }
 int sc(fParam2)
 {
     mem->storeConditional(Rsr + imm, Rtr);
+    incPC;
     return 0;
 }
 
@@ -501,32 +534,39 @@ int addi(fParam2)
         return OVExNo;
 
     Rdr = res;
+
+    incPC;
     return 0;
 }
 
 int addiu(fParam2)
 {
     Rdr = Rtr - imm;
+    incPC;
     return 0;
 }
 int andi(fParam2)
 {
     Rdr = Rtr & imm;
+    incPC;
     return 0;
 }
 int ori(fParam2)
 {
     Rdr = Rtr | imm;
+    incPC;
     return 0;
 }
 int nori(fParam2)
 {
     Rdr = !(Rtr | imm);
+    incPC;
     return 0;
 }
 int xori(fParam2)
 {
     Rdr = Rtr ^ imm;
+    incPC;
     return 0;
 }
 int srl(fParam2)
@@ -534,94 +574,189 @@ int srl(fParam2)
     Rdr = Rtr >> shamt;
     if (Rtr < 0)
         Rdr = Rdr * -1;
+    incPC;
     return 0;
 }
 int sll(fParam2)
 {
     Rdr = Rtr << shamt;
+    incPC;
     return 0;
 }
 int sra(fParam2)
 {
     Rdr = Rtr >> shamt;
+    incPC;
     return 0;
 }
 int slti(fParam2)
 {
     Rdr = (Rsr < imm);
+    incPC;
     return 0;
 }
 int sltiu(fParam2)
 {
     Rdr = (((uint)Rsr) < ((uint) imm));
+    incPC;
     return 0;
 }
 int beq(fParam2)
 {
-
+    if(Rtr == Rsr)
+        PC = PC + imm;
+    else
+        incPC;
+    return 0;
 }
 int bne(fParam2)
 {
-
+    if(Rtr == Rsr)
+        PC = PC + imm;
+    else
+        incPC;
+    return 0;
 }
 int lui(fParam2)
 {
-
+    Rtr = imm << 16;
+    incPC;
+    return 0;
 }
 
 int jr(fParam2)
 {
-
+    PC = Rsr;
+    return 0;
 }
 int jalr(fParam2)
 {
-
+    Rdr = PC + 8; //To be checked.
+    PC = Rsr;
+    incPC;
+    return 0;
 }
 int mfhi(fParam2)
 {
-
+    Rdr = RHI;
+    incPC;
+    return 0;
 }
 int mflo(fParam2)
 {
-
+    Rdr = RLO;
+    incPC;
+    return 0;
 }
 int mthi(fParam2)
 {
-
+    RHI = Rsr;
+    incPC;
+    return 0;
 }
 int mtlo(fParam2)
 {
-
+    RLO = Rsr;
+    incPC;
+    return 0;
 }
 int mult(fParam2)
 {
-
+    long res = Rsr * Rtr;
+    RLO = res & 0xFFFFFFFF;
+    RHI = res >> 32;
+    incPc;
+    return 0;
 }
 int multu(fParam2)
 {
-
+    long res = ((unsigned int)Rsr) * ((unsigned int)Rtr);
+    RLO = res & 0xFFFFFFFF;
+    RHI = res >> 32;
+    incPc;
+    return 0;
 }
 int div(fParam2)
 {
-
+    RLO = (Rsr / Rtr);
+    RHI = (Rsr % Rtr);
+    incPc;
+    return 0;
 }
 int divu(fParam2)
 {
-
+    RLO = ((unsigned int)Rsr) / ((unsigned int)Rtr);
+    RHI = ((unsigned int)Rsr) % ((unsigned int)Rtr);
+    incPc;
+    return 0;
 }
 int j_(fParam2)
 {
-
+    //Jump!
+    return 0;
 }
 int jal(fParam2)
 {
-
+    //Jump!
+    (*base)[31] = PC + 8; //To be checked.
+    return 0;
 }
 int syscall(fParam2)
 {
+    switch((*base)[2])
+    {
+        case 0:
+
+            break;
+        case 1:
+
+            break;
+        case 2:
+
+            break;
+        case 3:
+
+            break;
+        case 4:
+
+            break;
+        case 5:
+
+            break;
+        case 6:
+
+            break;
+        case 7:
+
+            break;
+        case 8:
+
+            break;
+        case 9:
+
+            break;
+        case 10:
+
+            break;
+        case 11:
+
+            break;
+        case 12:
+
+            break;
+        case 13:
+
+            break;
+        default:
+            incPC; //To be checked.
+            return UndefinedSyscall;
+            break;
+    }
+    incPC;
+    return SyscallExNo;
 
 }
 int nop(fParam2)
 {
-
+    return 0;
 }
