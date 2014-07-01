@@ -224,8 +224,7 @@ Assembler::Assembler(QStringList* stringList)
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
     initializeRegisters();
-    int address = 0;
-    int lineNumber = 0;
+    address = lineNumber = 0;
     //QStringList stringList = Text.document()->toPlainText().split('\n');
     foreach (QString line, *stringList)
     {
@@ -290,44 +289,49 @@ Assembler::Assembler(QStringList* stringList)
         }
         else if(PR.indexIn(line, 0) != -1)
         {
-
+            handlePR(PR,line);
         }
         else if(PRIL.indexIn(line, 0) != -1)
         {
-
+            handlePRIL(PRIL,line);
         }
         else if(PL.indexIn(line, 0) != -1)
         {
-
+            handlePL(PL,line);
         }
         else if(PZ.indexIn(line, 0) != -1)
         {
-
+            handlePZ(PZ,line);
         }
         else if(PSI.indexIn(line, 0) != -1)
         {
-
+            handlePSI(PSI,line);
         }
         else if(PDR.indexIn(line, 0) != -1)
         {
-
+            handlePDR(PDR,line);
         }
         else if(PSR.indexIn(line, 0) != -1)
         {
-
+            handlePSR(PSR,line);
         }
         else if(PI.indexIn(line, 0) != -1)
         {
-
+            handlePI(PI,line);
         }
         else if((LBL.indexIn(line, 0)) != -1)
         {
             labels[LBL.cap(1)] = address;
             address--;
         }
-        else if((CMT.indexIn(line, 0)) != -1 || line.size()==0 || WHITSPACE.indexIn(line,0) != -1)
+        else if((CMT.indexIn(line, 0)) != -1 || line.size()==0)
         {
             address--;
+        }
+        else
+        {
+            address--;
+            errorList.push_back(Error("Invalid Syntax",lineNumber));
         }
         address++;
         lineNumber++;
@@ -364,6 +368,172 @@ Assembler::Assembler(QStringList* stringList)
 
     }
 }
+
+void Assembler::handlePR(QRegExp m, QString line)
+{
+    if(m.cap(2) == "mul")
+    {
+
+    }
+    else if(m.cap(2) == "div")
+    {
+
+    }
+    else if(m.cap(2) == "rem")
+    {
+
+    }
+}
+void Assembler::handlePRIL(QRegExp m, QString line)
+{
+    if(m.cap(2) == "blti")
+    {
+
+    }
+    else if(m.cap(2) == "bgti")
+    {
+
+    }
+    else if(m.cap(2) == "blei")
+    {
+
+    }
+    else if(m.cap(2) == "bgei")
+    {
+
+    }
+    else if(m.cap(2) == "bltiu")
+    {
+
+    }
+    else if(m.cap(2) == "bgtiu")
+    {
+
+    }
+    else if(m.cap(2) == "bleiu")
+    {
+
+    }
+    else if(m.cap(2) == "bgeiu")
+    {
+
+    }
+}
+void Assembler::handlePL(QRegExp m, QString line)
+{
+    if(m.cap(2) == "blt")
+    {
+
+    }
+    else if(m.cap(2) == "bgt")
+    {
+
+    }
+    else if(m.cap(2) == "ble")
+    {
+
+    }
+    else if(m.cap(2) == "bge")
+    {
+
+    }
+    else if(m.cap(2) == "bltu")
+    {
+
+    }
+    else if(m.cap(2) == "bgtu")
+    {
+
+    }
+    else if(m.cap(2) == "bleu")
+    {
+
+    }
+    else if(m.cap(2) == "bgeu")
+    {
+
+    }
+}
+void Assembler::handlePZ(QRegExp m, QString line)
+{
+    else if(m.cap(2) == "beqz")
+    {
+
+    }
+    else if(m.cap(2) == "bnez")
+    {
+
+    }
+    else if(m.cap(2) == "bltz")
+    {
+
+    }
+    else if(m.cap(2) == "bgez")
+    {
+
+    }
+    else if(m.cap(2) == "bgtz")
+    {
+
+    }
+    else if(m.cap(2) == "blez")
+    {
+
+    }
+    else if(m.cap(2) == "la")
+    {
+
+    }
+}
+void Assembler::handlePSI(QRegExp m, QString line)
+{
+    if(m.cap(2) == "li")
+    {
+
+    }
+    else if(m.cap(2) == "ror")
+    {
+
+    }
+    else if(m.cap(2) == "rol")
+    {
+
+    }
+}
+void Assembler::handlePDR(QRegExp m, QString line)
+{
+    if(m.cap(2) == "not")
+    {
+
+    }
+    else if(m.cap(2) == "neg")
+    {
+
+    }
+    else if(m.cap(2) == "move")
+    {
+
+    }
+    else if(m.cap(2) == "abs")
+    {
+
+    }
+}
+void Assembler::handlePSR(QRegExp m, QString line)
+{
+    if(m.cap(2) == "clear")
+    {
+
+    }
+}
+void Assembler::handlePI(QRegExp m, QString line)
+{
+    if(m.cap(2) == "subi")
+    {
+
+    }
+}
+
 Assembler::~Assembler(){}
 
 Assembler::Assembler(){}
