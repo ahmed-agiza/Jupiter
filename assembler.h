@@ -32,13 +32,24 @@ private:
     QMap<QString, int> opcode;
     QVector<int> registers;
     //Assembler(QTextEdit&);
+<<<<<<< HEAD
     memory *dataSegment;
 
+=======
+    int address;
+    int lineNumber;
+>>>>>>> origin/master
 public:
     Assembler(QStringList *stringList);
     int getNumber(QString);
-    void initializeRegisters();
-
+    void handlePR(QRegExp m, QString line);
+    void handlePRIL(QRegExp m, QString line);
+    void handlePL(QRegExp m, QString line);
+    void handlePZ(QRegExp m, QString line);
+    void handlePSI(QRegExp m, QString line);
+    void handlePDR(QRegExp m, QString line);
+    void handlePSR(QRegExp m, QString line);
+    void handlePI(QRegExp m, QString line);
     ~Assembler();
     Assembler();
 
