@@ -10,6 +10,7 @@
 #include "globalRegex.h"
 #include <QMap>
 #include <QTextEdit>
+#include "memory.h"
 
 class Error
 {
@@ -23,7 +24,7 @@ public:
 
 class Assembler: public QObject
 {
-public:
+private:
     QVector<instruction> instructions;
     QVector<Error> errorList;
     QMap<QString, int> registerIndex;
@@ -31,6 +32,7 @@ public:
     QMap<QString, int> opcode;
     QVector<int> registers;
     //Assembler(QTextEdit&);
+    memory *dataSegment;
 
 public:
     Assembler(QStringList *stringList);
@@ -39,6 +41,9 @@ public:
 
     ~Assembler();
     Assembler();
+
+private slots:
+    void exceptionHandler(int);
 };
 
 #endif // ASSEMBLER_H

@@ -4,7 +4,8 @@
 memory::memory(int s)
 {
     size = s;
-    data.resize(s);
+    memBytes.resize(s);
+    memBytes.fill(0);
 }
 
 memory::~memory()
@@ -15,12 +16,12 @@ memory::~memory()
 
 void memory::storeByte(int addr, int data)
 {
-
+   memBytes[addr] = (data & 0xFF);
 }
 
 int memory::loadByte(int addr) const
 {
-
+    return QString(memBytes[addr]).toInt();
 }
 
 int memory::loadByteU(int addr) const

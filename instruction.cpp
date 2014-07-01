@@ -122,8 +122,11 @@ int nop(fParam);
 #define SyscallExNo 2 //Syscall exception code.
 #define UnknownSyscall 3
 
-#define incPC
+#define incPC PC += 4
 
+#define PC0Addr 0x00400000
+
+#define data0Addr 0x10010000
 
 
 instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, int d, __int16 im, int sh, instructionFormat f)
@@ -439,88 +442,88 @@ int sltu(fParam2)
 
 int sb(fParam2)
 {
-    mem->storeByte(Rsr + imm, Rtr);
+    mem->storeByte(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
 
 int lb(fParam2)
 {
-    Rtr = mem->loadByte(Rsr + imm) ;
+    Rtr = mem->loadByte(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 
 int lbu(fParam2)
 {
-    Rtr = mem->loadByteU(Rsr + imm) ;
+    Rtr = mem->loadByteU(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 
 int sh(fParam2)
 {
-    mem->storeHWord(Rsr + imm, Rtr);
+    mem->storeHWord(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
 int lh(fParam2)
 {
-    Rtr = mem->loadHWord(Rsr + imm) ;
+    Rtr = mem->loadHWord(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 int lhu(fParam2)
 {
-    Rtr = mem->loadHWordU(Rsr + imm) ;
+    Rtr = mem->loadHWordU(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 int sw(fParam2)
 {
-    mem->storeWord(Rsr + imm, Rtr);
+    mem->storeWord(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
 int lw(fParam2)
 {
-    Rtr = mem->loadWord(Rsr + imm) ;
+    Rtr = mem->loadWord(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 int lwl(fParam2)
 {
-    Rtr = mem->loadWord(Rsr + imm) ;
+    Rtr = mem->loadWord(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 int lwr(fParam2)
 {
-    Rtr = mem->loadWordR(Rsr + imm) ;
+    Rtr = mem->loadWordR(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 int swl(fParam2)
 {
-    mem->storeWordL(Rsr + imm, Rtr);
+    mem->storeWordL(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
 int swr(fParam2)
 {
-    mem->storeWordR(Rsr + imm, Rtr);
+    mem->storeWordR(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
 int ll(fParam2)
 {
-    Rtr = mem->loadLinked(Rsr + imm) ;
+    Rtr = mem->loadLinked(Rsr - data0Addr + imm) ;
     incPC;
     return 0;
 }
 int sc(fParam2)
 {
-    mem->storeConditional(Rsr + imm, Rtr);
+    mem->storeConditional(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
@@ -626,12 +629,12 @@ int lui(fParam2)
 
 int jr(fParam2)
 {
-    PC = Rsr;
+    PC = Rsr - PC0Addr;
     return 0;
 }
 int jalr(fParam2)
 {
-    Rdr = PC + 8; //To be checked.
+    Rdr = PC + PC0Addr + 8; //To be checked.
     PC = Rsr;
     incPC;
     return 0;
@@ -692,13 +695,13 @@ int divu(fParam2)
 }
 int j_(fParam2)
 {
-    //Jump!
+    PC = imm + 4;
     return 0;
 }
 int jal(fParam2)
 {
-    //Jump!
-    (*base)[31] = PC + 8; //To be checked.
+    PC = imm + 4;
+    (*base)[31] = PC + PC0Addr + 8; //To be checked.
     return 0;
 }
 int syscall(fParam2)

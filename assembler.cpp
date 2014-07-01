@@ -363,8 +363,18 @@ Assembler::Assembler(QStringList* stringList)
         qDebug() << "**********************************************";
 
     }
+
+    dataSegment = new memory(16384);
+    foreach(instruction ins,  instructions)
+    {
+        ins.setMem(dataSegment);
+        QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
+    }
 }
-Assembler::~Assembler(){}
+Assembler::~Assembler()
+{
+    delete dataSegment;
+}
 
 Assembler::Assembler(){}
 

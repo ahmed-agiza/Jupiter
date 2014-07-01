@@ -34,7 +34,7 @@ signals:
     void outOfRange();
 
 private:
-    QByteArray data;
+    QByteArray memBytes;
     int size;
 
 

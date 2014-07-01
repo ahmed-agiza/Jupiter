@@ -57,8 +57,14 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         e->ignore();
         return;
     }
+    else if (e->key() == Qt::Key_Tab)
+    {
+        this->insertPlainText("    ");
+        e->ignore();
+        return;
+    }
     else
-         QTextEdit::keyPressEvent(e);
+        QTextEdit::keyPressEvent(e);
 }
 
 void CodeEditor::insertCompletion(QString completion)
