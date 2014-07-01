@@ -16,8 +16,9 @@ private:
     SyntaxHL *SHL;
     QCompleter *codeCompleter;
     QTextEdit *lCounter;
-    //void keyPressEvent(QKeyEvent *e);
-   // bool eventFilter(QObject *, QEvent *);
+    void focusInEvent(QFocusEvent *);
+    void keyPressEvent(QKeyEvent *);
+
 
 signals:
 
