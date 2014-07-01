@@ -140,11 +140,15 @@ instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
     func = &add;//*
     format = f;
 
+    qDebug() << rs;
+    qDebug() << rt;
+    qDebug() << rd;
+
 
     for (int i = 0; i < 31; i++)
        registers->push_back(i);
 
-    qDebug() << "Before:";
+   /* qDebug() << "Before:";
     qDebug() << (*registers)[rs];
     qDebug() << (*registers)[rt];
     qDebug() << (*registers)[rd];
@@ -157,7 +161,7 @@ instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
     qDebug() << "After:";
     qDebug() << (*registers)[rs];
     qDebug() << (*registers)[rt];
-    qDebug() << (*registers)[rd];
+    qDebug() << (*registers)[rd];*/
 
 }
 

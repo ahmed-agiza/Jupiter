@@ -1,4 +1,5 @@
 #include "Assembler.h"
+#include <QDebug>
 
 
 
@@ -284,6 +285,19 @@ Assembler::Assembler(QStringList* stringList)
         } else {
             // missing label!!
         }
+    }
+
+    for (int i = 0; i < instructions.size(); i++)
+    {
+        qDebug() << "********* instruction " + QString::number(i) + " ********";
+        qDebug() << "Name: " << instructions[i].getName();
+        qDebug() << "Rd: " << instructions[i].getRd();
+        qDebug() << "Rs: " << instructions[i].getRs();
+        qDebug() << "Rt: " << instructions[i].getRt();
+        qDebug() << "Imm: " << instructions[i].getImm();
+        qDebug() << "Shamt: " << instructions[i].getShamt();
+        qDebug() << "**********************************************";
+
     }
 }
 Assembler::~Assembler(){}
