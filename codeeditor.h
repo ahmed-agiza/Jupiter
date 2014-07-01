@@ -17,7 +17,7 @@ private:
     QCompleter *codeCompleter;
     QTextEdit *lCounter;
     //void keyPressEvent(QKeyEvent *e);
-
+   // bool eventFilter(QObject *, QEvent *);
 
 signals:
 

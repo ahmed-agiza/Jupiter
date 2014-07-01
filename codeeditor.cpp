@@ -35,13 +35,32 @@ CodeEditor::CodeEditor(QWidget *parent) :
     codeCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     codeCompleter->setWidget(this);
     codeCompleter->setCompletionMode(QCompleter::PopupCompletion);
-
+   // installEventFilter(this);
     QObject::connect(codeCompleter, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounter()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(highlightLine()));
 }
 
+
+/*
+bool CodeEditor::eventFilter(QObject *O, QEvent *e)
+{
+    if(e->type() == QEvent::KeyPress)
+    {
+        if(((QKeyEvent*)e)->key() == Qt::Key_Return)
+        {
+            qDebug() << "-";
+           // qDebug() << codeCompleter->popup()->->data(codeCompleter->popup()->indexAt(QPoint(0, 0)));
+            e->ignore();
+            return true;
+        }
+        qDebug() << codeCompleter->popup()->model()->data(codeCompleter->popup()->currentIndex());
+        return false;
+    }
+
+}
+*/
 void CodeEditor::insertCompletion(QString completion)
 {
     QTextCursor currentPos = textCursor();
@@ -54,6 +73,7 @@ void CodeEditor::insertCompletion(QString completion)
 
 void CodeEditor::highlightLine()
 {
+
     QList<QTextEdit::ExtraSelection> linesHL;
     QTextEdit::ExtraSelection lineHL;
     lineHL.format.setBackground(QColor(Qt::lightGray).darker(180));
@@ -79,16 +99,12 @@ void CodeEditor::updateCounter()
    }
 }
 
-void CodeEditor::keyPressEvent(QKeyEvent *e)
-{
-    /*if (e->key() == Qt::Key_Return)
-        if(codeCompleter->popup()->isVisible())
-            insertCompletion(codeCompleter->currentCompletion());*/
-    e->accept();
-}
-
 void CodeEditor::completerPop()
 {
+
+    //qDebug() << this->parent()->objectName();
+    //qDebug() << this->parent()->parent()->objectName();
+    //qDebug() << this->parent()->parent()->parent()->objectName();
 
     QTextCursor sel = textCursor();
                 sel.select(QTextCursor::WordUnderCursor);
@@ -111,12 +127,18 @@ void CodeEditor::completerPop()
             QRect popRect = this->cursorRect();
             popRect.setWidth(50);
             codeCompleter->complete(popRect);
+            codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));
+           this->setFocus();
+            // codeCompleter->popup()->setFocus();
+           // qDebug() << codeCompleter->popup()->currentIndex().data();
         }
         else
             codeCompleter->popup()->hide();
     }
     else
         codeCompleter->popup()->hide();
+
+    //qDebug() << codeCompleter->popup()->isVisible();
 
 
 
