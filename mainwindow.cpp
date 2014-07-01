@@ -20,8 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     ui->setupUi(this);
-    this->setCentralWidget(ui->dockCode);
-    this->installEventFilter(this);
+    setCentralWidget(ui->dockCode);
+    installEventFilter(this);
 
 
 }
