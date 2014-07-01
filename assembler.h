@@ -11,10 +11,21 @@
 #include <QMap>
 #include <QTextEdit>
 
+class Error
+{
+public:
+    Error(){}
+    Error(QString s,int l):lineNumber(l),description(s){}
+
+    int lineNumber;
+    QString description;
+};
+
 class Assembler: public QObject
 {
 public:
     QVector<instruction> instructions;
+    QVector<Error> errorList;
     QMap<QString, int> registerIndex;
     QMap<QString, int> labels;
     QMap<QString, int> opcode;

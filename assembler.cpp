@@ -10,7 +10,7 @@ QString InvalidRegisterRegex = "\\$(?!(?:[12]?[\\d])|(?:3[012])|(?:zero)|(?:at)|
 // Matches comments
 QString commentRegex = "#.+";
 // Matches labels
-QString labelRegex = "\\b([a-zA-Z_]\\w*):";
+QString labelRegex = "[a-zA-Z_]\\w*";
 // Matches invalid labels (start with a number or an invalid character)
 QString invalidLabelRegex = "\\b[^a-zA-Z_]\\w*:\\b";
 // Matches valid directives' names
@@ -38,7 +38,7 @@ QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 //    sltu
 
 QString registerInstructions = "(add|addu|sub|subu|and|or|nor|xor|srlv|sllv|srav|slt|sltu)";
-QString registerFormat = "(" + labelRegex + "[ \t]*)?" + registerInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString registerFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + registerInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, imm($register)
@@ -58,7 +58,7 @@ QString registerFormat = "(" + labelRegex + "[ \t]*)?" + registerInstructions + 
 //      sc
 
 QString memoryInstructions = "(sb|lb|lbu|sh|lh|lhu|sw|lw|lwl|lwr|swl|swr|ll|sc)";
-QString memoryFormat = "(" + labelRegex + "[ \t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?";
+QString memoryFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, immediate
@@ -77,7 +77,7 @@ QString memoryFormat = "(" + labelRegex + "[ \t]*)?" + memoryInstructions + "[ \
 //    bne
 
 QString immInstructions = "(addi|addiu|andi|ori|nori|xori|srl|sll|sra|slti|sltiu|beq|bne)";
-QString immFormat = "(" + labelRegex + "[ \t]*)?" + immInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
+QString immFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + immInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, label
@@ -85,14 +85,14 @@ QString immFormat = "(" + labelRegex + "[ \t]*)?" + immInstructions + "[ \\t]+" 
 //      bne
 
 QString labelInstructions = "(beq|bne)";
-QString labelFormat = "(" + labelRegex + "[ \t]*)?" + labelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString labelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + labelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, immediate
 //      lui
 
 QString singleimmInstructions = "(lui)";
-QString singleimmFormat = "(" + labelRegex + "[ \t]*)?" + singleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
+QString singleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register
@@ -104,7 +104,7 @@ QString singleimmFormat = "(" + labelRegex + "[ \t]*)?" + singleimmInstructions 
 //      mthi
 
 QString singleRegisterInstructions = "(jr|jalr|mfhi|mflo|mtlo|mthi)";
-QString singleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + singleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString singleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register
@@ -114,7 +114,7 @@ QString singleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + singleRegisterIns
 //      divu
 
 QString doubleRegisterInstructions = "(mult|multu|div|divu)";
-QString doubleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + doubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString doubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + doubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction label
@@ -122,14 +122,14 @@ QString doubleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + doubleRegisterIns
 //      jal
 
 QString jumpInstructions = "(j|jal)";
-QString jumpFormat = "(" + labelRegex + "[ \t]*)?" + jumpInstructions + "[ \\t]+([a-zA-Z_]\\w*)" + "(?:[ \\t]+" + commentRegex + ")?";
+QString jumpFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + jumpInstructions + "[ \\t]+([a-zA-Z_]\\w*)" + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction
 //      syscall
 //      nop
 
-QString standaloneInstructions = "(" + labelRegex + "[ \t]*)?" + "(syscall|nop)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString standaloneInstructions = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "(syscall|nop)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, label
@@ -143,7 +143,7 @@ QString standaloneInstructions = "(" + labelRegex + "[ \t]*)?" + "(syscall|nop)"
 //  bgeu
 
 QString pLabelInstructions = "(blt|bgt|ble|bge|bltu|bgtu|bleu|bgeu)";
-QString pLabelFormat = "(" + labelRegex + "[ \t]*)?" + pLabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString pLabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pLabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, immediate, label
@@ -157,7 +157,7 @@ QString pLabelFormat = "(" + labelRegex + "[ \t]*)?" + pLabelInstructions + "[ \
 //  bgeiu
 
 QString pRILInstructions = "(blt|bgt|ble|bge|bltu|bgtu|bleu|bgeu)";
-QString pRILFormat = "(" + labelRegex + "[ \t]*)?" + pRILInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01][ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString pRILFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRILInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01][ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, label
@@ -170,7 +170,7 @@ QString pRILFormat = "(" + labelRegex + "[ \t]*)?" + pRILInstructions + "[ \\t]+
 //  la
 
 QString pZlabelInstructions = "(beqz|bnez|bltz|bgtz|blez|bgez)";
-QString pZlabelFormat = "(" + labelRegex + "[ \t]*)?" + pZlabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString pZlabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pZlabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, immediate
@@ -179,7 +179,7 @@ QString pZlabelFormat = "(" + labelRegex + "[ \t]*)?" + pZlabelInstructions + "[
 //  rol
 
 QString pSingleimmInstructions = "(li|ror|rol)";
-QString pSingleimmFormat = "(" + labelRegex + "[ \t]*)?" + pSingleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
+QString pSingleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pSingleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register
@@ -189,7 +189,7 @@ QString pSingleimmFormat = "(" + labelRegex + "[ \t]*)?" + pSingleimmInstruction
 //  abs
 
 QString pDoubleRegisterInstructions = "(not|neg|move|abs)";
-QString pDoubleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + pDoubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString pDoubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pDoubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, $register
@@ -198,92 +198,156 @@ QString pDoubleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + pDoubleRegisterI
 //  rem
 
 QString pRegisterInstructions = "(mul|div|rem)";
-QString pRegisterFormat = "(" + labelRegex + "[ \t]*)?" + pRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString pRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register
 //  clear
 
 QString pSingleRegisterInstructions = "(clear)";
-QString pSingleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + pSingleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString pSingleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pSingleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, immediate
 //  subi
 
 QString pImmInstructions = "(subi)";
-QString pImmFormat = "(" + labelRegex + "[ \t]*)?" + pImmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
+QString pImmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pImmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
+QRegExp R(registerFormat), M(memoryFormat), I(immFormat), L(labelFormat), SR(singleRegisterFormat), SI(singleimmFormat), DR(doubleRegisterFormat), J(jumpFormat), SA(standaloneInstructions), LBL(labelRegex), CMT(commentRegex), WHITSPACE("^[ \\t]+$");
+QRegExp PR(pRegisterFormat), PRIL(pRILFormat), PL(pLabelFormat), PZ(pZlabelFormat), PSI(pSingleimmFormat), PDR(pDoubleRegisterFormat), PSR(pSingleRegisterFormat), PI(pImmFormat);
 
 
 Assembler::Assembler(QStringList* stringList)
 {
-    QVector< QPair<int,QString> > missingBranchLabels;
-    QVector< QPair<int,QString> > missingJumpLabels;
+    QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
+    QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
     initializeRegisters();
     int address = 0;
+    int lineNumber = 0;
     //QStringList stringList = Text.document()->toPlainText().split('\n');
-    QRegExp R(registerFormat), M(memoryFormat), I(immFormat), L(labelFormat), SR(singleRegisterFormat), SI(singleimmFormat), DR(doubleRegisterFormat), J(jumpFormat), SA(standaloneInstructions), LBL(labelRegex), CMT(commentRegex);
-    foreach (QString line, *stringList) {
-        if((R.indexIn(line, 0)) != -1){
+    foreach (QString line, *stringList)
+    {
+        if((R.indexIn(line, 0)) != -1)
+        {
             instructions.push_back(instruction(R.cap(2),&registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
+            //qDebug()<<R.cap(1)<<" "<<R.cap(2)<<" "<<R.cap(3)<<" "<<R.cap(4)<<" "<<R.cap(5)<<"\n";
             if(R.cap(1).size()) labels[R.cap(1)] = address;
-        }else if((M.indexIn(line, 0)) != -1){
+        }
+        else if((M.indexIn(line, 0)) != -1)
+        {
             instructions.push_back(instruction(M.cap(2),&registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
             if(M.cap(1).size()) labels[M.cap(1)] = address;
-        }else if((I.indexIn(line, 0)) != -1){
+        }
+        else if((I.indexIn(line, 0)) != -1)
+        {
             instructions.push_back(instruction(I.cap(2),&registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),getNumber(I.cap(5)),IFormat));
-            if(I.cap(1).size()) labels[I.cap(1)] = address;
-        }else if((L.indexIn(line, 0)) != -1){
+            if(I.cap(1).size() > 0) labels[I.cap(1)] = address;
+        }
+        else if((L.indexIn(line, 0)) != -1)
+        {
             if(labels.contains(L.cap(5))){
                 instructions.push_back(instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
-            }else{
-                missingBranchLabels.push_back(qMakePair(address,L.cap(5)));
+            }
+            else{
+                missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),L.cap(5)));
                 instructions.push_back(instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
-            }if(L.cap(1).size()) labels[L.cap(1)] = address;
-        }else if((SR.indexIn(line, 0)) != -1){
+            }
+            if(L.cap(1).size()) labels[L.cap(1)] = address;
+        }
+        else if((SR.indexIn(line, 0)) != -1)
+        {
             instructions.push_back(instruction(SR.cap(2),&registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,registerIndex[SR.cap(3)],0,0,RFormat));
             if(SR.cap(1).size()) labels[SR.cap(1)] = address;
-        }else if((SI.indexIn(line, 0)) != -1){
+        }
+        else if((SI.indexIn(line, 0)) != -1)
+        {
             instructions.push_back(instruction(SI.cap(2),&registers,opcode[SI.cap(2)],0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0,IFormat));
             if(SI.cap(1).size()) labels[SI.cap(1)] = address;
-        }else if((DR.indexIn(line, 0)) != -1){
+        }
+        else if((DR.indexIn(line, 0)) != -1)
+        {
             instructions.push_back(instruction(DR.cap(2),&registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
             if(DR.cap(1).size()) labels[DR.cap(1)] = address;
-        }else if((J.indexIn(line, 0)) != -1){
+        }
+        else if((J.indexIn(line, 0)) != -1)
+        {
             if(labels.contains(J.cap(3))){
-                instructions.push_back(instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,labels[L.cap(5)],0,JFormat));
-            }else{
-                missingJumpLabels.push_back(qMakePair(address,J.cap(3)));
+                qDebug()<<"Yes!";
+                instructions.push_back(instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,labels[J.cap(3)],0,JFormat));
+            }
+            else{
+                missingJumpLabels.push_back(qMakePair(qMakePair(address,lineNumber),J.cap(3)));
                 instructions.push_back(instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,0,0,JFormat));
-            }if(J.cap(1).size()) labels[J.cap(1)] = address;
-        }else if((SA.indexIn(line, 0)) != -1){
+            }
+            if(J.cap(1).size()) labels[J.cap(1)] = address;
+        }
+        else if((SA.indexIn(line, 0)) != -1)
+        {
             instructions.push_back(instruction(SA.cap(2),&registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
             if(SA.cap(1).size()) labels[SA.cap(1)] = address;
-        }else if((LBL.indexIn(line, 0)) != -1){
+        }
+        else if(PR.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if(PRIL.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if(PL.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if(PZ.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if(PSI.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if(PDR.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if(PSR.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if(PI.indexIn(line, 0) != -1)
+        {
+
+        }
+        else if((LBL.indexIn(line, 0)) != -1)
+        {
             labels[LBL.cap(1)] = address;
             address--;
-        }else if((CMT.indexIn(line, 0)) != -1){
+        }
+        else if((CMT.indexIn(line, 0)) != -1 || line.size()==0 || WHITSPACE.indexIn(line,0) != -1)
+        {
             address--;
         }
         address++;
+        lineNumber++;
     }
-    for (int i=0; i<missingBranchLabels.size(); i++){
-        QPair<int,QString> lbl = missingBranchLabels[i];
+    for (int i=0; i<missingBranchLabels.size(); i++)
+    {
+        QPair<QPair<int,int>,QString> lbl = missingBranchLabels[i];
         if(labels.contains(lbl.second)){
-            instructions[lbl.first].setImm(labels[lbl.second]-lbl.first-1);
+            instructions[lbl.first.first].setImm(labels[lbl.second]-lbl.first.first-1);
         } else {
-            // missing label!!
+            errorList.push_back(Error("Label not found",lbl.first.second));
         }
     }
-    for (int i=0; i<missingJumpLabels.size(); i++){
-        QPair<int,QString> lbl = missingJumpLabels[i];
+    for (int i=0; i<missingJumpLabels.size(); i++)
+    {
+        QPair<QPair<int,int>,QString> lbl = missingJumpLabels[i];
         if(labels.contains(lbl.second)){
-            instructions[lbl.first].setImm(labels[lbl.second]);
+            instructions[lbl.first.first].setImm(labels[lbl.second]);
         } else {
-            // missing label!!
+            errorList.push_back(Error("Label not found",lbl.first.second));
         }
     }
 
@@ -305,6 +369,7 @@ Assembler::~Assembler(){}
 Assembler::Assembler(){}
 
 
+
 int Assembler::getNumber(QString s)
 {
     bool f;
@@ -315,6 +380,7 @@ int Assembler::getNumber(QString s)
         return s.mid(2).toUInt(&f,2);
     else return s.toInt();
 }
+
 
 void Assembler::initializeRegisters()
 {
