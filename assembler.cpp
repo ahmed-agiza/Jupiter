@@ -131,6 +131,88 @@ QString jumpFormat = "(" + labelRegex + "[ \t]*)?" + jumpInstructions + "[ \\t]+
 QString standaloneInstructions = "(" + labelRegex + "[ \t]*)?" + "(syscall|nop)"+ "(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+//  instruction $register, $register, label
+//  blt
+//  bgt
+//  ble
+//  bge
+//  bltu
+//  bgtu
+//  bleu
+//  bgeu
+
+QString pLabelInstructions = "(blt|bgt|ble|bge|bltu|bgtu|bleu|bgeu)";
+QString pLabelFormat = "(" + labelRegex + "[ \t]*)?" + pLabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//  instruction $register, immediate, label
+//  blti
+//  bgti
+//  blei
+//  bgei
+//  bltiu
+//  bgtiu
+//  bleiu
+//  bgeiu
+
+QString pRILInstructions = "(blt|bgt|ble|bge|bltu|bgtu|bleu|bgeu)";
+QString pRILFormat = "(" + labelRegex + "[ \t]*)?" + pRILInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01][ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//  instruction $register, label
+//  beqz
+//  bnez
+//  bltz
+//  bgtz
+//  blez
+//  bgez
+//  la
+
+QString pZlabelInstructions = "(beqz|bnez|bltz|bgtz|blez|bgez)";
+QString pZlabelFormat = "(" + labelRegex + "[ \t]*)?" + pZlabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//  instruction $register, immediate
+//  li
+//  ror
+//  rol
+
+QString pSingleimmInstructions = "(li|ror|rol)";
+QString pSingleimmFormat = "(" + labelRegex + "[ \t]*)?" + pSingleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//  instruction $register, $register
+//  not
+//  neg
+//  move
+//  abs
+
+QString pDoubleRegisterInstructions = "(not|neg|move|abs)";
+QString pDoubleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + pDoubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//  instruction $register, $register, $register
+//  mul
+//  div
+//  rem
+
+QString pRegisterInstructions = "(mul|div|rem)";
+QString pRegisterFormat = "(" + labelRegex + "[ \t]*)?" + pRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//  instruction $register
+//  clear
+
+QString pSingleRegisterInstructions = "(clear)";
+QString pSingleRegisterFormat = "(" + labelRegex + "[ \t]*)?" + pSingleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//  instruction $register, $register, immediate
+//  subi
+
+QString pImmInstructions = "(subi)";
+QString pImmFormat = "(" + labelRegex + "[ \t]*)?" + pImmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
