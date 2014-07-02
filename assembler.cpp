@@ -379,8 +379,8 @@ Assembler::~Assembler()
 {
     delete dataSegment;
 }
-<<<<<<< HEAD
-=======
+//<<<<<<< HEAD
+//=======
 
 void Assembler::handlePR(QRegExp m, QString line)
 {
@@ -469,7 +469,7 @@ void Assembler::handlePL(QRegExp m, QString line)
 }
 void Assembler::handlePZ(QRegExp m, QString line)
 {
-    else if(m.cap(2) == "beqz")
+    /*else*/ if(m.cap(2) == "beqz")
     {
 
     }
@@ -547,8 +547,8 @@ void Assembler::handlePI(QRegExp m, QString line)
     }
 }
 
-Assembler::~Assembler(){}
->>>>>>> origin/master
+//Assembler::~Assembler(){}
+//>>>>>>> origin/master
 
 Assembler::Assembler(){}
 
