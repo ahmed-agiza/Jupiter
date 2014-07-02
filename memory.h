@@ -12,26 +12,36 @@ public:
     memory (int s);
     void storeByte(int, int);
     int loadByte(int) const;
-    int loadByteU(int) const;
+    unsigned int loadByteU(int) const;
 
     void storeHWord(int, int);
     int loadHWord(int) const;
-    int loadHWordU(int) const;
+    unsigned int loadHWordU(int) const;
 
     void storeWord(int, int);
-    void storeWordL(int, int);
-    void storeWordR(int, int);
+    void storeWordL(int, int, int);
+    void storeWordR(int, int, int);
     int loadWord(int) const;
-    int loadWordL(int) const;
-    int loadWordR(int) const;
+    unsigned int loadWordU(int) const;
+    int loadWordL(int, int) const;
+    int loadWordR(int, int) const;
 
-    int storeConditional(int, int);
+    void storeConditional(int, int);
     int loadLinked(int) const;
+
+
+    bool isValidByte(int) const;
+    bool isValidHWord(int) const;
+    bool isValidWord(int) const;
+    bool isValidWordL(int, int) const;
+    bool isValidWordR(int, int) const;
+
+
 
     ~memory();
 
 signals:
-    void outOfRange();
+    void raiseException(int);
 
 private:
     QByteArray memBytes;
