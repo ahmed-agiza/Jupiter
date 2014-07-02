@@ -224,6 +224,7 @@ Assembler::Assembler(QStringList* stringList)
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
     initializeRegisters();
+    initializeFunctions();
     address = lineNumber = 0;
     //QStringList stringList = Text.document()->toPlainText().split('\n');
     foreach (QString line, *stringList)
@@ -372,6 +373,7 @@ Assembler::Assembler(QStringList* stringList)
     foreach(instruction ins,  instructions)
     {
         ins.setMem(dataSegment);
+        ins.setFunc(functionsMap[ins.getName()]);
         QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }
 }
@@ -381,6 +383,70 @@ Assembler::~Assembler()
 }
 //<<<<<<< HEAD
 //=======
+
+void Assembler::initializeFunctions()
+{
+    functionsMap["add"] = &add;
+    functionsMap["addu"] = &addu;
+    functionsMap["sub"] = &sub;
+    functionsMap["subu"] = &subu;
+    functionsMap["and"] = &and_;
+    functionsMap["or"] = &or_;
+    functionsMap["xor"] = &xor_;
+    functionsMap["nor"] = &nor_;
+    functionsMap["srlv"] = &srlv;
+    functionsMap["sllv"] = &sllv;
+    functionsMap["srav"] = &srav;
+    functionsMap["slt"] = &slt;
+    functionsMap["sltu"] = &sltu;
+
+    functionsMap["sb"] = &sb;
+    functionsMap["lb"] = &lb;
+    functionsMap["lbu"] = &lbu;
+    functionsMap["sh"] = &sh;
+    functionsMap["lh"] = &lh;
+    functionsMap["lhu"] = &lhu;
+    functionsMap["sw"] = &sw;
+    functionsMap["lw"] = &lw;
+    functionsMap["lwl"] = &lwl;
+    functionsMap["lwr"] = &lwr;
+    functionsMap["swl"] = &swl;
+    functionsMap["swr"] = &swr;
+    functionsMap["ll"] = &ll;
+    functionsMap["sc"] = &sc;
+
+
+    functionsMap["addi"] = &addi;
+    functionsMap["addiu"] = &addiu;
+    functionsMap["andi"] = &andi;
+    functionsMap["ori"] = &ori;
+    functionsMap["nori"] = &nori;
+    functionsMap["xori"] = &xori;
+    functionsMap["srl"] = &srl;
+    functionsMap["sll"] = &sll;
+    functionsMap["sra"] = &sra;
+    functionsMap["slti"] = &slti;
+    functionsMap["sltiu"] = &sltiu;
+    functionsMap["beq"] = &beq;
+    functionsMap["bne"] = &bne;
+    functionsMap["lui"] = &lui;
+
+    functionsMap["jr"] = &jr;
+    functionsMap["jalr"] = &jalr;
+    functionsMap["mfhi"] = &mfhi;
+    functionsMap["mflo"] = &mflo;
+    functionsMap["mthi"] = &mthi;
+    functionsMap["mtlo"] = &mtlo;
+    functionsMap["mult"] = &mult;
+    functionsMap["multu"] = &multu;
+    functionsMap["div"] = &div;
+    functionsMap["divu"] = &divu;
+    functionsMap["j"] = &j_;
+    functionsMap["jal"] = &jal;
+    functionsMap["syscall"] = &syscall;
+    functionsMap["nop"] = &nop;
+
+}
 
 void Assembler::handlePR(QRegExp m, QString line)
 {
@@ -552,6 +618,16 @@ void Assembler::handlePI(QRegExp m, QString line)
 
 Assembler::Assembler(){}
 
+
+void Assembler::simulate()
+{
+    PC = 1;
+
+    while (PC != -1 && PC <= instructions.size())
+    {
+        instructions[PC - 1].execute(PC);
+    }
+}
 
 
 int Assembler::getNumber(QString s)

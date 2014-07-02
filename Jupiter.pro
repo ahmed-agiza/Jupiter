@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     codeeditor.cpp \
     instruction.cpp \
     assembler.cpp \
-    memory.cpp
+    memory.cpp \
+    InstructionFuncs.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -26,7 +27,8 @@ HEADERS  += mainwindow.h \
     codeeditor.h \
     instruction.h \
     assembler.h \
-    memory.h
+    memory.h \
+    InstructionFuncs.h
 
 FORMS    += \
     mainwindow.ui

@@ -11,6 +11,8 @@
 #include <QMap>
 #include <QTextEdit>
 #include "memory.h"
+#include "InstructionFuncs.h"
+
 
 class Error
 {
@@ -30,6 +32,7 @@ private:
     QMap<QString, int> registerIndex;
     QMap<QString, int> labels;
     QMap<QString, int> opcode;
+    QMap<QString, int (*)(fParam2)> functionsMap;
     QVector<int> registers;
     //Assembler(QTextEdit&);
 //<<<<<<< HEAD
@@ -38,11 +41,13 @@ private:
 //=======
     int address;
     int lineNumber;
+    int PC;
 //>>>>>>> origin/master
 public:
     Assembler(QStringList *stringList);
     int getNumber(QString);
     void initializeRegisters();
+    void initializeFunctions();
     void handlePR(QRegExp m, QString line);
     void handlePRIL(QRegExp m, QString line);
     void handlePL(QRegExp m, QString line);
@@ -51,6 +56,8 @@ public:
     void handlePDR(QRegExp m, QString line);
     void handlePSR(QRegExp m, QString line);
     void handlePI(QRegExp m, QString line);
+
+    void simulate();
     ~Assembler();
     Assembler();
 
