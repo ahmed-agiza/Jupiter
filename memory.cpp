@@ -176,7 +176,7 @@ int memory::loadLinked(int addr) const
 {
     if (!isValidWord(addr))
         return 0;
-    loadWord(addr);
+    return loadWord(addr);
 }
 
 
