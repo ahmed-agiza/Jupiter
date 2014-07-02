@@ -111,7 +111,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
 
    foreach(QString pattern, instructionsList)
    {
-       tempSyn.pattern = QRegExp(QString("\\b" + pattern + "\\b")); tempSyn.format = instructionFormat;
+       tempSyn.pattern = QRegExp(QString("\\b" + pattern + "\\b"), Qt::CaseInsensitive); tempSyn.format = instructionFormat;
        syntaxes.append(tempSyn);
    }
 
@@ -128,7 +128,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
 
    foreach(QString pattern, registersList)
    {
-       tempSyn.pattern = QRegExp(pattern); tempSyn.format = registerFormat;
+       tempSyn.pattern = QRegExp(pattern, Qt::CaseInsensitive); tempSyn.format = registerFormat;
        syntaxes.append(tempSyn);
    }
 

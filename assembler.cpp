@@ -215,8 +215,8 @@ QString pImmInstructions = "(subi)";
 QString pImmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pImmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-QRegExp R(registerFormat), M(memoryFormat), I(immFormat), L(labelFormat), SR(singleRegisterFormat), SI(singleimmFormat), DR(doubleRegisterFormat), J(jumpFormat), SA(standaloneInstructions), LBL(labelRegex), CMT(commentRegex), WHITSPACE("^[ \\t]+$");
-QRegExp PR(pRegisterFormat), PRIL(pRILFormat), PL(pLabelFormat), PZ(pZlabelFormat), PSI(pSingleimmFormat), PDR(pDoubleRegisterFormat), PSR(pSingleRegisterFormat), PI(pImmFormat);
+QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensitive), I(immFormat, Qt::CaseInsensitive), L(labelFormat, Qt::CaseInsensitive), SR(singleRegisterFormat, Qt::CaseInsensitive), SI(singleimmFormat, Qt::CaseInsensitive), DR(doubleRegisterFormat, Qt::CaseInsensitive), J(jumpFormat, Qt::CaseInsensitive), SA(standaloneInstructions, Qt::CaseInsensitive), LBL(labelRegex, Qt::CaseInsensitive), CMT(commentRegex, Qt::CaseInsensitive), WHITSPACE("^[ \\t]+$", Qt::CaseInsensitive);
+QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 
 
 Assembler::Assembler(QStringList* stringList)
@@ -734,5 +734,9 @@ void Assembler::initializeRegisters()
     opcode["swr"] = 46;
     opcode["ll"] = 48;
     opcode["sc"] = 56;
+
+    foreach (int r, registers) r = 0;
+    registers[28] = 0x10008000;
+    registers[29] = 0x7FFFEFFC;
 }
 

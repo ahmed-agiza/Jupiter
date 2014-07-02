@@ -19,7 +19,10 @@ SOURCES += main.cpp\
     instruction.cpp \
     assembler.cpp \
     memory.cpp \
-    InstructionFuncs.cpp
+    InstructionFuncs.cpp \
+    registersmodel.cpp \
+    memorymodel.cpp \
+    instructionsmodel.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -28,7 +31,10 @@ HEADERS  += mainwindow.h \
     instruction.h \
     assembler.h \
     memory.h \
-    InstructionFuncs.h
+    InstructionFuncs.h \
+    registersmodel.h \
+    memorymodel.h \
+    instructionsmodel.h
 
 FORMS    += \
     mainwindow.ui
