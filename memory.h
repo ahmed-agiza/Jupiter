@@ -11,7 +11,7 @@ class memory : public QObject
 public:
     memory ();
     void storeByte(int, char);
-    int loadByte(int) const;
+    char loadByte(int) const;
     unsigned char loadByteU(int) const;
 
     void storeHWord(int, short);
@@ -48,15 +48,15 @@ private:
     QByteArray heapSegment;
     QByteArray stackSegment;
 
-    const unsigned int textSegmentBaseAddress = 0x4000000;
-    const unsigned int dataSegmentBaseAddress = 0x10010000;
-    const unsigned int heapSegmentBaseAddress = 0x100d0000;
-    const unsigned int stackSegmentLimitAddress = 0x80000000;
+    const unsigned int textSegmentBaseAddress;
+    const unsigned int dataSegmentBaseAddress;
+    const unsigned int heapSegmentBaseAddress;
+    const unsigned int stackSegmentLimitAddress;
 
-    const unsigned int textSegmentPhysicalSize = 64 * 1024;
-    const unsigned int dataSegmentPhysicalSize = 64 * 1024;
-    const unsigned int heapSegmentPhysicalSize = 128 * 1024;
-    const unsigned int stackSegmentPhysicalSize = 128 * 1024;
+    const unsigned int textSegmentPhysicalSize;
+    const unsigned int dataSegmentPhysicalSize;
+    const unsigned int heapSegmentPhysicalSize;
+    const unsigned int stackSegmentPhysicalSize;
 };
 
 #endif // MEMORY_H

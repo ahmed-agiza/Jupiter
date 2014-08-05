@@ -211,7 +211,7 @@ int lwl(fParam2)
 {
     UNUSE_I
     Q_UNUSED(PC);
-    Rtr = (Rtr & 0x0000FFFF)|((short)(mem->loadWordL(Rsr - data0Addr, imm)) << 16) ;
+    //Rtr = (Rtr & 0x0000FFFF)|((short)(mem->loadWordL(Rsr - data0Addr, imm)) << 16) ;
     incPC;
     return 0;
 }
@@ -219,7 +219,7 @@ int lwr(fParam2)
 {
     UNUSE_I
     Q_UNUSED(PC);
-    Rtr = (Rtr & 0xFFFF0000) | ((short)mem->loadWordR(Rsr - data0Addr, imm)) ;
+    //Rtr = (Rtr & 0xFFFF0000) | ((short)mem->loadWordR(Rsr - data0Addr, imm)) ;
     incPC;
     return 0;
 }
@@ -228,7 +228,7 @@ int swl(fParam2)
 {
     UNUSE_I
     Q_UNUSED(PC);
-    mem->storeWordL(Rsr - data0Addr, imm, Rtr);
+    //mem->storeWordL(Rsr - data0Addr, imm, Rtr);
     incPC;
     return 0;
 }
@@ -236,7 +236,7 @@ int swr(fParam2)
 {
     UNUSE_I
     Q_UNUSED(PC);
-    mem->storeWordR(Rsr - data0Addr, imm, Rtr);
+    //mem->storeWordR(Rsr - data0Addr, imm, Rtr);
     incPC;
     return 0;
 }

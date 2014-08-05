@@ -8,6 +8,11 @@
 
 #define outOfRangeExNo 4
 
+bool isLittleEndian()
+{
+    return true;
+}
+
 unsigned int memory::getByteSegment(int addr) const
 {
     if(addr >= textSegmentBaseAddress && addr < textSegmentBaseAddress + textSegmentPhysicalSize)
@@ -41,7 +46,14 @@ unsigned int memory::getWordSegment(int addr) const
     return firstByte;
 }
 
-memory::memory()
+memory::memory():    textSegmentBaseAddress (0x4000000),
+                    dataSegmentBaseAddress (0x10010000),
+                    heapSegmentBaseAddress (0x100d0000),
+                    stackSegmentLimitAddress (0x80000000),
+                    textSegmentPhysicalSize (64 * 1024),
+                    dataSegmentPhysicalSize (64 * 1024),
+                    heapSegmentPhysicalSize (128 * 1024),
+                    stackSegmentPhysicalSize (128 * 1024)
 {
     textSegment.resize(textSegmentPhysicalSize);
     dataSegment.resize(dataSegmentPhysicalSize);
