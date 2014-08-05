@@ -30,6 +30,7 @@ bool MainWindow::eventFilter(QObject *, QEvent *e)
 {
     if (e->type() == QEvent::Show)
         on_actionNew_triggered();
+    return false;
 }
 
 
