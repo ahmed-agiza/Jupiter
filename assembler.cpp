@@ -369,7 +369,7 @@ Assembler::Assembler(QStringList* stringList)
 
     }
 
-    dataSegment = new memory();
+    dataSegment = new Memory();
     foreach(instruction ins,  instructions)
     {
         ins.setMem(dataSegment);

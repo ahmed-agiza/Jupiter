@@ -25,6 +25,8 @@ private slots:
 
     void on_actionAssemble_triggered();
 
+    void on_actionSimulate_triggered();
+
     void on_actionClose_triggered();
 
     void printS();

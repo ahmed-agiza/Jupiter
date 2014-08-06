@@ -40,7 +40,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::on_actionSimulate_triggered()
+{
 
+}
 
 void MainWindow::on_actionNew_triggered()
 {

@@ -13,7 +13,17 @@ bool isLittleEndian()
     return true;
 }
 
-unsigned int memory::getByteSegment(int addr) const
+unsigned int getScreensHeightCount()
+{
+    return 4;
+}
+
+unsigned int getScreensWidthCount()
+{
+    return 4;
+}
+
+unsigned int Memory::getByteSegment(unsigned int addr) const
 {
     if(addr >= textSegmentBaseAddress && addr < textSegmentBaseAddress + textSegmentPhysicalSize)
         return TEXT_SEGMENT;
@@ -29,7 +39,7 @@ unsigned int memory::getByteSegment(int addr) const
 }
 
 
-unsigned int memory::getHWordSegment(int addr) const
+unsigned int Memory::getHWordSegment(unsigned int addr) const
 {
     unsigned int firstByte = getByteSegment(addr);
     unsigned int lastByte = getByteSegment(addr+1);
@@ -37,7 +47,7 @@ unsigned int memory::getHWordSegment(int addr) const
         return OUT_OF_RANGE;
     return firstByte;
 }
-unsigned int memory::getWordSegment(int addr) const
+unsigned int Memory::getWordSegment(unsigned int addr) const
 {
     unsigned int firstByte = getByteSegment(addr);
     unsigned int lastByte = getByteSegment(addr+3);
@@ -46,15 +56,21 @@ unsigned int memory::getWordSegment(int addr) const
     return firstByte;
 }
 
-memory::memory():   textSegmentBaseAddress (0x4000000),
+Memory::Memory():   textSegmentBaseAddress (0x4000000),
                     dataSegmentBaseAddress (0x10010000),
                     heapSegmentBaseAddress (0x10500000),
                     stackSegmentLimitAddress (0x80000000),
                     textSegmentPhysicalSize (64 * 1024),
                     dataSegmentPhysicalSize (64 * 1024),
                     heapSegmentPhysicalSize (128 * 1024),
-                    stackSegmentPhysicalSize (128 * 1024)
+                    stackSegmentPhysicalSize (128 * 1024),
+                    screenWidth(512),
+                    screenHeight(384)
 {
+    //backgroundTileSet.resize(256);
+    //spritesTileSet.resize(256);
+    //tileMap.resize(screenHeight/16 * getScreensHeightCount());
+    //tileMap.fill( QVector<char>(screenWidth/16 * getScreensWidthCount() ));
     textSegment.resize(textSegmentPhysicalSize);
     dataSegment.resize(dataSegmentPhysicalSize);
     heapSegment.resize(heapSegmentPhysicalSize);
@@ -65,13 +81,13 @@ memory::memory():   textSegmentBaseAddress (0x4000000),
     stackSegment.fill(0);
 }
 
-memory::~memory()
+Memory::~Memory()
 {
 
 }
 
 
-void memory::storeByte(int addr, char data)
+void Memory::storeByte(unsigned int addr, char data)
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE)
@@ -86,7 +102,7 @@ void memory::storeByte(int addr, char data)
         stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = data;
 }
 
-char memory::loadByte(int addr) const
+char Memory::loadByte(unsigned int addr) const
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE)
@@ -99,9 +115,10 @@ char memory::loadByte(int addr) const
         return heapSegment[addr - heapSegmentBaseAddress];
     else if(segment == STACK_SEGMENT)
         return stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
+    else return 0;
 }
 
-unsigned char memory::loadByteU(int addr) const
+unsigned char Memory::loadByteU(unsigned int addr) const
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE)
@@ -114,9 +131,10 @@ unsigned char memory::loadByteU(int addr) const
         return (unsigned char)heapSegment[addr - heapSegmentBaseAddress];
     else if(segment == STACK_SEGMENT)
         return (unsigned char)stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
+    else return 0;
 }
 
-void memory::storeHWord(int addr, short data)
+void Memory::storeHWord(unsigned int addr, short data)
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE) {
@@ -157,7 +175,7 @@ void memory::storeHWord(int addr, short data)
 }
 
 
-short memory::loadHWord(int addr) const
+short Memory::loadHWord(unsigned int addr) const
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE) {
@@ -186,10 +204,10 @@ short memory::loadHWord(int addr) const
         } else {
             return ((unsigned short)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
         }
-    }
+    } else return 0;
 }
 
-unsigned short memory::loadHWordU(int addr) const
+unsigned short Memory::loadHWordU(unsigned int addr) const
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE) {
@@ -218,10 +236,10 @@ unsigned short memory::loadHWordU(int addr) const
         } else {
             return (unsigned short)((unsigned short)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
         }
-    }
+    } else return 0;
 }
 
-void memory::storeWord(int addr, int data)
+void Memory::storeWord(unsigned int addr, int data)
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE) {
@@ -277,7 +295,7 @@ void memory::storeWord(int addr, int data)
     }
 }
 
-int memory::loadWord(int addr) const
+int Memory::loadWord(unsigned int addr) const
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE) {
@@ -311,10 +329,10 @@ int memory::loadWord(int addr) const
         } else {
             return ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
         }
-    }
+    } else return 0;
 }
 
-unsigned int memory::loadWordU(int addr)const
+unsigned int Memory::loadWordU(unsigned int addr)const
 {
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE) {
@@ -348,22 +366,22 @@ unsigned int memory::loadWordU(int addr)const
         } else {
             return (unsigned int)((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
         }
-    }
+    } else return 0;
 }
-void memory::storeConditional(int addr, int data)
+void Memory::storeConditional(unsigned int addr, int data)
 {
     storeWord(addr, data);
 }
 
-int memory::loadLinked(int addr) const
+int Memory::loadLinked(unsigned int addr) const
 {
     return loadWord(addr);
 }
 
 /*
-bool memory::isValidWordL(int addr, int off) const
+bool Memory::isValidWordL(int addr, int off) const
 {
-    if (addr - off > memoryLimit)
+    if (addr - off > MemoryLimit)
     {
        // emit raiseException(outOfRangeExNo);
         return false;
@@ -371,9 +389,9 @@ bool memory::isValidWordL(int addr, int off) const
     return true;
 
 }
-bool memory::isValidWordR(int addr, int off) const
+bool Memory::isValidWordR(int addr, int off) const
 {
-    if (addr + off > memoryLimit)
+    if (addr + off > MemoryLimit)
     {
         //emit raiseException(outOfRangeExNo);
         return false;
@@ -382,21 +400,21 @@ bool memory::isValidWordR(int addr, int off) const
 
 }
 
-int memory::loadWordL(int addr, int off) const
+int Memory::loadWordL(int addr, int off) const
 {
     if (!isValidWordL(addr, off))
         return 0;
     return (int) (memBytes[addr - off] << 8 |  memBytes[addr - off + 1]);
 }
 
-int memory::loadWordR(int addr, int off) const
+int Memory::loadWordR(int addr, int off) const
 {
     if (!isValidWordR(addr, off))
         return 0;
     return (int) (memBytes[addr + off] << 8 |  memBytes[addr + off - 1] << 8);
 }
 
-void memory::storeWordL(int addr, int off, int data)
+void Memory::storeWordL(int addr, int off, int data)
 {
     if (!isValidWordL(addr, off))
         return;
@@ -404,7 +422,7 @@ void memory::storeWordL(int addr, int off, int data)
     memBytes[addr - off + 1] = (data << 16) & 0xFF;
 }
 
-void memory::storeWordR(int addr, int off, int data)
+void Memory::storeWordR(int addr, int off, int data)
 {
     if (!isValidWordR(addr, off))
         return;

@@ -1,7 +1,7 @@
 #include "instruction.h"
 #include "InstructionFuncs.h"
 
-//#define fParam2 QVector<__int32> *base, int rs, int rt, int rd, __int16 imm, int shamt, int &PC, memory *mem
+//#define fParam2 QVector<__int32> *base, int rs, int rt, int rd, __int16 imm, int shamt, int &PC, Memory *mem
 #define UNUSE_R Q_UNUSED(imm); Q_UNUSED(PC); Q_UNUSED(mem);
 #define UNUSE_I Q_UNUSED(rd); Q_UNUSED(shamt);
 #define UNUSE_J Q_UNUSED(rs); Q_UNUSED(rt); Q_UNUSED(rd); Q_UNUSED(shamt);

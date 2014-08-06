@@ -4,30 +4,35 @@
 #include <QMap>
 #include <QByteArray>
 #include <QObject>
+#include <QMatrix>
+#include <QVector>
+#include <SFML/Graphics.hpp>
+#include "palettecolor.h"
+#include "tile.h"
 
-class memory : public QObject
+class Memory : public QObject
 {
     Q_OBJECT
 public:
-    memory ();
-    void storeByte(int, char);
-    char loadByte(int) const;
-    unsigned char loadByteU(int) const;
+    Memory ();
+    void storeByte(unsigned int, char);
+    char loadByte(unsigned int) const;
+    unsigned char loadByteU(unsigned int) const;
 
-    void storeHWord(int, short);
-    short loadHWord(int) const;
-    unsigned short loadHWordU(int) const;
+    void storeHWord(unsigned int, short);
+    short loadHWord(unsigned int) const;
+    unsigned short loadHWordU(unsigned int) const;
 
-    void storeWord(int, int);
-    int loadWord(int) const;
-    unsigned int loadWordU(int) const;
+    void storeWord(unsigned int, int);
+    int loadWord(unsigned int) const;
+    unsigned int loadWordU(unsigned int) const;
 
-    void storeConditional(int, int);
-    int loadLinked(int) const;
+    void storeConditional(unsigned int, int);
+    int loadLinked(unsigned int) const;
 
-    unsigned int getByteSegment(int) const;
-    unsigned int getHWordSegment(int) const;
-    unsigned int getWordSegment(int) const;
+    unsigned int getByteSegment(unsigned int) const;
+    unsigned int getHWordSegment(unsigned int) const;
+    unsigned int getWordSegment(unsigned int) const;
 
 //    bool isValidWordL(int, int) const;
 //    bool isValidWordR(int, int) const;
@@ -36,8 +41,7 @@ public:
 //    int loadWordL(int, int) const;
 //    int loadWordR(int, int) const;
 
-
-    ~memory();
+    ~Memory();
 
 signals:
     void raiseException(int);
@@ -47,7 +51,11 @@ private:
     QByteArray dataSegment;
     QByteArray heapSegment;
     QByteArray stackSegment;
-
+    //QVector< Tile > backgroundTileSet;
+    //QVector< Tile > spritesTileSet;
+    //QVector< QVector< char > > tileMap;
+    //QVector< QVector< sf::Sprite > > backgroundMatrix;
+    //QVector<PaletteColor> palette;
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
     const unsigned int heapSegmentBaseAddress;
@@ -57,6 +65,9 @@ private:
     const unsigned int dataSegmentPhysicalSize;
     const unsigned int heapSegmentPhysicalSize;
     const unsigned int stackSegmentPhysicalSize;
+
+    const unsigned int screenWidth;
+    const unsigned int screenHeight;
 };
 
 #endif // MEMORY_H

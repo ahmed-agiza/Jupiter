@@ -7,7 +7,7 @@
 #include <QObject>
 #include "memory.h"
 
-#define fParam QVector<int> *, int, int, int, __int16, int , int &, memory *
+#define fParam QVector<int> *, int, int, int, __int16, int , int &, Memory *
 
 enum instructionFormat {RFormat, IFormat, JFormat};
 
@@ -28,7 +28,7 @@ public:
     void setImm(__int16);
     void setShamt(int);
     void setOp(int);
-    void setMem(memory *);
+    void setMem(Memory *);
     QString getName() const;
     int getRs() const;
     int getRd() const;
@@ -63,7 +63,7 @@ private:
     int (*func)(fParam);
     int opcode;
 
-    memory *mem;
+    Memory *mem;
 
     instructionFormat format;
 

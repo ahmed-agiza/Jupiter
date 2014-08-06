@@ -22,7 +22,10 @@ SOURCES += main.cpp\
     InstructionFuncs.cpp \
     registersmodel.cpp \
     memorymodel.cpp \
-    instructionsmodel.cpp
+    instructionsmodel.cpp \
+    palettecolor.cpp \
+    tile.cpp \
+    gamesprite.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -33,10 +36,23 @@ HEADERS  += mainwindow.h \
     InstructionFuncs.h \
     registersmodel.h \
     memorymodel.h \
-    instructionsmodel.h
+    instructionsmodel.h \
+    palettecolor.h \
+    tile.h \
+    gamesprite.h
 
 FORMS    += \
     mainwindow.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc
+
+LIBS += -LC:/SFML/lib
+
+CONFIG(release, debug|release): LIBS += -lsfml-audio -lsfml-graphics -lsfml-main -lsfml-network -lsfml-window -lsfml-system
+CONFIG(debug, debug|release): LIBS += -lsfml-audio-d -lsfml-graphics-d -lsfml-main-d -lsfml-network-d -lsfml-window-d -lsfml-system-d
+
+INCLUDEPATH += C:/SFML/include
+DEPENDPATH += C:/SFML/include
+
+CONFIG += c++11

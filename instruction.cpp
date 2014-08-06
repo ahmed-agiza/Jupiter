@@ -88,7 +88,7 @@ void instruction::setRegisters(QVector<__int32> *b)
     registers = b;
 }
 
-void instruction::setMem(memory *m)
+void instruction::setMem(Memory *m)
 {
     mem = m;
 }

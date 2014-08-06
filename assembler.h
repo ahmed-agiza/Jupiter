@@ -7,7 +7,6 @@
 #include <QString>
 #include <iostream>
 #include <fstream>
-#include "globalRegex.h"
 #include <QMap>
 #include <QTextEdit>
 #include "memory.h"
@@ -36,7 +35,7 @@ private:
     QVector<int> registers;
     //Assembler(QTextEdit&);
 //<<<<<<< HEAD
-    memory *dataSegment;
+    Memory *dataSegment;
 
 //=======
     int address;

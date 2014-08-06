@@ -4,7 +4,7 @@
 
 
 
-#define fParam2 QVector<__int32> *base, int rs, int rt, int rd, __int16 imm, int shamt, int &PC, memory *mem
+#define fParam2 QVector<__int32> *base, int rs, int rt, int rd, __int16 imm, int shamt, int &PC, Memory *mem
 
 #define Rdr (*base)[rd]
 #define Rtr (*base)[rt]
