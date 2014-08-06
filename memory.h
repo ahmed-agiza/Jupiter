@@ -29,12 +29,12 @@ public:
     unsigned int getHWordSegment(int) const;
     unsigned int getWordSegment(int) const;
 
-    //    bool isValidWordL(int, int) const;
-    //    bool isValidWordR(int, int) const;
-    //    void storeWordL(int, int, int);
-    //    void storeWordR(int, int, int);
-    //    int loadWordL(int, int) const;
-    //    int loadWordR(int, int) const;
+//    bool isValidWordL(int, int) const;
+//    bool isValidWordR(int, int) const;
+//    void storeWordL(int, int, int);
+//    void storeWordR(int, int, int);
+//    int loadWordL(int, int) const;
+//    int loadWordR(int, int) const;
 
 
     ~memory();

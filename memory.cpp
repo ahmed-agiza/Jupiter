@@ -46,9 +46,9 @@ unsigned int memory::getWordSegment(int addr) const
     return firstByte;
 }
 
-memory::memory():    textSegmentBaseAddress (0x4000000),
+memory::memory():   textSegmentBaseAddress (0x4000000),
                     dataSegmentBaseAddress (0x10010000),
-                    heapSegmentBaseAddress (0x100d0000),
+                    heapSegmentBaseAddress (0x10500000),
                     stackSegmentLimitAddress (0x80000000),
                     textSegmentPhysicalSize (64 * 1024),
                     dataSegmentPhysicalSize (64 * 1024),

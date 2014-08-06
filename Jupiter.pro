@@ -26,7 +26,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
-    globalRegex.h \
     codeeditor.h \
     instruction.h \
     assembler.h \
