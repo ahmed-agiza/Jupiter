@@ -1,4 +1,6 @@
 #include "tile.h"
+
+
 Tile::Tile()
 {
     texture.setRepeated(true);
@@ -39,6 +41,10 @@ sf::Texture Tile::getTexture() const
     return texture;
 }
 
+sf::Image Tile::getImage() const
+{
+    return image;
+}
 Tile::~Tile()
 {
 

@@ -15,6 +15,7 @@ public:
     char loadByte(unsigned int) const;
     void storeByte(unsigned int, char);
     Texture getTexture() const;
+    Image getImage() const;
 private:
     QVector<PaletteColor>* pall;
     Image image;

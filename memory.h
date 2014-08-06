@@ -9,6 +9,7 @@
 #include <SFML/Graphics.hpp>
 #include "palettecolor.h"
 #include "tile.h"
+#include "gamesprite.h"
 
 class Memory : public QObject
 {
@@ -55,7 +56,8 @@ private:
     QVector< Tile > spritesTileSet;
     QVector< QVector< char > > tileMap;
     QVector< QVector< sf::Sprite > > backgroundMatrix;
-    QVector<PaletteColor> palette;
+    QVector< PaletteColor > palette;
+    QVector< GameSprite > spriteRam;
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
     const unsigned int heapSegmentBaseAddress;
