@@ -14,9 +14,9 @@ public:
     char loadByte(unsigned int) const;
     void storeByte(unsigned int, char);
 private:
-    //Image image;
-    //Texture texture;
-    //Sprite sprite;
+    Image image;
+    Texture texture;
+    Sprite sprite;
     vector<unsigned char> memoryBytes;
 };
 

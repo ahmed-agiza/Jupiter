@@ -1,14 +1,15 @@
 #ifndef PALETTECOLOR_H
 #define PALETTECOLOR_H
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <QVector>
 #include <QSet>
 class PaletteColor
 {
 public:
     PaletteColor();
-    //sf::Color getColor() const;
-    //void setColor(sf::Color);
+    sf::Color getColor() const;
+    void setColor(sf::Color);
     void addBgTile(unsigned int);
     void addSpTile(unsigned int);
     unsigned int getBgTile(unsigned int) const;
@@ -16,7 +17,7 @@ public:
     unsigned int getBgTilesCount() const;
     unsigned int getSpTilesCount() const;
 private:
-    //sf::Color color;
+    sf::Color color;
     QSet<unsigned int>bgTilesSet;
     QSet<unsigned int>spTilesSet;
     QVector<unsigned int> bgTiles;

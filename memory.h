@@ -51,11 +51,11 @@ private:
     QByteArray dataSegment;
     QByteArray heapSegment;
     QByteArray stackSegment;
-    //QVector< Tile > backgroundTileSet;
-    //QVector< Tile > spritesTileSet;
-    //QVector< QVector< char > > tileMap;
-    //QVector< QVector< sf::Sprite > > backgroundMatrix;
-    //QVector<PaletteColor> palette;
+    QVector< Tile > backgroundTileSet;
+    QVector< Tile > spritesTileSet;
+    QVector< QVector< char > > tileMap;
+    QVector< QVector< sf::Sprite > > backgroundMatrix;
+    QVector<PaletteColor> palette;
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
     const unsigned int heapSegmentBaseAddress;

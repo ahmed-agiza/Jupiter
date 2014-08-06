@@ -67,10 +67,10 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
                     screenWidth(512),
                     screenHeight(384)
 {
-    //backgroundTileSet.resize(256);
-    //spritesTileSet.resize(256);
-    //tileMap.resize(screenHeight/16 * getScreensHeightCount());
-    //tileMap.fill( QVector<char>(screenWidth/16 * getScreensWidthCount() ));
+    backgroundTileSet.resize(256);
+    spritesTileSet.resize(256);
+    tileMap.resize(screenHeight/16 * getScreensHeightCount());
+    tileMap.fill( QVector<char>(screenWidth/16 * getScreensWidthCount() ));
     textSegment.resize(textSegmentPhysicalSize);
     dataSegment.resize(dataSegmentPhysicalSize);
     heapSegment.resize(heapSegmentPhysicalSize);

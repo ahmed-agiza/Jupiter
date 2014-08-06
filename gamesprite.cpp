@@ -2,7 +2,7 @@
 
 GameSprite::GameSprite()
 {
-    //image.create(32,32);
+    image.create(32,32);
     memoryBytes.resize(8);
 }
 

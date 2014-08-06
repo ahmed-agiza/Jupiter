@@ -1,10 +1,9 @@
 #include "palettecolor.h"
-#include <SFML/Graphics.hpp>
 
 PaletteColor::PaletteColor()
 {
 }
-/*
+
 sf::Color PaletteColor::getColor() const
 {
     return color;
@@ -13,7 +12,7 @@ void PaletteColor::setColor(sf::Color clr)
 {
     color = clr;
 }
-*/
+
 void PaletteColor::addBgTile(unsigned int tile)
 {
     if(!bgTilesSet.contains(tile)) {
