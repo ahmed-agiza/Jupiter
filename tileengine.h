@@ -21,7 +21,8 @@ public:
     void getChanges();
     void update();
     void renderFrame();
-
+signals:
+    void renderNow();
 };
 
 #endif // TILEENGINE_H

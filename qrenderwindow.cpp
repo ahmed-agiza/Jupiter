@@ -35,7 +35,6 @@ void QRenderWindow::showEvent(QShowEvent*)
         // Let the derived class do its specific stuff
         initialize();
         // Setup the timer to trigger a refresh at specified framerate
-        connect(&myTimer, SIGNAL(timeout()), this, SLOT(repaint()));
         myTimer.start();
         myInitialized = true;
     }

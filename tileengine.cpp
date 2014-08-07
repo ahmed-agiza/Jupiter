@@ -13,6 +13,8 @@ void TileEngine::initialize()
     time.asMilliseconds(1000.0/double(framesPerSecond));
     screenSize.x = 512;
     screenSize.y = 384;
+    clk.restart();
+    connect(this, SIGNAL(renderNow()), this, SLOT(repaint()));
 }
 
 void TileEngine::getChanges()
@@ -25,7 +27,7 @@ void TileEngine::update()
     if(clk.getElapsedTime() >= time){
         clk.restart();
         getChanges();
-        RenderWindow::clear(Color(0, 128, 0));
+        RenderWindow::clear(Color(0, 128, 128));
         renderFrame();
     }
 }
@@ -42,4 +44,6 @@ void TileEngine::renderFrame()
         if(memory->spriteRam[i].shouldRender())
             RenderWindow::draw(memory->spriteRam[i].sprite);
     }
+
+    emit renderNow();
 }
