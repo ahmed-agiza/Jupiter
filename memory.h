@@ -44,6 +44,8 @@ public:
 
     ~Memory();
 
+    QVector< QVector< sf::Sprite > > backgroundMatrix;
+    QVector< GameSprite > spriteRam;
 signals:
     void raiseException(int);
 
@@ -55,9 +57,8 @@ private:
     QVector< Tile > backgroundTileSet;
     QVector< Tile > spritesTileSet;
     QVector< QVector< char > > tileMap;
-    QVector< QVector< sf::Sprite > > backgroundMatrix;
     QVector< PaletteColor > palette;
-    QVector< GameSprite > spriteRam;
+
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
     const unsigned int heapSegmentBaseAddress;

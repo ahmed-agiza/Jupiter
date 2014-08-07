@@ -136,3 +136,8 @@ void GameSprite::makeImage()
         sprite.setScale(scaleH + 1, scaleV + 1);
     }
 }
+
+bool GameSprite::shouldRender() const
+{
+    return ((memoryBytes[7]>>7)&1);
+}

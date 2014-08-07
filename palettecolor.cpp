@@ -1,4 +1,5 @@
 #include "palettecolor.h"
+#include "tile.h"
 
 PaletteColor::PaletteColor()
 {
@@ -12,6 +13,9 @@ void PaletteColor::storeByte(unsigned int index, char byte)
     else if(index == 3)  color.a = byte;
 
     // update tiles here
+    for(int i=0; i<myTiles.size(); i++){
+        myTiles[i]->update();
+    }
 }
 
 char PaletteColor::loadByte(unsigned int index) const
@@ -32,35 +36,10 @@ void PaletteColor::setColor(sf::Color clr)
     color = clr;
 }
 
-void PaletteColor::addBgTile(unsigned int tile)
+void PaletteColor::addTile(Tile * tile)
 {
-    if(!bgTilesSet.contains(tile)) {
-        bgTiles.push_back(tile);
-        bgTilesSet.insert(tile);
+    if(!myTilesSet.contains(tile)){
+        myTiles.append(tile);
+        myTilesSet.insert(tile);
     }
-}
-
-void PaletteColor::addSpTile(unsigned int tile)
-{
-    if(!spTilesSet.contains(tile)) {
-        spTiles.push_back(tile);
-        spTilesSet.insert(tile);
-    }
-}
-
-unsigned int PaletteColor::getBgTile(unsigned int index) const
-{
-    return bgTiles[index];
-}
-unsigned int PaletteColor::getSpTile(unsigned int index) const
-{
-    return spTiles[index];
-}
-unsigned int PaletteColor::getBgTilesCount() const
-{
-    return bgTiles.size();
-}
-unsigned int PaletteColor::getSpTilesCount() const
-{
-    return spTiles.size();
 }

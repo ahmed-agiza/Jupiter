@@ -25,7 +25,9 @@ SOURCES += main.cpp\
     instructionsmodel.cpp \
     palettecolor.cpp \
     tile.cpp \
-    gamesprite.cpp
+    gamesprite.cpp \
+    tileengine.cpp \
+    qrenderwindow.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -39,7 +41,9 @@ HEADERS  += mainwindow.h \
     instructionsmodel.h \
     palettecolor.h \
     tile.h \
-    gamesprite.h
+    gamesprite.h \
+    tileengine.h \
+    qrenderwindow.h
 
 FORMS    += \
     mainwindow.ui

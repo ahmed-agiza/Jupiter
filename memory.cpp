@@ -110,6 +110,10 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
     dataSegment.fill(0);
     heapSegment.fill(0);
     stackSegment.fill(0);
+
+    for (int i = 0; i < backgroundMatrix.size(); i++)
+        for (int j = 0; j < backgroundMatrix[i].size(); j++)
+            backgroundMatrix[i][j].setPosition(j * 16, i * 16);
 }
 
 Memory::~Memory()
@@ -133,7 +137,12 @@ void Memory::storeByte(unsigned int addr, char data)
     else if(segment == STACK_SEGMENT)
         stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = data;
     else if(segment == TILE_MAP){
-
+        int w = screenWidth/16 * getScreensWidthCount();
+        int r = (addr - tileMapBaseAddress)/w;
+        int c = (addr - tileMapBaseAddress)%w;
+        backgroundTileSet[tileMap[r][c]].removeSprite(&backgroundMatrix[r][c]);
+        tileMap[r][c] = data;
+        backgroundMatrix[r][c].setTexture(backgroundTileSet[tileMap[r][c]].getTexture());
     }else if(segment == BG_TILE_SET)
         backgroundTileSet[(addr >> 8)&0xff].storeByte(addr, data);
     else if(segment == SP_TILE_SET)
@@ -159,7 +168,10 @@ char Memory::loadByte(unsigned int addr) const
     else if(segment == STACK_SEGMENT)
         return stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
     else if(segment == TILE_MAP){
-
+        int w = screenWidth/16 * getScreensWidthCount();
+        int r = (addr - tileMapBaseAddress)/w;
+        int c = (addr - tileMapBaseAddress)%w;
+        return tileMap[r][c];
     }else if(segment == BG_TILE_SET)
         return backgroundTileSet[(addr >> 8)&0xff].loadByte(addr);
     else if(segment == SP_TILE_SET)
@@ -181,7 +193,7 @@ void Memory::storeHWord(unsigned int addr, short data)
     if(getHWordSegment(addr) == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
         return;
-    }if(addr & 1 != 0){
+    }if((addr & 1) != 0){
         //emit raiseException(NOT_HWORD_ALIGN_EX_NO);
         return;
     }
@@ -200,7 +212,7 @@ short Memory::loadHWord(unsigned int addr) const
     if(getHWordSegment(addr) == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
         return 0;
-    }if(addr & 1 != 0){
+    }if((addr & 1) != 0){
         //emit raiseException(NOT_HWORD_ALIGN_EX_NO);
         return 0;
     }
@@ -220,7 +232,7 @@ void Memory::storeWord(unsigned int addr, int data)
     if(getWordSegment(addr) == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
         return;
-    }if(addr & 3 != 0){
+    }if((addr & 3) != 0){
         //emit raiseException(NOT_WORD_ALIGN_EX_NO);
         return;
     }
@@ -242,7 +254,7 @@ int Memory::loadWord(unsigned int addr) const
     if(getWordSegment(addr) == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
         return 0;
-    }if(addr & 3 != 0){
+    }if((addr & 3) != 0){
         //emit raiseException(NOT_WORD_ALIGN_EX_NO);
         return 0;
     }

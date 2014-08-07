@@ -16,6 +16,9 @@ public:
     void storeByte(unsigned int, char);
     Texture getTexture() const;
     Image getImage() const;
+    void update();
+    void addSprite(Sprite*);
+    void removeSprite(Sprite*);
 private:
     QVector<PaletteColor>* pall;
     Image image;

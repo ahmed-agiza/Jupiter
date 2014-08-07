@@ -32,8 +32,10 @@ void Tile::storeByte(unsigned int address, char byte)
 {
     unsigned char row = (address&0xf0)>>4;
     unsigned char col = (address&0xf);
+
     tileData[row][col] = byte;
     image.setPixel(col, row, (*pall)[(tileData[row][col])].getColor());
+    save();
 }
 
 sf::Texture Tile::getTexture() const
@@ -48,4 +50,26 @@ sf::Image Tile::getImage() const
 Tile::~Tile()
 {
 
+}
+
+void Tile::update()
+{
+    for(int i=0; i<16; i++)
+        for(int j=0; j<16; j++)
+            image.setPixel(j, i, (*pall)[(tileData[i][j])].getColor());
+    save();
+}
+
+void Tile::addSprite(Sprite* sp)
+{
+    spritesPointers.append(sp);
+}
+
+void Tile::removeSprite(Sprite* sp)
+{
+    for(int i=0; i<spritesPointers.size(); i++)
+        if(spritesPointers[i] == sp){
+            spritesPointers.remove(i);
+            i = spritesPointers.size();
+        }
 }

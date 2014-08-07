@@ -12,12 +12,14 @@ public:
     ~GameSprite();
     char loadByte(unsigned int) const;
     void storeByte(unsigned int, char);
+    bool shouldRender() const;
+
+    Sprite sprite;
 private:
     QVector<Tile> *tileSetPointer;
     Image img0, img1;
     Image image;
     Texture texture;
-    Sprite sprite;
     QVector<unsigned char> memoryBytes;
 
     void makeImage();
