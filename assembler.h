@@ -33,15 +33,12 @@ private:
     QMap<QString, int> opcode;
     QMap<QString, int (*)(fParam2)> functionsMap;
     QVector<int> registers;
-    //Assembler(QTextEdit&);
-//<<<<<<< HEAD
-    Memory *dataSegment;
 
-//=======
+    Memory *mem;
     int address;
     int lineNumber;
     int PC;
-//>>>>>>> origin/master
+
 public:
     Assembler(QStringList *stringList);
     int getNumber(QString);

@@ -369,20 +369,19 @@ Assembler::Assembler(QStringList* stringList)
 
     }
 
-    dataSegment = new Memory();
+    mem = new Memory();
     foreach(instruction ins,  instructions)
     {
-        ins.setMem(dataSegment);
+        ins.setMem(mem);
+
         ins.setFunc(functionsMap[ins.getName()]);
         QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }
 }
 Assembler::~Assembler()
 {
-    delete dataSegment;
+    delete mem;
 }
-//<<<<<<< HEAD
-//=======
 
 void Assembler::initializeFunctions()
 {
