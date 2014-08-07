@@ -4,9 +4,16 @@
 #define DATA_SEGMENT 2
 #define HEAP_SEGMENT 3
 #define STACK_SEGMENT 4
+#define TILE_MAP 5
+#define BG_TILE_SET 6
+#define SP_TILE_SET 7
+#define SPRITE_RAM 8
+#define PALETTE 9
 #define OUT_OF_RANGE 0
 
-#define outOfRangeExNo 4
+#define OUT_OF_RANGE_EX_NO 4
+#define NOT_HWORD_ALIGN_EX_NO 5
+#define NOT_WORD_ALIGN_EX_NO 6
 
 bool isLittleEndian()
 {
@@ -33,9 +40,18 @@ unsigned int Memory::getByteSegment(unsigned int addr) const
         return HEAP_SEGMENT;
     else if(addr >= stackSegmentLimitAddress - stackSegmentPhysicalSize && addr < stackSegmentLimitAddress)
         return STACK_SEGMENT;
+    else if(addr >= tileMapBaseAddress && addr < tileMapBaseAddress + tileMapPhysicalSize)
+        return TILE_MAP;
+    else if(addr >= backgroundTileSetBaseAddress && addr < backgroundTileSetBaseAddress + backgroundTileSetPhysicalSize)
+        return BG_TILE_SET;
+    else if(addr >= spritesTileSetBaseAddress && addr < spritesTileSetBaseAddress + spritesTileSetPhysicalSize)
+        return SP_TILE_SET;
+    else if(addr >= spriteRamBaseAddress && addr < spriteRamBaseAddress + spriteRamPhysicalSize)
+        return SPRITE_RAM;
+    else if(addr >= paletteBaseAddress && addr < paletteBaseAddress + palettePhysicalSize)
+        return PALETTE;
     else
         return OUT_OF_RANGE;
-        //emit raiseException(outOfRangeExNo);
 }
 
 
@@ -60,13 +76,23 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
                     dataSegmentBaseAddress (0x10010000),
                     heapSegmentBaseAddress (0x10500000),
                     stackSegmentLimitAddress (0x80000000),
+                    spriteRamBaseAddress (0x10400000),
+                    paletteBaseAddress (0x104FF000),
+                    tileMapBaseAddress (0x10100000),
+                    spritesTileSetBaseAddress (0x10030000),
+                    backgroundTileSetBaseAddress (0x10020000),
                     textSegmentPhysicalSize (64 * 1024),
                     dataSegmentPhysicalSize (64 * 1024),
                     heapSegmentPhysicalSize (128 * 1024),
                     stackSegmentPhysicalSize (128 * 1024),
+                    spriteRamPhysicalSize (512),
+                    palettePhysicalSize (1 * 1024),
+                    spritesTileSetPhysicalSize (64 * 1024),
+                    backgroundTileSetPhysicalSize (64 * 1024),
                     screenWidth(512),
                     screenHeight(384)
 {
+    tileMapPhysicalSize = screenHeight/16 * getScreensHeightCount() * screenWidth/16 * getScreensWidthCount(),
     backgroundTileSet.resize(256);
     spritesTileSet.resize(256);
     tileMap.resize(screenHeight/16 * getScreensHeightCount());
@@ -95,9 +121,10 @@ Memory::~Memory()
 void Memory::storeByte(unsigned int addr, char data)
 {
     int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE)
+    if (segment == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
         return;
-    else if(segment == TEXT_SEGMENT)
+    }else if(segment == TEXT_SEGMENT)
         textSegment[addr - textSegmentBaseAddress] = data;
     else if(segment == DATA_SEGMENT)
         dataSegment[addr - dataSegmentBaseAddress] = data;
@@ -105,14 +132,25 @@ void Memory::storeByte(unsigned int addr, char data)
         heapSegment[addr - heapSegmentBaseAddress] = data;
     else if(segment == STACK_SEGMENT)
         stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = data;
+    else if(segment == TILE_MAP){
+
+    }else if(segment == BG_TILE_SET)
+        backgroundTileSet[(addr >> 8)&0xff].storeByte(addr, data);
+    else if(segment == SP_TILE_SET)
+        spritesTileSet[(addr>>8)&0xff].storeByte(addr, data);
+    else if(segment == SPRITE_RAM)
+        spriteRam[(addr - spriteRamBaseAddress)>>3].storeByte(addr,data);
+    else if(segment == PALETTE)
+        palette[(addr - paletteBaseAddress)>>2].storeByte(addr&0xff,data);
 }
 
 char Memory::loadByte(unsigned int addr) const
 {
     int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE)
+    if (segment == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
         return 0;
-    else if(segment == TEXT_SEGMENT)
+    }else if(segment == TEXT_SEGMENT)
         return textSegment[addr - textSegmentBaseAddress];
     else if(segment == DATA_SEGMENT)
         return dataSegment[addr - dataSegmentBaseAddress];
@@ -120,258 +158,104 @@ char Memory::loadByte(unsigned int addr) const
         return heapSegment[addr - heapSegmentBaseAddress];
     else if(segment == STACK_SEGMENT)
         return stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
+    else if(segment == TILE_MAP){
+
+    }else if(segment == BG_TILE_SET)
+        return backgroundTileSet[(addr >> 8)&0xff].loadByte(addr);
+    else if(segment == SP_TILE_SET)
+        return spritesTileSet[(addr>>8)&0xff].loadByte(addr);
+    else if(segment == SPRITE_RAM)
+        return spriteRam[(addr - spriteRamBaseAddress)>>3].loadByte(addr);
+    else if(segment == PALETTE)
+        return palette[(addr - paletteBaseAddress)>>2].loadByte(addr&0xff);
     else return 0;
 }
 
 unsigned char Memory::loadByteU(unsigned int addr) const
 {
-    int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE)
-        return 0;
-    else if(segment == TEXT_SEGMENT)
-        return (unsigned char)textSegment[addr - textSegmentBaseAddress];
-    else if(segment == DATA_SEGMENT)
-        return (unsigned char)dataSegment[addr - dataSegmentBaseAddress];
-    else if(segment == HEAP_SEGMENT)
-        return (unsigned char)heapSegment[addr - heapSegmentBaseAddress];
-    else if(segment == STACK_SEGMENT)
-        return (unsigned char)stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
-    else return 0;
+    return (unsigned char)loadByte(addr);
 }
 
 void Memory::storeHWord(unsigned int addr, short data)
 {
-    int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE) {
+    if(getHWordSegment(addr) == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
         return;
-    } else if(segment == TEXT_SEGMENT) {
-        if(isLittleEndian()) {
-            textSegment[(addr - textSegmentBaseAddress)] = (data&0xff);
-            textSegment[(addr - textSegmentBaseAddress) + 1] = (data>>8);
-        } else {
-            textSegment[(addr - textSegmentBaseAddress)] = (data>>8);
-            textSegment[(addr - textSegmentBaseAddress) + 1] = (data&0xff);
-        }
-    } else if(segment == DATA_SEGMENT) {
-        if(isLittleEndian()) {
-            dataSegment[addr - dataSegmentBaseAddress] = (data&0xff);
-            dataSegment[addr - dataSegmentBaseAddress + 1] = (data>>8);
-        } else {
-            dataSegment[addr - dataSegmentBaseAddress] = (data>>8);
-            dataSegment[addr - dataSegmentBaseAddress + 1] = (data&0xff);
-        }
-    } else if(segment == HEAP_SEGMENT) {
-        if(isLittleEndian()) {
-            heapSegment[addr - heapSegmentBaseAddress] = (data&0xff);
-            heapSegment[addr - heapSegmentBaseAddress + 1] = (data>>8);
-        } else {
-            heapSegment[addr - heapSegmentBaseAddress] = (data>>8);
-            heapSegment[addr - heapSegmentBaseAddress + 1] = (data&0xff);
-        }
-    } else if(segment == STACK_SEGMENT) {
-        if(isLittleEndian()) {
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = (data&0xff);
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] = (data>>8);
-        } else {
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = (data>>8);
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] = (data&0xff);
-        }
+    }if(addr & 1 != 0){
+        //emit raiseException(NOT_HWORD_ALIGN_EX_NO);
+        return;
+    }
+    if(isLittleEndian()) {
+        storeByte(addr,data&0xff);
+        storeByte(addr+1, data>>8);
+    } else {
+        storeByte(addr,data>>8);
+        storeByte(addr+1, data&0xff);
     }
 }
 
 
 short Memory::loadHWord(unsigned int addr) const
 {
-    int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE) {
+    if(getHWordSegment(addr) == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
         return 0;
-    } else if(segment == TEXT_SEGMENT) {
-        if(isLittleEndian()) {
-            return ((unsigned short)(textSegment[(addr - textSegmentBaseAddress) + 1] << 8) & textSegment[(addr - textSegmentBaseAddress)]);
-        } else {
-            return ((unsigned short)(textSegment[(addr - textSegmentBaseAddress)] << 8) & textSegment[(addr - textSegmentBaseAddress) + 1]);
-        }
-    } else if(segment == DATA_SEGMENT) {
-        if(isLittleEndian()) {
-            return ((unsigned short)(dataSegment[addr - dataSegmentBaseAddress + 1] << 8) & dataSegment[addr - dataSegmentBaseAddress]);
-        } else {
-            return ((unsigned short)(dataSegment[addr - dataSegmentBaseAddress] << 8) & dataSegment[addr - dataSegmentBaseAddress + 1]);
-        }
-    } else if(segment == HEAP_SEGMENT) {
-        if(isLittleEndian()) {
-            return ((unsigned short)(heapSegment[addr - heapSegmentBaseAddress + 1] << 8) & heapSegment[addr - heapSegmentBaseAddress]);
-        } else {
-            return ((unsigned short)(heapSegment[addr - heapSegmentBaseAddress] << 8) & heapSegment[addr - heapSegmentBaseAddress + 1]);
-        }
-    } else if(segment == STACK_SEGMENT) {
-        if(isLittleEndian()) {
-            return ((unsigned short)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]);
-        } else {
-            return ((unsigned short)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
-        }
-    } else return 0;
+    }if(addr & 1 != 0){
+        //emit raiseException(NOT_HWORD_ALIGN_EX_NO);
+        return 0;
+    }
+    if(isLittleEndian())
+        return ((unsigned short)(loadByte(addr + 1) << 8) & loadByteU(addr));
+    else
+        return ((unsigned short)(loadByte(addr) << 8) & loadByteU(addr + 1));
 }
 
 unsigned short Memory::loadHWordU(unsigned int addr) const
 {
-    int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE) {
-        return 0;
-    } else if(segment == TEXT_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned short)((unsigned short)(textSegment[(addr - textSegmentBaseAddress) + 1] << 8) & textSegment[(addr - textSegmentBaseAddress)]);
-        } else {
-            return (unsigned short)((unsigned short)(textSegment[(addr - textSegmentBaseAddress)] << 8) & textSegment[(addr - textSegmentBaseAddress) + 1]);
-        }
-    } else if(segment == DATA_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned short)((unsigned short)(dataSegment[addr - dataSegmentBaseAddress + 1] << 8) & dataSegment[addr - dataSegmentBaseAddress]);
-        } else {
-            return (unsigned short)((unsigned short)(dataSegment[addr - dataSegmentBaseAddress] << 8) & dataSegment[addr - dataSegmentBaseAddress + 1]);
-        }
-    } else if(segment == HEAP_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned short)((unsigned short)(heapSegment[addr - heapSegmentBaseAddress + 1] << 8) & heapSegment[addr - heapSegmentBaseAddress]);
-        } else {
-            return (unsigned short)((unsigned short)(heapSegment[addr - heapSegmentBaseAddress] << 8) & heapSegment[addr - heapSegmentBaseAddress + 1]);
-        }
-    } else if(segment == STACK_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned short)((unsigned short)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]);
-        } else {
-            return (unsigned short)((unsigned short)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
-        }
-    } else return 0;
+    return (unsigned short)loadHWord(addr);
 }
 
 void Memory::storeWord(unsigned int addr, int data)
 {
-    int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE) {
+    if(getWordSegment(addr) == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
         return;
-    } else if(segment == TEXT_SEGMENT) {
-        if(isLittleEndian()) {
-            textSegment[(addr - textSegmentBaseAddress)] = (data&0xff);
-            textSegment[(addr - textSegmentBaseAddress) + 1] = (data>>8)&0xff;
-            textSegment[(addr - textSegmentBaseAddress) + 2] = (data>>16)&0xff;
-            textSegment[(addr - textSegmentBaseAddress) + 3] = (data>>24);
-        } else {
-            textSegment[(addr - textSegmentBaseAddress)] = (data>>24);
-            textSegment[(addr - textSegmentBaseAddress) + 1] = (data>>16)&0xff;
-            textSegment[(addr - textSegmentBaseAddress) + 2] = (data>>8)&0xff;
-            textSegment[(addr - textSegmentBaseAddress) + 3] = (data&0xff);
-        }
-    } else if(segment == DATA_SEGMENT) {
-        if(isLittleEndian()) {
-            dataSegment[addr - dataSegmentBaseAddress] = (data&0xff);
-            dataSegment[addr - dataSegmentBaseAddress + 1] = (data>>8)&0xff;
-            dataSegment[addr - dataSegmentBaseAddress + 2] = (data>>16)&0xff;
-            dataSegment[addr - dataSegmentBaseAddress + 3] = (data>>24);
-        } else {
-            dataSegment[addr - dataSegmentBaseAddress] = (data>>24);
-            dataSegment[addr - dataSegmentBaseAddress + 1] = (data>>16)&0xff;
-            dataSegment[addr - dataSegmentBaseAddress + 2] = (data>>8)&0xff;
-            dataSegment[addr - dataSegmentBaseAddress + 3] = (data&0xff);
-        }
-    } else if(segment == HEAP_SEGMENT) {
-        if(isLittleEndian()) {
-            heapSegment[addr - heapSegmentBaseAddress] = (data&0xff);
-            heapSegment[addr - heapSegmentBaseAddress + 1] = (data>>8)&0xff;
-            heapSegment[addr - heapSegmentBaseAddress + 2] = (data>>16)&0xff;
-            heapSegment[addr - heapSegmentBaseAddress + 3] = (data>>24);
-        } else {
-            heapSegment[addr - heapSegmentBaseAddress] = (data>>24);
-            heapSegment[addr - heapSegmentBaseAddress + 1] = (data>>16)&0xff;
-            heapSegment[addr - heapSegmentBaseAddress + 2] = (data>>8)&0xff;
-            heapSegment[addr - heapSegmentBaseAddress + 3] = (data&0xff);
-        }
-    } else if(segment == STACK_SEGMENT) {
-        if(isLittleEndian()) {
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = (data&0xff);
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] = (data>>8)&0xff;
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 2] = (data>>16)&0xff;
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 3] = (data>>24);
-        } else {
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = (data>>24);
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] = (data>>16)&0xff;
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 2] = (data>>8)&0xff;
-            stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 3] = (data&0xff);
-        }
+    }if(addr & 3 != 0){
+        //emit raiseException(NOT_WORD_ALIGN_EX_NO);
+        return;
+    }
+    if(isLittleEndian()) {
+        storeByte(addr, data&0xff);
+        storeByte(addr+1, (data>>8)&0xff);
+        storeByte(addr+2, (data>>16)&0xff);
+        storeByte(addr+3, (data>>24)&0xff);
+    } else {
+        storeByte(addr, (data>>24)&0xff);
+        storeByte(addr+1, (data>>16)&0xff);
+        storeByte(addr+2, (data>>8)&0xff);
+        storeByte(addr+3, (data)&0xff);
     }
 }
 
 int Memory::loadWord(unsigned int addr) const
 {
-    int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE) {
+    if(getWordSegment(addr) == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
         return 0;
-    } else if(segment == TEXT_SEGMENT) {
-        if(isLittleEndian()) {
-            return (((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 3]) << 24) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 2]) << 16) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 1]) << 8) & textSegment[(addr - textSegmentBaseAddress)]);
-        } else {
-            return (((unsigned int)(textSegment[(addr - textSegmentBaseAddress)]) << 24) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 1]) << 16) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 2]) << 8) & textSegment[(addr - textSegmentBaseAddress) + 3]);
-        }
-    } else if(segment == DATA_SEGMENT) {
-        if(isLittleEndian()) {
-            return (((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 3]) << 24) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 2]) << 16) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 1]) << 8) & dataSegment[addr - dataSegmentBaseAddress]);
-        } else {
-            return (((unsigned int)(dataSegment[addr - dataSegmentBaseAddress]) << 24) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 1]) << 16) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 2]) << 8) & dataSegment[addr - dataSegmentBaseAddress + 3]);
-        }
-    } else if(segment == HEAP_SEGMENT) {
-        if(isLittleEndian()) {
-            return (((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 3]) << 24) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 2]) << 16) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 1]) << 8) & heapSegment[addr - heapSegmentBaseAddress]);
-        } else {
-            return (((unsigned int)(heapSegment[addr - heapSegmentBaseAddress]) << 24) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 1]) << 16) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 2]) << 8) & heapSegment[addr - heapSegmentBaseAddress + 3]);
-        }
-    } else if(segment == STACK_SEGMENT) {
-        if(isLittleEndian()) {
-            return (((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 3]) << 24) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 2]) << 16) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]) << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]);
-        } else {
-            return (((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]) << 24) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]) << 16) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 2]) << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 3]);
-        }
-        if(isLittleEndian()) {
-            return ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]);
-        } else {
-            return ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
-        }
-    } else return 0;
+    }if(addr & 3 != 0){
+        //emit raiseException(NOT_WORD_ALIGN_EX_NO);
+        return 0;
+    }
+    if(isLittleEndian()) {
+        return (((unsigned int)(loadByte(addr + 3)) << 24) & ((unsigned int)(loadByteU(addr + 2)) << 16) & ((unsigned int)(loadByteU(addr + 1)) << 8) & (loadByteU(addr)));
+    } else {
+        return (((unsigned int)(loadByte(addr)) << 24) & ((unsigned int)(loadByteU(addr + 1)) << 16) & ((unsigned int)(loadByteU(addr + 2)) << 8) & (loadByteU(addr + 3)));
+    }
 }
 
 unsigned int Memory::loadWordU(unsigned int addr)const
 {
-    int segment = getByteSegment(addr);
-    if (segment == OUT_OF_RANGE) {
-        return 0;
-    } else if(segment == TEXT_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned int)(((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 3]) << 24) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 2]) << 16) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 1]) << 8) & textSegment[(addr - textSegmentBaseAddress)]);
-        } else {
-            return (unsigned int)(((unsigned int)(textSegment[(addr - textSegmentBaseAddress)]) << 24) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 1]) << 16) & ((unsigned int)(textSegment[(addr - textSegmentBaseAddress) + 2]) << 8) & textSegment[(addr - textSegmentBaseAddress) + 3]);
-        }
-    } else if(segment == DATA_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned int)(((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 3]) << 24) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 2]) << 16) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 1]) << 8) & dataSegment[addr - dataSegmentBaseAddress]);
-        } else {
-            return (unsigned int)(((unsigned int)(dataSegment[addr - dataSegmentBaseAddress]) << 24) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 1]) << 16) & ((unsigned int)(dataSegment[addr - dataSegmentBaseAddress + 2]) << 8) & dataSegment[addr - dataSegmentBaseAddress + 3]);
-        }
-    } else if(segment == HEAP_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned int)(((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 3]) << 24) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 2]) << 16) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 1]) << 8) & heapSegment[addr - heapSegmentBaseAddress]);
-        } else {
-            return (unsigned int)(((unsigned int)(heapSegment[addr - heapSegmentBaseAddress]) << 24) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 1]) << 16) & ((unsigned int)(heapSegment[addr - heapSegmentBaseAddress + 2]) << 8) & heapSegment[addr - heapSegmentBaseAddress + 3]);
-        }
-    } else if(segment == STACK_SEGMENT) {
-        if(isLittleEndian()) {
-            return (unsigned int)(((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 3]) << 24) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 2]) << 16) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]) << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]);
-        } else {
-            return (unsigned int)(((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]) << 24) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]) << 16) & ((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 2]) << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 3]);
-        }
-        if(isLittleEndian()) {
-            return (unsigned int)((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)]);
-        } else {
-            return (unsigned int)((unsigned int)(stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] << 8) & stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize) + 1]);
-        }
-    } else return 0;
+    return (unsigned int)loadWord(addr);
 }
 void Memory::storeConditional(unsigned int addr, int data)
 {
@@ -388,7 +272,7 @@ bool Memory::isValidWordL(int addr, int off) const
 {
     if (addr - off > MemoryLimit)
     {
-       // emit raiseException(outOfRangeExNo);
+       // emit raiseException(OUT_OF_RANGE_EX_NO);
         return false;
     }
     return true;
@@ -398,7 +282,7 @@ bool Memory::isValidWordR(int addr, int off) const
 {
     if (addr + off > MemoryLimit)
     {
-        //emit raiseException(outOfRangeExNo);
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
         return false;
     }
     return true;

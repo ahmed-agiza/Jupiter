@@ -16,6 +16,8 @@ public:
     unsigned int getSpTile(unsigned int) const;
     unsigned int getBgTilesCount() const;
     unsigned int getSpTilesCount() const;
+    void storeByte(unsigned int, char);
+    char loadByte(unsigned int) const;
 private:
     sf::Color color;
     QSet<unsigned int>bgTilesSet;

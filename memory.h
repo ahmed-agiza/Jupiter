@@ -63,10 +63,22 @@ private:
     const unsigned int heapSegmentBaseAddress;
     const unsigned int stackSegmentLimitAddress;
 
+    const unsigned int spriteRamBaseAddress;
+    const unsigned int paletteBaseAddress;
+    const unsigned int tileMapBaseAddress;
+    const unsigned int spritesTileSetBaseAddress;
+    const unsigned int backgroundTileSetBaseAddress;
+
     const unsigned int textSegmentPhysicalSize;
     const unsigned int dataSegmentPhysicalSize;
     const unsigned int heapSegmentPhysicalSize;
     const unsigned int stackSegmentPhysicalSize;
+
+    const unsigned int spriteRamPhysicalSize;
+    const unsigned int palettePhysicalSize;
+    unsigned int tileMapPhysicalSize;
+    const unsigned int spritesTileSetPhysicalSize;
+    const unsigned int backgroundTileSetPhysicalSize;
 
     const unsigned int screenWidth;
     const unsigned int screenHeight;
