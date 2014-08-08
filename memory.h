@@ -7,15 +7,18 @@
 #include <QMatrix>
 #include <QVector>
 #include <QString>
+#include <QFile>
+#include <QDebug>
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include <fstream>
 #include "palettecolor.h"
 #include "tile.h"
 #include "gamesprite.h"
 
-class Memory //: public QObject
+class Memory : public QObject
 {
- //   Q_OBJECT
+    Q_OBJECT
 public:
     Memory ();
     void storeByte(unsigned int, char);
@@ -52,7 +55,7 @@ public:
     QVector< GameSprite > spriteRam;
 signals:
     void raiseException(int);
-
+    void loadingNumberChanged(int);
 private:
     QByteArray textSegment;
     QByteArray dataSegment;

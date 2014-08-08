@@ -3,6 +3,7 @@
 
 PaletteColor::PaletteColor()
 {
+    color = Color(0,0,0,0);
 }
 
 void PaletteColor::storeByte(unsigned int index, char byte)

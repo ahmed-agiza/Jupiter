@@ -92,7 +92,8 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
                     screenWidth(512),
                     screenHeight(384)
 {
-    tileMapPhysicalSize = screenHeight/16 * getScreensHeightCount() * screenWidth/16 * getScreensWidthCount(),
+
+    tileMapPhysicalSize = screenHeight/16 * getScreensHeightCount() * screenWidth/16 * getScreensWidthCount();
     backgroundTileSet.resize(256);
     spritesTileSet.resize(256);
     tileMap.resize(screenHeight/16 * getScreensHeightCount());
@@ -111,9 +112,18 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
     heapSegment.fill(0);
     stackSegment.fill(0);
 
+    for(int i=0; i<backgroundTileSet.size(); i++)
+        backgroundTileSet[i].setPalette(&palette);
+    for(int i=0; i<spritesTileSet.size(); i++)
+        spritesTileSet[i].setPalette(&palette);
+
     for (int i = 0; i < backgroundMatrix.size(); i++)
         for (int j = 0; j < backgroundMatrix[i].size(); j++)
             backgroundMatrix[i][j].setPosition(j * 16, i * 16);
+
+    for(int i=0; i<spriteRam.size(); i++)
+        spriteRam[i].setTileSet(&spritesTileSet);
+
 }
 
 Memory::~Memory()
@@ -142,7 +152,7 @@ void Memory::storeByte(unsigned int addr, char data)
         int c = (addr - tileMapBaseAddress)%w;
         backgroundTileSet[tileMap[r][c]].removeSprite(&backgroundMatrix[r][c]);
         tileMap[r][c] = data;
-        backgroundMatrix[r][c].setTexture(backgroundTileSet[tileMap[r][c]].getTexture());
+        backgroundMatrix[r][c].setTexture(backgroundTileSet[(unsigned char)tileMap[r][c]].getTexture());
     }else if(segment == BG_TILE_SET)
         backgroundTileSet[(addr >> 8)&0xff].storeByte(addr, data);
     else if(segment == SP_TILE_SET)
@@ -150,7 +160,7 @@ void Memory::storeByte(unsigned int addr, char data)
     else if(segment == SPRITE_RAM)
         spriteRam[(addr - spriteRamBaseAddress)>>3].storeByte(addr,data);
     else if(segment == PALETTE)
-        palette[(addr - paletteBaseAddress)>>2].storeByte(addr&0xff,data);
+        palette[(addr - paletteBaseAddress)>>2].storeByte(addr&0x3,data);
 }
 
 char Memory::loadByte(unsigned int addr) const
@@ -179,7 +189,7 @@ char Memory::loadByte(unsigned int addr) const
     else if(segment == SPRITE_RAM)
         return spriteRam[(addr - spriteRamBaseAddress)>>3].loadByte(addr);
     else if(segment == PALETTE)
-        return palette[(addr - paletteBaseAddress)>>2].loadByte(addr&0xff);
+        return palette[(addr - paletteBaseAddress)>>2].loadByte(addr&0x3);
     else return 0;
 }
 
@@ -282,107 +292,134 @@ int Memory::loadLinked(unsigned int addr) const
 
 void Memory::saveMemory(QString fileName, QVector<bool> segmentsToLoad)
 {
+    int count = 0;
     std::ofstream out;
     out.open(fileName.toStdString().c_str(), std::ofstream::binary);
     if(segmentsToLoad[0]){
         for(int i=0; i<textSegmentPhysicalSize; i++){
             out.put(loadByte(textSegmentBaseAddress + i));
+            count++;
         }
     }
     if(segmentsToLoad[1]){
         for(int i=0; i<dataSegmentPhysicalSize; i++){
             out.put(loadByte(dataSegmentBaseAddress + i));
+            count++;
         }
     }
     if(segmentsToLoad[2]){
         for(int i=0; i<backgroundTileSetPhysicalSize; i++){
             out.put(loadByte(backgroundTileSetBaseAddress + i));
+            count++;
         }
     }
     if(segmentsToLoad[3]){
         for(int i=0; i<spritesTileSetPhysicalSize; i++){
             out.put(loadByte(spritesTileSetBaseAddress + i));
+            count++;
         }
     }
     if(segmentsToLoad[4]){
         for(int i=0; i<tileMapPhysicalSize; i++){
             out.put(loadByte(tileMapBaseAddress + i));
+            count++;
         }
     }
     if(segmentsToLoad[5]){
         for(int i=0; i<spriteRamPhysicalSize; i++){
             out.put(loadByte(spriteRamBaseAddress + i));
+            count++;
         }
     }
     if(segmentsToLoad[6]){
         for(int i=0; i<palettePhysicalSize; i++){
             out.put(loadByte(paletteBaseAddress + i));
+            count++;
         }
     }
     if(segmentsToLoad[7]){
         for(int i=0; i<heapSegmentPhysicalSize; i++){
             out.put(loadByte(heapSegmentBaseAddress + i));
+            count++;
         }
     }
 
+
+    qDebug() << "saved: "<<count<<" bytes\n";
     out.close();
 }
 
 void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
 {
-    std::ifstream in;
-    in.open(fileName.toStdString().c_str(), std::ifstream::binary);
-    char byte;
+    int count = 0;
+    QFile in(fileName);
+    in.open(QIODevice::ReadOnly);
+
+    char* byte = new char;
 
     if(segmentsToLoad[0]){
         for(int i=0; i<textSegmentPhysicalSize; i++){
-            in.get(byte);
-            storeByte(textSegmentBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(textSegmentBaseAddress + i, *byte);
+            count++;
         }
     }
     if(segmentsToLoad[1]){
         for(int i=0; i<dataSegmentPhysicalSize; i++){
-            in.get(byte);
-            storeByte(dataSegmentBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(dataSegmentBaseAddress + i, *byte);
+            count++;
         }
     }
 
     if(segmentsToLoad[2]){
         for(int i=0; i<backgroundTileSetPhysicalSize; i++){
-            in.get(byte);
-            storeByte(backgroundTileSetBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(backgroundTileSetBaseAddress + i, *byte);
+            count++;
         }
     }
+
     if(segmentsToLoad[3]){
         for(int i=0; i<spritesTileSetPhysicalSize; i++){
-            in.get(byte);
-            storeByte(spritesTileSetBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(spritesTileSetBaseAddress + i, *byte);
+            count++;
         }
     }
+
     if(segmentsToLoad[4]){
         for(int i=0; i<tileMapPhysicalSize; i++){
-            in.get(byte);
-            storeByte(tileMapBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(tileMapBaseAddress + i, *byte);
+            count++;
         }
     }
+
     if(segmentsToLoad[5]){
         for(int i=0; i<spriteRamPhysicalSize; i++){
-            in.get(byte);
-            storeByte(spriteRamBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(spriteRamBaseAddress + i, *byte);
+            count++;
         }
     }
+
     if(segmentsToLoad[6]){
         for(int i=0; i<palettePhysicalSize; i++){
-            in.get(byte);
-            storeByte(paletteBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(paletteBaseAddress + i, *byte);
+            count++;
         }
     }
     if(segmentsToLoad[7]){
         for(int i=0; i<heapSegmentPhysicalSize; i++){
-            in.get(byte);
-            storeByte(heapSegmentBaseAddress + i, byte);
+            in.getChar(byte);
+            storeByte(heapSegmentBaseAddress + i, *byte);
+            count++;
         }
     }
+
+    qDebug() << "loaded: "<<count<<" bytes\n";
     in.close();
 }
 

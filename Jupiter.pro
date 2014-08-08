@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     gamesprite.cpp \
     tileengine.cpp \
     qrenderwindow.cpp \
-    loadmemorythread.cpp
+    loadmemorythread.cpp \
+    memoryloading.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -45,10 +46,12 @@ HEADERS  += mainwindow.h \
     gamesprite.h \
     tileengine.h \
     qrenderwindow.h \
-    loadmemorythread.h
+    loadmemorythread.h \
+    memoryloading.h
 
 FORMS    += \
-    mainwindow.ui
+    mainwindow.ui \
+    memoryloading.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc

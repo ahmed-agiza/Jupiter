@@ -6,7 +6,7 @@
 #include <QCompleter>
 #include "assembler.h"
 #include "loadmemorythread.h"
-
+#include "memoryloading.h"
 namespace Ui {
 class MainWindow;
 }
@@ -34,8 +34,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Memory* mem;
-    LoadMemoryThread* myThread;
+    MemoryLoading* memoryLoading;
     //Menus
 };
 

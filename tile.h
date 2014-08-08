@@ -11,6 +11,7 @@ public:
     Tile();
     Tile(QVector<QVector<char> >);
     ~Tile();
+    void setPalette(QVector<PaletteColor> *);
     void save();
     char loadByte(unsigned int) const;
     void storeByte(unsigned int, char);

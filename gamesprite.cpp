@@ -49,6 +49,7 @@ void GameSprite::storeByte(unsigned int address, char byte)
         makeImage();
         break;
     }
+
 }
 
 void GameSprite::makeImage()
@@ -129,7 +130,7 @@ void GameSprite::makeImage()
                 sprite.setTextureRect(IntRect(0,0,16,32));
             }
         } else {
-            texture.loadFromImage(image);
+            texture.loadFromImage(img0);
             sprite.setTexture(texture);
             sprite.setTextureRect(IntRect(0,0,16,16));
         }
@@ -140,4 +141,12 @@ void GameSprite::makeImage()
 bool GameSprite::shouldRender() const
 {
     return ((memoryBytes[7]>>7)&1);
+}
+
+void GameSprite::setTileSet(QVector<Tile>* tileSet)
+{
+    this->tileSetPointer = tileSet;
+    img0 = (*tileSetPointer)[memoryBytes[0]].getImage();
+    img1 = (*tileSetPointer)[memoryBytes[1]].getImage();
+    makeImage();
 }

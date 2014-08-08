@@ -6,6 +6,12 @@ Tile::Tile()
     texture.setRepeated(true);
     tileData.resize(16);
     tileData.fill(QVector<char>(16,0));
+    image.create(16,16,Color(0,0,0,255));
+}
+
+void Tile::setPalette(QVector<PaletteColor> *palette)
+{
+    this->pall = palette;
 }
 
 Tile::Tile(QVector<QVector<char> > tileData)
@@ -35,6 +41,7 @@ void Tile::storeByte(unsigned int address, char byte)
 
     tileData[row][col] = byte;
     image.setPixel(col, row, (*pall)[(tileData[row][col])].getColor());
+    (*pall)[(tileData[row][col])].addTile(this);
     save();
 }
 

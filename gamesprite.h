@@ -13,7 +13,7 @@ public:
     char loadByte(unsigned int) const;
     void storeByte(unsigned int, char);
     bool shouldRender() const;
-
+    void setTileSet(QVector<Tile>*);
     Sprite sprite;
 private:
     QVector<Tile> *tileSetPointer;
