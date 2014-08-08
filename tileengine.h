@@ -18,11 +18,12 @@ public:
     TileEngine(QWidget*, const QPoint&, const QSize&);
     ~TileEngine();
     void initialize();
-    void getChanges();
     void update();
     void renderFrame();
 signals:
     void renderNow();
+public slots:
+    void updateNow();
 };
 
 #endif // TILEENGINE_H

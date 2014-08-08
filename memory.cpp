@@ -22,12 +22,12 @@ bool isLittleEndian()
 
 unsigned int getScreensHeightCount()
 {
-    return 4;
+    return 2;
 }
 
 unsigned int getScreensWidthCount()
 {
-    return 4;
+    return 2;
 }
 
 unsigned int Memory::getByteSegment(unsigned int addr) const
@@ -277,6 +277,113 @@ void Memory::storeConditional(unsigned int addr, int data)
 int Memory::loadLinked(unsigned int addr) const
 {
     return loadWord(addr);
+}
+
+
+void Memory::saveMemory(QString fileName, QVector<bool> segmentsToLoad)
+{
+    std::ofstream out;
+    out.open(fileName.toStdString().c_str(), std::ofstream::binary);
+    if(segmentsToLoad[0]){
+        for(int i=0; i<textSegmentPhysicalSize; i++){
+            out.put(loadByte(textSegmentBaseAddress + i));
+        }
+    }
+    if(segmentsToLoad[1]){
+        for(int i=0; i<dataSegmentPhysicalSize; i++){
+            out.put(loadByte(dataSegmentBaseAddress + i));
+        }
+    }
+    if(segmentsToLoad[2]){
+        for(int i=0; i<backgroundTileSetPhysicalSize; i++){
+            out.put(loadByte(backgroundTileSetBaseAddress + i));
+        }
+    }
+    if(segmentsToLoad[3]){
+        for(int i=0; i<spritesTileSetPhysicalSize; i++){
+            out.put(loadByte(spritesTileSetBaseAddress + i));
+        }
+    }
+    if(segmentsToLoad[4]){
+        for(int i=0; i<tileMapPhysicalSize; i++){
+            out.put(loadByte(tileMapBaseAddress + i));
+        }
+    }
+    if(segmentsToLoad[5]){
+        for(int i=0; i<spriteRamPhysicalSize; i++){
+            out.put(loadByte(spriteRamBaseAddress + i));
+        }
+    }
+    if(segmentsToLoad[6]){
+        for(int i=0; i<palettePhysicalSize; i++){
+            out.put(loadByte(paletteBaseAddress + i));
+        }
+    }
+    if(segmentsToLoad[7]){
+        for(int i=0; i<heapSegmentPhysicalSize; i++){
+            out.put(loadByte(heapSegmentBaseAddress + i));
+        }
+    }
+
+    out.close();
+}
+
+void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
+{
+    std::ifstream in;
+    in.open(fileName.toStdString().c_str(), std::ifstream::binary);
+    char byte;
+
+    if(segmentsToLoad[0]){
+        for(int i=0; i<textSegmentPhysicalSize; i++){
+            in.get(byte);
+            storeByte(textSegmentBaseAddress + i, byte);
+        }
+    }
+    if(segmentsToLoad[1]){
+        for(int i=0; i<dataSegmentPhysicalSize; i++){
+            in.get(byte);
+            storeByte(dataSegmentBaseAddress + i, byte);
+        }
+    }
+
+    if(segmentsToLoad[2]){
+        for(int i=0; i<backgroundTileSetPhysicalSize; i++){
+            in.get(byte);
+            storeByte(backgroundTileSetBaseAddress + i, byte);
+        }
+    }
+    if(segmentsToLoad[3]){
+        for(int i=0; i<spritesTileSetPhysicalSize; i++){
+            in.get(byte);
+            storeByte(spritesTileSetBaseAddress + i, byte);
+        }
+    }
+    if(segmentsToLoad[4]){
+        for(int i=0; i<tileMapPhysicalSize; i++){
+            in.get(byte);
+            storeByte(tileMapBaseAddress + i, byte);
+        }
+    }
+    if(segmentsToLoad[5]){
+        for(int i=0; i<spriteRamPhysicalSize; i++){
+            in.get(byte);
+            storeByte(spriteRamBaseAddress + i, byte);
+        }
+    }
+    if(segmentsToLoad[6]){
+        for(int i=0; i<palettePhysicalSize; i++){
+            in.get(byte);
+            storeByte(paletteBaseAddress + i, byte);
+        }
+    }
+    if(segmentsToLoad[7]){
+        for(int i=0; i<heapSegmentPhysicalSize; i++){
+            in.get(byte);
+            storeByte(heapSegmentBaseAddress + i, byte);
+        }
+    }
+    in.close();
 }
 
 /*

@@ -10,26 +10,17 @@ TileEngine::TileEngine(QWidget* parent, const QPoint& position, const QSize& siz
 void TileEngine::initialize()
 {
     framesPerSecond = 25;
-    time.asMilliseconds(1000.0/double(framesPerSecond));
+    time = milliseconds(1000.0/double(framesPerSecond));
     screenSize.x = 512;
     screenSize.y = 384;
     clk.restart();
-    connect(this, SIGNAL(renderNow()), this, SLOT(repaint()));
-}
-
-void TileEngine::getChanges()
-{
-
 }
 
 void TileEngine::update()
 {
-    if(clk.getElapsedTime() >= time){
-        clk.restart();
-        getChanges();
-        RenderWindow::clear(Color(0, 128, 128));
-        renderFrame();
-    }
+    RenderWindow::clear(Color(0, 128, 128));
+    renderFrame();
+    QRenderWindow::paintEvent(0);
 }
 
 void TileEngine::renderFrame()
@@ -44,6 +35,9 @@ void TileEngine::renderFrame()
         if(memory->spriteRam[i].shouldRender())
             RenderWindow::draw(memory->spriteRam[i].sprite);
     }
+}
 
-    emit renderNow();
+TileEngine::~TileEngine()
+{
+
 }

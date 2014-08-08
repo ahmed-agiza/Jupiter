@@ -1,5 +1,6 @@
 #include "Assembler.h"
 #include <QDebug>
+#include <iostream>
 
 
 
@@ -369,7 +370,6 @@ Assembler::Assembler(QStringList* stringList)
 
     }
 
-    mem = new Memory();
     foreach(instruction ins,  instructions)
     {
         ins.setMem(mem);
@@ -377,10 +377,12 @@ Assembler::Assembler(QStringList* stringList)
         ins.setFunc(functionsMap[ins.getName()]);
         QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }
+    //engine = new TileEngine(QWidget* parent, const QPoint& position, const QSize& size);
 }
 Assembler::~Assembler()
 {
     delete mem;
+    delete engine;
 }
 
 void Assembler::initializeFunctions()

@@ -5,6 +5,7 @@
 #include "syntaxhl.h"
 #include <QCompleter>
 #include "assembler.h"
+#include "loadmemorythread.h"
 
 namespace Ui {
 class MainWindow;
@@ -33,7 +34,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-
+    Memory* mem;
+    LoadMemoryThread* myThread;
     //Menus
 };
 

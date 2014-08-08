@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <QTimer>
 
-class QRenderWindow : public QWidget
+class QRenderWindow : public QWidget, public sf::RenderWindow
 {
     Q_OBJECT
 public:

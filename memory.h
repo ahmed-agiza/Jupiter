@@ -6,14 +6,16 @@
 #include <QObject>
 #include <QMatrix>
 #include <QVector>
+#include <QString>
 #include <SFML/Graphics.hpp>
+#include <fstream>
 #include "palettecolor.h"
 #include "tile.h"
 #include "gamesprite.h"
 
-class Memory : public QObject
+class Memory //: public QObject
 {
-    Q_OBJECT
+ //   Q_OBJECT
 public:
     Memory ();
     void storeByte(unsigned int, char);
@@ -35,6 +37,8 @@ public:
     unsigned int getHWordSegment(unsigned int) const;
     unsigned int getWordSegment(unsigned int) const;
 
+    void loadMemory(QString, QVector<bool>);
+    void saveMemory(QString, QVector<bool>);
 //    bool isValidWordL(int, int) const;
 //    bool isValidWordR(int, int) const;
 //    void storeWordL(int, int, int);
@@ -59,6 +63,7 @@ private:
     QVector< QVector< char > > tileMap;
     QVector< PaletteColor > palette;
 
+public:
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
     const unsigned int heapSegmentBaseAddress;

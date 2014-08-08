@@ -11,7 +11,7 @@
 #include <QTextEdit>
 #include "memory.h"
 #include "InstructionFuncs.h"
-
+#include "tileengine.h"
 
 class Error
 {
@@ -35,6 +35,7 @@ private:
     QVector<int> registers;
 
     Memory *mem;
+    TileEngine *engine;
     int address;
     int lineNumber;
     int PC;

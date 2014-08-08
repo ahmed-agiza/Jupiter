@@ -12,6 +12,7 @@
 #include "instruction.h"
 #include <QVector>
 #include <QMessageBox>
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -91,7 +92,11 @@ void MainWindow::printS()
 
 void MainWindow::on_actionAssemble_triggered()
 {
-
+    mem = new Memory;
+    myThread = new LoadMemoryThread();
+    myThread->memory = mem;
+    myThread->start();
+/*
    if (ui->mdiAreaCode->currentSubWindow())
    {
         QWidget *W  = ui->mdiAreaCode->currentSubWindow()->findChild <QWidget *> ("NW");
@@ -113,6 +118,7 @@ void MainWindow::on_actionAssemble_triggered()
    }
    else
         QMessageBox::critical(this, "Error", "Error 3");
+        */
 }
 
 void MainWindow::on_actionClose_triggered()

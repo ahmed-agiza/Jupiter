@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     tile.cpp \
     gamesprite.cpp \
     tileengine.cpp \
-    qrenderwindow.cpp
+    qrenderwindow.cpp \
+    loadmemorythread.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -43,7 +44,8 @@ HEADERS  += mainwindow.h \
     tile.h \
     gamesprite.h \
     tileengine.h \
-    qrenderwindow.h
+    qrenderwindow.h \
+    loadmemorythread.h
 
 FORMS    += \
     mainwindow.ui

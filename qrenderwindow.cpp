@@ -31,7 +31,7 @@ void QRenderWindow::showEvent(QShowEvent*)
         XFlush(QX11Info::display());
 #endif
         // Create the SFML window with the widget handle
-        sf::RenderWindow::create((void *) winId());
+        sf::RenderWindow::create(reinterpret_cast<sf::WindowHandle>(winId()));
         // Let the derived class do its specific stuff
         initialize();
         // Setup the timer to trigger a refresh at specified framerate
