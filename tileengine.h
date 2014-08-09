@@ -20,6 +20,7 @@ public:
     void initialize();
     void update();
     void renderFrame();
+    void setMemory(Memory*);
 signals:
     void renderNow();
 public slots:

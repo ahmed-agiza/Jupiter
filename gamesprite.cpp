@@ -1,4 +1,5 @@
 #include "gamesprite.h"
+#include <QDebug>
 
 bool isLilEndian()
 {
@@ -28,10 +29,16 @@ void GameSprite::storeByte(unsigned int address, char byte)
     memoryBytes[index] = byte;
     switch(index) {
     case 0:
-    case 1:
-        img0 = (*tileSetPointer)[memoryBytes[0]].getImage();
-        img1 = (*tileSetPointer)[memoryBytes[1]].getImage();
+        if(memoryBytes[0] != memoryBytes[1])
+            (*tileSetPointer)[memoryBytes[0]].removeGameSprite(this);
         makeImage();
+        (*tileSetPointer)[memoryBytes[0]].addGameSprite(this);
+        break;
+    case 1:
+        if(memoryBytes[0] != memoryBytes[1])
+            (*tileSetPointer)[memoryBytes[1]].removeGameSprite(this);
+        makeImage();
+        (*tileSetPointer)[memoryBytes[1]].addGameSprite(this);
         break;
     case 2:
     case 3:
@@ -44,8 +51,6 @@ void GameSprite::storeByte(unsigned int address, char byte)
         break;
     case 6:
     case 7:
-        img0 = (*tileSetPointer)[memoryBytes[0]].getImage();
-        img1 = (*tileSetPointer)[memoryBytes[1]].getImage();
         makeImage();
         break;
     }
@@ -54,6 +59,9 @@ void GameSprite::storeByte(unsigned int address, char byte)
 
 void GameSprite::makeImage()
 {
+    img0 = (*tileSetPointer)[memoryBytes[0]].getImage();
+    img1 = (*tileSetPointer)[memoryBytes[1]].getImage();
+
     bool renderingEnabled = (memoryBytes[7]>>7)&1;
     bool twoSprites = (memoryBytes[7])&1;
     bool attachedHorizontally = (memoryBytes[7]>>1)&1;
@@ -88,9 +96,11 @@ void GameSprite::makeImage()
             img0.flipVertically();
         if(tile0FlipH)
             img0.flipHorizontally();
+
         for(int i=0; i<16; i++)
             for(int j=0; j<16; j++)
                 image.setPixel(j,i,img0.getPixel(j,i));
+
         if(twoSprites) {
             if(tile1Rotation == 1) {
                 Image tempImg = img1;
@@ -146,7 +156,5 @@ bool GameSprite::shouldRender() const
 void GameSprite::setTileSet(QVector<Tile>* tileSet)
 {
     this->tileSetPointer = tileSet;
-    img0 = (*tileSetPointer)[memoryBytes[0]].getImage();
-    img1 = (*tileSetPointer)[memoryBytes[1]].getImage();
     makeImage();
 }

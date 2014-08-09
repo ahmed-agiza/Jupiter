@@ -14,15 +14,15 @@ public:
     void storeByte(unsigned int, char);
     bool shouldRender() const;
     void setTileSet(QVector<Tile>*);
-    Sprite sprite;
-private:
-    QVector<Tile> *tileSetPointer;
     Image img0, img1;
     Image image;
-    Texture texture;
+    Sprite sprite;
     QVector<unsigned char> memoryBytes;
-
     void makeImage();
+private:
+    QVector<Tile> *tileSetPointer;
+    Texture texture;
+
 };
 
 #endif // GAMESPRITE_H

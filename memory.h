@@ -16,6 +16,7 @@
 #include "tile.h"
 #include "gamesprite.h"
 
+class TileEngine;
 class Memory : public QObject
 {
     Q_OBJECT
@@ -53,6 +54,12 @@ public:
 
     QVector< QVector< sf::Sprite > > backgroundMatrix;
     QVector< GameSprite > spriteRam;
+    QVector< Tile > backgroundTileSet;
+    QVector< Tile > spritesTileSet;
+    QVector< QVector< char > > tileMap;
+    QVector< PaletteColor > palette;
+
+    void setTileEngine(TileEngine *);
 signals:
     void raiseException(int);
     void loadingNumberChanged(int);
@@ -61,11 +68,8 @@ private:
     QByteArray dataSegment;
     QByteArray heapSegment;
     QByteArray stackSegment;
-    QVector< Tile > backgroundTileSet;
-    QVector< Tile > spritesTileSet;
-    QVector< QVector< char > > tileMap;
-    QVector< PaletteColor > palette;
 
+    TileEngine* engine;
 public:
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;

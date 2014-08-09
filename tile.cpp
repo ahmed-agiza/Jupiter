@@ -1,5 +1,5 @@
 #include "tile.h"
-
+#include "gamesprite.h"
 
 Tile::Tile()
 {
@@ -25,6 +25,9 @@ void Tile::save()
     texture.loadFromImage(image);
     for(int i=0; i<spritesPointers.size(); i++) {
         spritesPointers[i]->setTexture(texture);
+    }
+    for(int i=0; i<gameSpritesPointers.size(); i++) {
+        gameSpritesPointers[i]->makeImage();
     }
 }
 
@@ -67,9 +70,12 @@ void Tile::update()
     save();
 }
 
-void Tile::addSprite(Sprite* sp)
+void Tile::addSprite(Sprite *sp)
 {
-    spritesPointers.append(sp);
+    if(!spritesPointersSet.contains(sp)){
+        spritesPointers.append(sp);
+        spritesPointersSet.insert(sp);
+    }
 }
 
 void Tile::removeSprite(Sprite* sp)
@@ -79,4 +85,25 @@ void Tile::removeSprite(Sprite* sp)
             spritesPointers.remove(i);
             i = spritesPointers.size();
         }
+}
+
+void Tile::addGameSprite(GameSprite *sp)
+{
+    if(!gameSpritesPointersSet.contains(sp)){
+        gameSpritesPointers.append(sp);
+        gameSpritesPointersSet.insert(sp);
+    }
+}
+
+void Tile::removeGameSprite(GameSprite* sp)
+{
+    if(gameSpritesPointersSet.contains(sp))
+    {
+        gameSpritesPointersSet.remove(sp);
+        for(int i=0; i<gameSpritesPointers.size(); i++)
+            if(gameSpritesPointers[i] == sp){
+                gameSpritesPointers.remove(i);
+                i = gameSpritesPointers.size();
+            }
+    }
 }

@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "tileengine.h"
 
 #define TEXT_SEGMENT 1
 #define DATA_SEGMENT 2
@@ -153,14 +154,21 @@ void Memory::storeByte(unsigned int addr, char data)
         backgroundTileSet[tileMap[r][c]].removeSprite(&backgroundMatrix[r][c]);
         tileMap[r][c] = data;
         backgroundMatrix[r][c].setTexture(backgroundTileSet[(unsigned char)tileMap[r][c]].getTexture());
-    }else if(segment == BG_TILE_SET)
+        backgroundTileSet[(unsigned char)tileMap[r][c]].addSprite(&backgroundMatrix[r][c]);
+        //engine->update();
+    }else if(segment == BG_TILE_SET){
         backgroundTileSet[(addr >> 8)&0xff].storeByte(addr, data);
-    else if(segment == SP_TILE_SET)
+        //engine->update();
+    }else if(segment == SP_TILE_SET){
         spritesTileSet[(addr>>8)&0xff].storeByte(addr, data);
-    else if(segment == SPRITE_RAM)
+        //engine->update();
+    }else if(segment == SPRITE_RAM){
         spriteRam[(addr - spriteRamBaseAddress)>>3].storeByte(addr,data);
-    else if(segment == PALETTE)
+        //engine->update();
+    }else if(segment == PALETTE){
         palette[(addr - paletteBaseAddress)>>2].storeByte(addr&0x3,data);
+        //engine->update();
+    }
 }
 
 char Memory::loadByte(unsigned int addr) const
@@ -419,8 +427,15 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         }
     }
 
+
     qDebug() << "loaded: "<<count<<" bytes\n";
     in.close();
+    emit loadingNumberChanged(64);
+}
+
+void Memory::setTileEngine(TileEngine *engine)
+{
+    this->engine = engine;
 }
 
 /*

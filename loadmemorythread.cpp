@@ -9,7 +9,7 @@ LoadMemoryThread::LoadMemoryThread(QObject *parent) :
 void LoadMemoryThread::run()
 {
     //QMutex mutex;
-
+    qDebug() << "Started!";
     QVector<bool> segmentsToLoad(8);
     segmentsToLoad.fill(0);
     segmentsToLoad[2] = 1;
@@ -18,6 +18,5 @@ void LoadMemoryThread::run()
     segmentsToLoad[5] = 1;
     segmentsToLoad[6] = 1;
     memory->loadMemory("C:/memory.bin",segmentsToLoad);
-    memory->saveMemory("D:/memory2.bin",segmentsToLoad);
     qDebug() << "Done :)\n";
 }
