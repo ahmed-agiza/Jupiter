@@ -35,6 +35,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
+    Memory* memory;
     //Menus
 };
 

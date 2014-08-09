@@ -1,6 +1,7 @@
 #include "gamesprite.h"
 #include <QDebug>
 
+#define TILE_SIZE 16
 bool isLilEndian()
 {
     return true;
@@ -8,7 +9,7 @@ bool isLilEndian()
 
 GameSprite::GameSprite()
 {
-    image.create(32,32);
+    image.create(TILE_SIZE * 2, TILE_SIZE * 2);
     memoryBytes.resize(8);
     memoryBytes.fill(0);
 }
@@ -76,73 +77,73 @@ void GameSprite::makeImage()
     if(renderingEnabled) {
         if(tile0Rotation == 1) {
             Image tempImg = img0;
-            for(int i=0; i<16; i++)
-                for(int j=0; j<16; j++)
-                    img0.setPixel(j,i,tempImg.getPixel(15-i,j));
+            for(int i=0; i<TILE_SIZE; i++)
+                for(int j=0; j<TILE_SIZE; j++)
+                    img0.setPixel(j,i,tempImg.getPixel(TILE_SIZE-1-i,j));
         }
         else if(tile0Rotation == 2) {
             Image tempImg = img0;
-            for(int i=0; i<16; i++)
-                for(int j=0; j<16; j++)
-                    img0.setPixel(j,i,tempImg.getPixel(i,15-j));
+            for(int i=0; i<TILE_SIZE; i++)
+                for(int j=0; j<TILE_SIZE; j++)
+                    img0.setPixel(j,i,tempImg.getPixel(i,TILE_SIZE-1-j));
         }
         else if(tile0Rotation == 3) {
             Image tempImg = img0;
-            for(int i=0; i<16; i++)
-                for(int j=0; j<16; j++)
-                    img0.setPixel(j,i,tempImg.getPixel(15-i,15-j));
+            for(int i=0; i<TILE_SIZE; i++)
+                for(int j=0; j<TILE_SIZE; j++)
+                    img0.setPixel(j,i,tempImg.getPixel(TILE_SIZE-1-i,TILE_SIZE-1-j));
         }
         if(tile0FlipV)
             img0.flipVertically();
         if(tile0FlipH)
             img0.flipHorizontally();
 
-        for(int i=0; i<16; i++)
-            for(int j=0; j<16; j++)
+        for(int i=0; i<TILE_SIZE; i++)
+            for(int j=0; j<TILE_SIZE; j++)
                 image.setPixel(j,i,img0.getPixel(j,i));
 
         if(twoSprites) {
             if(tile1Rotation == 1) {
                 Image tempImg = img1;
-                for(int i=0; i<16; i++)
-                    for(int j=0; j<16; j++)
-                        img1.setPixel(j,i,tempImg.getPixel(15-i,j));
+                for(int i=0; i<TILE_SIZE; i++)
+                    for(int j=0; j<TILE_SIZE; j++)
+                        img1.setPixel(j,i,tempImg.getPixel(TILE_SIZE-1-i,j));
             }
             else if(tile1Rotation == 2) {
                 Image tempImg = img1;
-                for(int i=0; i<16; i++)
-                    for(int j=0; j<16; j++)
-                        img1.setPixel(j,i,tempImg.getPixel(i,15-j));
+                for(int i=0; i<TILE_SIZE; i++)
+                    for(int j=0; j<TILE_SIZE; j++)
+                        img1.setPixel(j,i,tempImg.getPixel(i,TILE_SIZE-1-j));
             }
             else if(tile1Rotation == 3) {
                 Image tempImg = img1;
-                for(int i=0; i<16; i++)
-                    for(int j=0; j<16; j++)
-                        img1.setPixel(j,i,tempImg.getPixel(15-i,15-j));
+                for(int i=0; i<TILE_SIZE; i++)
+                    for(int j=0; j<TILE_SIZE; j++)
+                        img1.setPixel(j,i,tempImg.getPixel(TILE_SIZE-1-i,TILE_SIZE-1-j));
             }
             if(tile1FlipV)
                 img1.flipVertically();
             if(tile1FlipH)
                 img1.flipHorizontally();
             if(attachedHorizontally) {
-                for(int i=0; i<16; i++)
-                    for(int j=16; j<32; j++)
-                        image.setPixel(j,i,img1.getPixel(j-16,i));
+                for(int i=0; i<TILE_SIZE; i++)
+                    for(int j=TILE_SIZE; j<(TILE_SIZE * 2); j++)
+                        image.setPixel(j,i,img1.getPixel(j-TILE_SIZE,i));
                 texture.loadFromImage(image);
                 sprite.setTexture(texture);
-                sprite.setTextureRect(IntRect(0,0,32,16));
+                sprite.setTextureRect(IntRect(0,0,TILE_SIZE * 2,TILE_SIZE));
             } else {
-                for(int i=16; i<32; i++)
-                    for(int j=0; j<16; j++)
-                        image.setPixel(j,i,img1.getPixel(j,i-16));
+                for(int i=TILE_SIZE; i<TILE_SIZE * 2; i++)
+                    for(int j=0; j<TILE_SIZE; j++)
+                        image.setPixel(j,i,img1.getPixel(j,i-TILE_SIZE));
                 texture.loadFromImage(image);
                 sprite.setTexture(texture);
-                sprite.setTextureRect(IntRect(0,0,16,32));
+                sprite.setTextureRect(IntRect(0,0,TILE_SIZE,TILE_SIZE * 2));
             }
         } else {
             texture.loadFromImage(img0);
             sprite.setTexture(texture);
-            sprite.setTextureRect(IntRect(0,0,16,16));
+            sprite.setTextureRect(IntRect(0,0,TILE_SIZE,TILE_SIZE));
         }
         sprite.setScale(scaleH + 1, scaleV + 1);
     }

@@ -24,7 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(ui->dockCode);
     installEventFilter(this);
 
-    memoryLoading = new MemoryLoading(this);
+    memory = new Memory;
+    memoryLoading = new MemoryLoading(this, this->memory);
     memoryLoading->show();
 }
 
@@ -39,6 +40,7 @@ bool MainWindow::eventFilter(QObject *, QEvent *e)
 
 MainWindow::~MainWindow()
 {
+    delete memory;
     delete ui;
 }
 
@@ -103,7 +105,7 @@ void MainWindow::on_actionAssemble_triggered()
             {
                 qDebug() << E->toPlainText();
                 QStringList instrs = E->toPlainText().split("\n");
-                Assembler A(&instrs);
+                Assembler A(&instrs, memory);
             }
             else
                 QMessageBox::critical(this, "Error", "Error 1");

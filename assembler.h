@@ -41,7 +41,7 @@ private:
     int PC;
 
 public:
-    Assembler(QStringList *stringList);
+    Assembler(QStringList *stringList, Memory *memory);
     int getNumber(QString);
     void initializeRegisters();
     void initializeFunctions();

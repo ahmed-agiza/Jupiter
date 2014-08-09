@@ -16,6 +16,8 @@
 #define NOT_HWORD_ALIGN_EX_NO 5
 #define NOT_WORD_ALIGN_EX_NO 6
 
+#define TILE_SIZE 16
+
 bool isLittleEndian()
 {
     return true;
@@ -88,19 +90,20 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
                     stackSegmentPhysicalSize (128 * 1024),
                     spriteRamPhysicalSize (512),
                     palettePhysicalSize (1 * 1024),
-                    spritesTileSetPhysicalSize (64 * 1024),
-                    backgroundTileSetPhysicalSize (64 * 1024),
                     screenWidth(512),
                     screenHeight(384)
 {
 
-    tileMapPhysicalSize = screenHeight/16 * getScreensHeightCount() * screenWidth/16 * getScreensWidthCount();
+    spritesTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
+    backgroundTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
+
+    tileMapPhysicalSize = screenHeight/TILE_SIZE * getScreensHeightCount() * screenWidth/TILE_SIZE * getScreensWidthCount();
     backgroundTileSet.resize(256);
     spritesTileSet.resize(256);
-    tileMap.resize(screenHeight/16 * getScreensHeightCount());
-    tileMap.fill( QVector<char>(screenWidth/16 * getScreensWidthCount() ));
-    backgroundMatrix.resize(screenHeight/16 * getScreensHeightCount());
-    backgroundMatrix.fill( QVector<sf::Sprite>(screenWidth/16 * getScreensWidthCount() ));
+    tileMap.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
+    tileMap.fill( QVector<char>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
+    backgroundMatrix.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
+    backgroundMatrix.fill( QVector<sf::Sprite>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
     spriteRam.resize(64);
     palette.resize(256);
 
@@ -120,7 +123,7 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
 
     for (int i = 0; i < backgroundMatrix.size(); i++)
         for (int j = 0; j < backgroundMatrix[i].size(); j++)
-            backgroundMatrix[i][j].setPosition(j * 16, i * 16);
+            backgroundMatrix[i][j].setPosition(j * TILE_SIZE, i * TILE_SIZE);
 
     for(int i=0; i<spriteRam.size(); i++)
         spriteRam[i].setTileSet(&spritesTileSet);
@@ -148,7 +151,7 @@ void Memory::storeByte(unsigned int addr, char data)
     else if(segment == STACK_SEGMENT)
         stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = data;
     else if(segment == TILE_MAP){
-        int w = screenWidth/16 * getScreensWidthCount();
+        int w = screenWidth/TILE_SIZE * getScreensWidthCount();
         int r = (addr - tileMapBaseAddress)/w;
         int c = (addr - tileMapBaseAddress)%w;
         backgroundTileSet[tileMap[r][c]].removeSprite(&backgroundMatrix[r][c]);
@@ -186,7 +189,7 @@ char Memory::loadByte(unsigned int addr) const
     else if(segment == STACK_SEGMENT)
         return stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
     else if(segment == TILE_MAP){
-        int w = screenWidth/16 * getScreensWidthCount();
+        int w = screenWidth/TILE_SIZE * getScreensWidthCount();
         int r = (addr - tileMapBaseAddress)/w;
         int c = (addr - tileMapBaseAddress)%w;
         return tileMap[r][c];

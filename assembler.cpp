@@ -220,8 +220,9 @@ QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensit
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 
 
-Assembler::Assembler(QStringList* stringList)
+Assembler::Assembler(QStringList* stringList, Memory *memory)
 {
+    this->mem = memory;
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
     initializeRegisters();
@@ -370,10 +371,12 @@ Assembler::Assembler(QStringList* stringList)
 
     }
 
+    unsigned int addr = mem->textSegmentBaseAddress;
     foreach(instruction ins,  instructions)
     {
         ins.setMem(mem);
-
+        mem->storeWord(addr,ins.getWord());
+        addr += 4;
         ins.setFunc(functionsMap[ins.getName()]);
         QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }

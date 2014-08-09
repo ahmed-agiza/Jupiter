@@ -1,7 +1,7 @@
 #include "tileengine.h"
 
 bool saved = 0;
-
+#define TILE_SIZE 16
 TileEngine::TileEngine(QWidget* parent, const QPoint& position, const QSize& size) : QRenderWindow(parent, position, size, 20)
 {
 
@@ -29,18 +29,18 @@ void TileEngine::setMemory(Memory * memory)
 void TileEngine::renderFrame()
 {
 
-    for (unsigned int i = verticalScroll / 16; i < ceil((verticalScroll + float(screenSize.y)) / 16.0); i++)
-        for (unsigned int j = horizontalScroll / 16; j < ceil((horizontalScroll + float(screenSize.x)) / 16.0); j++){
-            Vector2f spritePosition(Vector2f(j * 16 - horizontalScroll, i * 16 - verticalScroll));
+    for (unsigned int i = verticalScroll / TILE_SIZE; i < ceil((verticalScroll + float(screenSize.y)) / float(TILE_SIZE)); i++)
+        for (unsigned int j = horizontalScroll / TILE_SIZE; j < ceil((horizontalScroll + float(screenSize.x)) / float(TILE_SIZE)); j++){
+            Vector2f spritePosition(Vector2f(j * TILE_SIZE - horizontalScroll, i * TILE_SIZE - verticalScroll));
             Vector2f spriteOrigin(0,0);
 
-            if(j * 16 < horizontalScroll){
-                spritePosition.x = ((j + 1) * 16 - horizontalScroll - 1);
-                spriteOrigin.x = 15;
+            if(j * TILE_SIZE < horizontalScroll){
+                spritePosition.x = ((j + 1) * TILE_SIZE - horizontalScroll - 1);
+                spriteOrigin.x = TILE_SIZE - 1;
             }
-            if(i * 16 < verticalScroll){
-                spritePosition.y = ((i + 1) * 16 - verticalScroll - 1);
-                spriteOrigin.y = 15;
+            if(i * TILE_SIZE < verticalScroll){
+                spritePosition.y = ((i + 1) * TILE_SIZE - verticalScroll - 1);
+                spriteOrigin.y = TILE_SIZE - 1;
             }
             memory->backgroundMatrix[i][j].setPosition(spritePosition);
             memory->backgroundMatrix[i][j].setOrigin(spriteOrigin);

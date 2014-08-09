@@ -15,7 +15,7 @@ class MemoryLoading : public QWidget
     Q_OBJECT
 
 public:
-    explicit MemoryLoading(QWidget *parent = 0);
+    explicit MemoryLoading(QWidget *parent, Memory*);
     ~MemoryLoading();
 signals:
     void firstRender();

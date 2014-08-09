@@ -1,12 +1,13 @@
 #include "tile.h"
 #include "gamesprite.h"
 
+#define TILE_SIZE 16
 Tile::Tile()
 {
     texture.setRepeated(true);
-    tileData.resize(16);
-    tileData.fill(QVector<char>(16,0));
-    image.create(16,16,Color(0,0,0,255));
+    tileData.resize(TILE_SIZE);
+    tileData.fill(QVector<char>(TILE_SIZE,0));
+    image.create(TILE_SIZE,TILE_SIZE,Color(0,0,0,255));
 }
 
 void Tile::setPalette(QVector<PaletteColor> *palette)
@@ -64,8 +65,8 @@ Tile::~Tile()
 
 void Tile::update()
 {
-    for(int i=0; i<16; i++)
-        for(int j=0; j<16; j++)
+    for(int i=0; i<TILE_SIZE; i++)
+        for(int j=0; j<TILE_SIZE; j++)
             image.setPixel(j, i, (*pall)[(tileData[i][j])].getColor());
     save();
 }

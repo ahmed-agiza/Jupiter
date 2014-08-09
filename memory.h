@@ -88,10 +88,10 @@ public:
     const unsigned int stackSegmentPhysicalSize;
 
     const unsigned int spriteRamPhysicalSize;
-    const unsigned int palettePhysicalSize;
+    unsigned int palettePhysicalSize;
     unsigned int tileMapPhysicalSize;
-    const unsigned int spritesTileSetPhysicalSize;
-    const unsigned int backgroundTileSetPhysicalSize;
+    unsigned int spritesTileSetPhysicalSize;
+    unsigned int backgroundTileSetPhysicalSize;
 
     const unsigned int screenWidth;
     const unsigned int screenHeight;

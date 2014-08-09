@@ -1,12 +1,12 @@
 #include "memoryloading.h"
 #include "ui_memoryloading.h"
 
-MemoryLoading::MemoryLoading(QWidget *parent) :
+MemoryLoading::MemoryLoading(QWidget *parent, Memory *mem) :
     QWidget(parent),
     ui(new Ui::MemoryLoading)
 {
     ui->setupUi(this);
-
+    this->mem = mem;
 }
 
 MemoryLoading::~MemoryLoading()
@@ -16,7 +16,6 @@ MemoryLoading::~MemoryLoading()
 
 void MemoryLoading::on_pushButton_pressed()
 {
-    mem = new Memory;
     //engine = new TileEngine(this, QPoint(0,0), QSize(512,384));
     //mem->setTileEngine(engine);
     connect(mem, SIGNAL(loadingNumberChanged(int)), this, SLOT(onLoadingNumberChanged(int)));
