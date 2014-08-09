@@ -9,15 +9,15 @@
 
 #define fParam QVector<int> *, int, int, int, __int16, int , int &, Memory *
 
-enum instructionFormat {RFormat, IFormat, JFormat};
+enum InstructionFormat {RFormat, IFormat, JFormat};
 
-class instruction : public QObject
+class Instruction : public QObject
 {
     Q_OBJECT
 public:
-    instruction(QString n, QVector<__int32> *, int, int, int, int, __int16, int, instructionFormat);
+    Instruction(QString n, QVector<__int32> *, int, int, int, int, __int32, int, InstructionFormat);
 
-    ~instruction();
+    ~Instruction();
 
     void setRegisters(QVector<__int32> *);
     void setValues(QString, int, int, int, int, __int16, int);
@@ -40,12 +40,13 @@ public:
     int getShamt() const;
     int getOp() const;
 
+    int getWord();
     void execute(int &);
     void setFunc(int (*sFunc)(fParam));
 
-    instruction(const instruction &inst);
-    instruction();
-    instruction & operator=(const instruction &inst);
+    Instruction(const Instruction &inst);
+    Instruction();
+    Instruction & operator=(const Instruction &inst);
 
 signals:
     void raiseException(int exceptionNumber);
@@ -65,8 +66,8 @@ private:
 
     Memory *mem;
 
-    instructionFormat format;
-
+    InstructionFormat format;
+    int instructionWord;
 };
 
 #endif // INSTRUCTION_H

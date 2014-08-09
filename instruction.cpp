@@ -2,7 +2,7 @@
 #include <QDebug>
 
 
-instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, int d, __int16 im, int sh, instructionFormat f)
+Instruction::Instruction(QString n, QVector<__int32> *b, int o, int s, int t, int d, __int32 im, int sh, InstructionFormat f)
 {
     opcode = o;
     registers = b;
@@ -16,8 +16,15 @@ instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
     //func = &add;//*
     format = f;
 
+    if(format == RFormat){
+        instructionWord = ((opcode << 26)|(rs<<21)|(rt<<16)|(rd<<11)|(shamt<<6)|(0));
+    }else if(format == IFormat){
+        instructionWord = (opcode << 26)|(rs<<21)|(rt<<16)|(imm);
+    }else{
+        instructionWord = (opcode << 26)|im;
+    }
 
-    for (int i = 0; i < 31; i++)
+    for (int i = 0; i < 32; i++)        // this was 31 I changed it to 32
        registers->push_back(i);
 
    /* qDebug() << "Before:";
@@ -37,7 +44,7 @@ instruction::instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
 
 }
 
-instruction::instruction(const instruction &inst)
+Instruction::Instruction(const Instruction &inst)
 {
     registers = inst.registers;
     name = inst.name;
@@ -53,15 +60,15 @@ instruction::instruction(const instruction &inst)
     mem = inst.mem;
     format = inst.format;
 
-
+    instructionWord = inst.instructionWord;
 }
 
-instruction::instruction()
+Instruction::Instruction()
 {
 
 }
 
-instruction & instruction::operator = (const instruction &inst)
+Instruction & Instruction::operator = (const Instruction &inst)
 {
     registers = inst.registers;
     name = inst.name;
@@ -78,22 +85,23 @@ instruction & instruction::operator = (const instruction &inst)
 
     format = inst.format;
 
+    instructionWord = inst.instructionWord;
     return *this;
 }
 
 
 
-void instruction::setRegisters(QVector<__int32> *b)
+void Instruction::setRegisters(QVector<__int32> *b)
 {
     registers = b;
 }
 
-void instruction::setMem(Memory *m)
+void Instruction::setMem(Memory *m)
 {
     mem = m;
 }
 
-void instruction::setValues(QString n, int o, int s, int d, int t, __int16 im, int sh)
+void Instruction::setValues(QString n, int o, int s, int d, int t, __int16 im, int sh)
 {
     opcode = o;
     name = n;
@@ -104,37 +112,37 @@ void instruction::setValues(QString n, int o, int s, int d, int t, __int16 im, i
     shamt = sh;
 }
 
-void instruction::setOp(int o)
+void Instruction::setOp(int o)
 {
     opcode = o;
 }
 
-void instruction::setName(QString n)
+void Instruction::setName(QString n)
 {
     name = n;
 }
 
-instruction::~instruction()
+Instruction::~Instruction()
 {
 
 }
 
-void instruction::setRs(int s)
+void Instruction::setRs(int s)
 {
     rs = s;
 }
 
-void instruction::setRd(int d)
+void Instruction::setRd(int d)
 {
     rd = d;
 }
 
-void instruction::setRt(int t)
+void Instruction::setRt(int t)
 {
     rt = t;
 }
 
-void instruction::setImm(__int16 im)
+void Instruction::setImm(__int16 im)
 {
     imm = im;
 }
@@ -142,63 +150,63 @@ void instruction::setImm(__int16 im)
 
 
 
-void instruction::setShamt(int sh)
+void Instruction::setShamt(int sh)
 {
     shamt = sh;
 }
 
-void instruction::setFunc(int (*sFunc)(fParam))
+void Instruction::setFunc(int (*sFunc)(fParam))
 {
     func = sFunc;
 }
 
-QString instruction::getName() const
+QString Instruction::getName() const
 {
     return name;
 }
 
-int instruction::getOp() const
+int Instruction::getOp() const
 {
     return opcode;
 }
 
-int instruction::getRs() const
+int Instruction::getRs() const
 {
     return rs;
 }
 
-int instruction::getRd() const
+int Instruction::getRd() const
 {
     return rd;
 }
-int instruction::getRt() const
+int Instruction::getRt() const
 {
     return rt;
 }
 
-int instruction::getRsData() const
+int Instruction::getRsData() const
 {
     return (*registers)[rs];
 }
-int instruction::getRdData() const
+int Instruction::getRdData() const
 {
     return (*registers)[rd];
 }
-int instruction::getRtData() const
+int Instruction::getRtData() const
 {
     return (*registers)[rt];
 }
 
-__int16 instruction::getImm() const
+__int16 Instruction::getImm() const
 {
     return imm;
 }
-int instruction::getShamt() const
+int Instruction::getShamt() const
 {
     return shamt;
 }
 
-void instruction::execute(int &inPC)
+void Instruction::execute(int &inPC)
 {
    int x = (*func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
    if(x != 0)
@@ -206,3 +214,7 @@ void instruction::execute(int &inPC)
 
 }
 
+int Instruction::getWord()
+{
+    return instructionWord;
+}

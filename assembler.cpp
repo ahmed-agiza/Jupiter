@@ -233,61 +233,61 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
     {
         if((R.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(instruction(R.cap(2),&registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
+            instructions.push_back(Instruction(R.cap(2),&registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
             //qDebug()<<R.cap(1)<<" "<<R.cap(2)<<" "<<R.cap(3)<<" "<<R.cap(4)<<" "<<R.cap(5)<<"\n";
             if(R.cap(1).size()) labels[R.cap(1)] = address;
         }
         else if((M.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(instruction(M.cap(2),&registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
+            instructions.push_back(Instruction(M.cap(2),&registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
             if(M.cap(1).size()) labels[M.cap(1)] = address;
         }
         else if((I.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(instruction(I.cap(2),&registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),getNumber(I.cap(5)),IFormat));
+            instructions.push_back(Instruction(I.cap(2),&registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),getNumber(I.cap(5)),IFormat));
             if(I.cap(1).size() > 0) labels[I.cap(1)] = address;
         }
         else if((L.indexIn(line, 0)) != -1)
         {
             if(labels.contains(L.cap(5))){
-                instructions.push_back(instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
+                instructions.push_back(Instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
             }
             else{
                 missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),L.cap(5)));
-                instructions.push_back(instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
+                instructions.push_back(Instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
             }
             if(L.cap(1).size()) labels[L.cap(1)] = address;
         }
         else if((SR.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(instruction(SR.cap(2),&registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,registerIndex[SR.cap(3)],0,0,RFormat));
+            instructions.push_back(Instruction(SR.cap(2),&registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,registerIndex[SR.cap(3)],0,0,RFormat));
             if(SR.cap(1).size()) labels[SR.cap(1)] = address;
         }
         else if((SI.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(instruction(SI.cap(2),&registers,opcode[SI.cap(2)],0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0,IFormat));
+            instructions.push_back(Instruction(SI.cap(2),&registers,opcode[SI.cap(2)],0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0,IFormat));
             if(SI.cap(1).size()) labels[SI.cap(1)] = address;
         }
         else if((DR.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(instruction(DR.cap(2),&registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
+            instructions.push_back(Instruction(DR.cap(2),&registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
             if(DR.cap(1).size()) labels[DR.cap(1)] = address;
         }
         else if((J.indexIn(line, 0)) != -1)
         {
             if(labels.contains(J.cap(3))){
                 qDebug()<<"Yes!";
-                instructions.push_back(instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,labels[J.cap(3)],0,JFormat));
+                instructions.push_back(Instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,labels[J.cap(3)],0,JFormat));
             }
             else{
                 missingJumpLabels.push_back(qMakePair(qMakePair(address,lineNumber),J.cap(3)));
-                instructions.push_back(instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,0,0,JFormat));
+                instructions.push_back(Instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,0,0,JFormat));
             }
             if(J.cap(1).size()) labels[J.cap(1)] = address;
         }
         else if((SA.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(instruction(SA.cap(2),&registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
+            instructions.push_back(Instruction(SA.cap(2),&registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
             if(SA.cap(1).size()) labels[SA.cap(1)] = address;
         }
         else if(PR.indexIn(line, 0) != -1)
@@ -372,7 +372,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
     }
 
     unsigned int addr = mem->textSegmentBaseAddress;
-    foreach(instruction ins,  instructions)
+    foreach(Instruction ins,  instructions)
     {
         ins.setMem(mem);
         mem->storeWord(addr,ins.getWord());
@@ -613,7 +613,8 @@ void Assembler::handlePI(QRegExp m, QString line)
 {
     if(m.cap(2) == "subi")
     {
-
+        instructions.push_back(Instruction("addi",&registers,opcode[m.cap(2)],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,-getNumber(m.cap(5)),getNumber(m.cap(5)),IFormat));
+        if(m.cap(1).size() > 0) labels[m.cap(1)] = address;
     }
 }
 

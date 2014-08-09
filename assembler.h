@@ -26,7 +26,7 @@ public:
 class Assembler: public QObject
 {
 private:
-    QVector<instruction> instructions;
+    QVector<Instruction> instructions;
     QVector<Error> errorList;
     QMap<QString, int> registerIndex;
     QMap<QString, int> labels;
