@@ -29,9 +29,21 @@ void TileEngine::setMemory(Memory * memory)
 void TileEngine::renderFrame()
 {
 
-    for (int i = verticalScroll / 16; i < ceil((verticalScroll + float(screenSize.y)) / 16.0); i++)
-        for (int j = horizontalScroll / 16; j < ceil((horizontalScroll + float(screenSize.x)) / 16.0); j++){
-            memory->backgroundMatrix[i][j].setPosition(Vector2f(j * 16 - horizontalScroll, i * 16 - verticalScroll));
+    for (unsigned int i = verticalScroll / 16; i < ceil((verticalScroll + float(screenSize.y)) / 16.0); i++)
+        for (unsigned int j = horizontalScroll / 16; j < ceil((horizontalScroll + float(screenSize.x)) / 16.0); j++){
+            Vector2f spritePosition(Vector2f(j * 16 - horizontalScroll, i * 16 - verticalScroll));
+            Vector2f spriteOrigin(0,0);
+
+            if(j * 16 < horizontalScroll){
+                spritePosition.x = ((j + 1) * 16 - horizontalScroll - 1);
+                spriteOrigin.x = 15;
+            }
+            if(i * 16 < verticalScroll){
+                spritePosition.y = ((i + 1) * 16 - verticalScroll - 1);
+                spriteOrigin.y = 15;
+            }
+            memory->backgroundMatrix[i][j].setPosition(spritePosition);
+            memory->backgroundMatrix[i][j].setOrigin(spriteOrigin);
             RenderWindow::draw(memory->backgroundMatrix[i][j]);
         }
 
