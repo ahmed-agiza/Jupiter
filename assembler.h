@@ -40,6 +40,9 @@ private:
     int lineNumber;
     int PC;
 
+    QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
+    QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
+
 public:
     Assembler(QStringList *stringList, Memory *memory);
     int getNumber(QString);
