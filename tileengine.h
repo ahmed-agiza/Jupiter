@@ -15,14 +15,12 @@ private:
     Vector2u screenSize;
     unsigned int horizontalScroll, verticalScroll;
 public:
-    TileEngine(QWidget*, const QPoint&, const QSize&);
+    TileEngine(QWidget*, const QPoint&, const QSize&, Memory *);
     ~TileEngine();
     void initialize();
     void update();
     void renderFrame();
     void setMemory(Memory*);
-signals:
-    void renderNow();
 public slots:
     void updateNow();
 };

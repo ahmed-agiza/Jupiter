@@ -122,3 +122,12 @@ void MainWindow::on_actionClose_triggered()
 {
     ui->mdiAreaCode->closeAllSubWindows();
 }
+
+void MainWindow::on_actionTileset_viewer_triggered()
+{
+    //memoryLoading = new MemoryLoading(this, this->memory);
+    //memoryLoading->show();
+
+    tileSetViewer = new TileSetViewer(this, memory);
+    tileSetViewer->show();
+}

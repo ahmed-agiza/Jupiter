@@ -63,6 +63,7 @@ public:
 signals:
     void raiseException(int);
     void loadingNumberChanged(int);
+    void renderNow();
 private:
     QByteArray textSegment;
     QByteArray dataSegment;

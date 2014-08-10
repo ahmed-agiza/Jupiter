@@ -175,6 +175,8 @@
     <addaction name="actionBitmap_Display"/>
     <addaction name="actionBase_Converter"/>
     <addaction name="separator"/>
+    <addaction name="actionTileset_viewer"/>
+    <addaction name="separator"/>
     <addaction name="actionConfigure"/>
    </widget>
    <addaction name="menuFile"/>
@@ -551,6 +553,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionTileset_viewer">
+   <property name="text">
+    <string>Tileset Viewer</string>
    </property>
   </action>
  </widget>

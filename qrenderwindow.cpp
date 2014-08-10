@@ -34,7 +34,6 @@ void QRenderWindow::showEvent(QShowEvent*)
         sf::RenderWindow::create(reinterpret_cast<sf::WindowHandle>(winId()));
         // Let the derived class do its specific stuff
         initialize();
-        connect(&myTimer, SIGNAL(timeout()), this, SLOT(repaint()));
         // Setup the timer to trigger a refresh at specified framerate
         myTimer.start();
         myInitialized = true;

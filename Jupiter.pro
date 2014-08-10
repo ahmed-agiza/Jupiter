@@ -29,7 +29,9 @@ SOURCES += main.cpp\
     tileengine.cpp \
     qrenderwindow.cpp \
     loadmemorythread.cpp \
-    memoryloading.cpp
+    memoryloading.cpp \
+    tilesetviewer.cpp \
+    tilerenderwindow.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -47,11 +49,14 @@ HEADERS  += mainwindow.h \
     tileengine.h \
     qrenderwindow.h \
     loadmemorythread.h \
-    memoryloading.h
+    memoryloading.h \
+    tilesetviewer.h \
+    tilerenderwindow.h
 
 FORMS    += \
     mainwindow.ui \
-    memoryloading.ui
+    memoryloading.ui \
+    tilesetviewer.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc

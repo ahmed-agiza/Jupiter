@@ -28,8 +28,11 @@ void MemoryLoading::on_pushButton_pressed()
 void MemoryLoading::onLoadingNumberChanged(int number)
 {
     this->resize(552, 424);
-    engine = new TileEngine(0, QPoint(0,0), QSize(512,384));
+    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), mem);
     mem->setTileEngine(engine);
-    engine->setMemory(mem);
     engine->show();
+    tileSetViewer = new TileSetViewer(this, mem);
+    tileSetViewer->show();
+    //tileRenderWindow = new TileRenderWindow(0, mem);
+    //tileRenderWindow->show();
 }

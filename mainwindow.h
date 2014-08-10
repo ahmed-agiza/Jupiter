@@ -7,6 +7,7 @@
 #include "assembler.h"
 #include "loadmemorythread.h"
 #include "memoryloading.h"
+#include "tilesetviewer.h"
 namespace Ui {
 class MainWindow;
 }
@@ -30,12 +31,15 @@ private slots:
 
     void on_actionClose_triggered();
 
+    void on_actionTileset_viewer_triggered();
+
     void printS();
 
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
     Memory* memory;
+    TileSetViewer *tileSetViewer;
     //Menus
 };
 

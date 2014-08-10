@@ -6,6 +6,8 @@
 #include "memory.h"
 #include "loadmemorythread.h"
 #include "tileengine.h"
+#include "tilesetviewer.h"
+#include "tilerenderwindow.h"
 namespace Ui {
 class MemoryLoading;
 }
@@ -28,7 +30,8 @@ private:
     LoadMemoryThread* myThread;
     TileEngine *engine;
     QFrame* MainFrame;
-
+    TileSetViewer *tileSetViewer;
+    TileRenderWindow *tileRenderWindow;
 };
 
 #endif // MEMORYLOADING_H

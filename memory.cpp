@@ -158,19 +158,19 @@ void Memory::storeByte(unsigned int addr, char data)
         tileMap[r][c] = data;
         backgroundMatrix[r][c].setTexture(backgroundTileSet[(unsigned char)tileMap[r][c]].getTexture());
         backgroundTileSet[(unsigned char)tileMap[r][c]].addSprite(&backgroundMatrix[r][c]);
-        //engine->update();
+        emit renderNow();
     }else if(segment == BG_TILE_SET){
         backgroundTileSet[(addr >> 8)&0xff].storeByte(addr, data);
-        //engine->update();
+        emit renderNow();
     }else if(segment == SP_TILE_SET){
         spritesTileSet[(addr>>8)&0xff].storeByte(addr, data);
-        //engine->update();
+        emit renderNow();
     }else if(segment == SPRITE_RAM){
         spriteRam[(addr - spriteRamBaseAddress)>>3].storeByte(addr,data);
-        //engine->update();
+        emit renderNow();
     }else if(segment == PALETTE){
         palette[(addr - paletteBaseAddress)>>2].storeByte(addr&0x3,data);
-        //engine->update();
+        emit renderNow();
     }
 }
 
