@@ -58,7 +58,7 @@ public:
     void handlePI(QRegExp m, QString line);
 
     void simulate();
-    QVector<int> registers;
+    QVector<int> *registers;
     ~Assembler();
     Assembler();
 

@@ -34,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < 32; i++){
         mainProcessorRegisters.append(0);
     }
+    mainProcessorRegisters[28] = 0x10008000;
+    mainProcessorRegisters[29] = 0x7FFFEFFC;
 
     RegistersModel *regModel = new RegistersModel(&mainProcessorRegisters, this);
     ui->tableMainRegisters->setModel(regModel);
@@ -62,7 +64,7 @@ void MainWindow::on_actionSimulate_triggered()
 {
     if (assem){
         assem->simulate();
-        mainProcessorRegisters = assem->registers;
+        mainProcessorRegisters = *assem->registers;
     }
 }
 

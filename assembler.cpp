@@ -226,72 +226,73 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
     initializeRegisters();
     initializeFunctions();
     address = lineNumber = 0;
-    //QStringList stringList = Text.document()->toPlainText().split('\n');
+    this->registers = registers;
+
     foreach (QString line, *stringList)
     {
         if((R.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(Instruction(R.cap(2),&registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
+            instructions.push_back(Instruction(R.cap(2),registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
             //qDebug()<<R.cap(1)<<" "<<R.cap(2)<<" "<<R.cap(3)<<" "<<R.cap(4)<<" "<<R.cap(5)<<"\n";
             if(R.cap(1).size()) labels[R.cap(1)] = address;
         }
         else if((M.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(Instruction(M.cap(2),&registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
+            instructions.push_back(Instruction(M.cap(2),registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
             if(M.cap(1).size()) labels[M.cap(1)] = address;
         }
         else if((I.indexIn(line, 0)) != -1)
         {
             if(I.cap(2) == "sll" || I.cap(2) == "srl" || I.cap(2) == "sra")
-                instructions.push_back(Instruction(I.cap(2),&registers,opcode[I.cap(2)],0,registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),RFormat));
+                instructions.push_back(Instruction(I.cap(2),registers,opcode[I.cap(2)],0,registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),RFormat));
             else
-                instructions.push_back(Instruction(I.cap(2),&registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),0,IFormat));
+                instructions.push_back(Instruction(I.cap(2),registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),0,IFormat));
             if(I.cap(1).size() > 0) labels[I.cap(1)] = address;
         }
         else if((L.indexIn(line, 0)) != -1)
         {
             if(labels.contains(L.cap(5))){
-                instructions.push_back(Instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
+                instructions.push_back(Instruction(L.cap(2),registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
             }
             else{
                 missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),L.cap(5)));
-                instructions.push_back(Instruction(L.cap(2),&registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
+                instructions.push_back(Instruction(L.cap(2),registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
             }
             if(L.cap(1).size()) labels[L.cap(1)] = address;
         }
         else if((SR.indexIn(line, 0)) != -1)
         {
             if(SR.cap(2) == "j" || SR.cap(2) == "jal")
-                instructions.push_back(Instruction(SR.cap(2),&registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,0,0,0,RFormat));
+                instructions.push_back(Instruction(SR.cap(2),registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,0,0,0,RFormat));
             else
-                instructions.push_back(Instruction(SR.cap(2),&registers,opcode[SR.cap(2)],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
+                instructions.push_back(Instruction(SR.cap(2),registers,opcode[SR.cap(2)],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
             if(SR.cap(1).size()) labels[SR.cap(1)] = address;
         }
         else if((SI.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(Instruction(SI.cap(2),&registers,opcode[SI.cap(2)],0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0,IFormat));
+            instructions.push_back(Instruction(SI.cap(2),registers,opcode[SI.cap(2)],0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0,IFormat));
             if(SI.cap(1).size()) labels[SI.cap(1)] = address;
         }
         else if((DR.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(Instruction(DR.cap(2),&registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
+            instructions.push_back(Instruction(DR.cap(2),registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
             if(DR.cap(1).size()) labels[DR.cap(1)] = address;
         }
         else if((J.indexIn(line, 0)) != -1)
         {
             if(labels.contains(J.cap(3))){
                 qDebug()<<"Yes!";
-                instructions.push_back(Instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,labels[J.cap(3)],0,JFormat));
+                instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,labels[J.cap(3)],0,JFormat));
             }
             else{
                 missingJumpLabels.push_back(qMakePair(qMakePair(address,lineNumber),J.cap(3)));
-                instructions.push_back(Instruction(J.cap(2),&registers,opcode[J.cap(2)],0,0,0,0,0,JFormat));
+                instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,0,0,JFormat));
             }
             if(J.cap(1).size()) labels[J.cap(1)] = address;
         }
         else if((SA.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(Instruction(SA.cap(2),&registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
+            instructions.push_back(Instruction(SA.cap(2),registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
             if(SA.cap(1).size()) labels[SA.cap(1)] = address;
         }
         else if(PR.indexIn(line, 0) != -1)
@@ -390,6 +391,7 @@ Assembler::~Assembler()
 {
     delete mem;
     delete engine;
+    delete registers;
 }
 
 void Assembler::initializeFunctions()
@@ -460,22 +462,22 @@ void Assembler::handlePR(QRegExp m, QString line)
 {
     if(m.cap(2) == "mul")
     {
-        instructions.push_back(Instruction("mult",&registers,opcode["mult"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
-        instructions.push_back(Instruction("mflo",&registers,opcode["mflo"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("mult",registers,opcode["mult"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
+        instructions.push_back(Instruction("mflo",registers,opcode["mflo"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "div")
     {
-        instructions.push_back(Instruction("div",&registers,opcode["div"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
-        instructions.push_back(Instruction("mflo",&registers,opcode["mflo"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("div",registers,opcode["div"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
+        instructions.push_back(Instruction("mflo",registers,opcode["mflo"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "rem")
     {
-        instructions.push_back(Instruction("div",&registers,opcode["div"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
-        instructions.push_back(Instruction("mfhi",&registers,opcode["mfhi"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("div",registers,opcode["div"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
+        instructions.push_back(Instruction("mfhi",registers,opcode["mfhi"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
@@ -484,108 +486,108 @@ void Assembler::handlePRIL(QRegExp m, QString line)
 {
     if(m.cap(2) == "blti")
     {
-        instructions.push_back(Instruction("slti",&registers,opcode["slti"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("slti",registers,opcode["slti"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "bgti")
     {
-        instructions.push_back(Instruction("addi",&registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
     }
     else if(m.cap(2) == "blei")
     {
-        instructions.push_back(Instruction("addi",&registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
     }
     else if(m.cap(2) == "bgei")
     {
-        instructions.push_back(Instruction("slti",&registers,opcode["slti"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("slti",registers,opcode["slti"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "bltiu")
     {
-        instructions.push_back(Instruction("sltiu",&registers,opcode["sltiu"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("sltiu",registers,opcode["sltiu"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "bgtiu")
     {
-        instructions.push_back(Instruction("addi",&registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
-        instructions.push_back(Instruction("sltu",&registers,opcode["sltu"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("sltu",registers,opcode["sltu"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
     }
     else if(m.cap(2) == "bleiu")
     {
-        instructions.push_back(Instruction("addi",&registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
-        instructions.push_back(Instruction("sltu",&registers,opcode["sltu"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex["0"],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("sltu",registers,opcode["sltu"],registerIndex["at"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
     }
     else if(m.cap(2) == "bgeiu")
     {
-        instructions.push_back(Instruction("sltiu",&registers,opcode["sltiu"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
+        instructions.push_back(Instruction("sltiu",registers,opcode["sltiu"],registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),0,IFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
@@ -595,98 +597,98 @@ void Assembler::handlePL(QRegExp m, QString line)
 {
     if(m.cap(2) == "blt")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "bgt")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
 
     }
     else if(m.cap(2) == "ble")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "bge")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "bltu")
     {
-        instructions.push_back(Instruction("sltu",&registers,opcode["sltu"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("sltu",registers,opcode["sltu"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "bgtu")
     {
-        instructions.push_back(Instruction("sltu",&registers,opcode["sltu"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("sltu",registers,opcode["sltu"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "bleu")
     {
-        instructions.push_back(Instruction("sltu",&registers,opcode["sltu"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("sltu",registers,opcode["sltu"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "bgeu")
     {
-        instructions.push_back(Instruction("sltu",&registers,opcode["sltu"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("sltu",registers,opcode["sltu"],registerIndex[m.cap(3)],registerIndex[m.cap(4)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(5))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(5)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(5)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
@@ -697,11 +699,11 @@ void Assembler::handlePZ(QRegExp m, QString line)
     if(m.cap(2) == "beqz")
     {
         if(labels.contains(m.cap(4))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex[m.cap(3)],0,labels[m.cap(4)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex[m.cap(3)],0,labels[m.cap(4)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(4)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex[m.cap(3)],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex[m.cap(3)],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
@@ -709,63 +711,63 @@ void Assembler::handlePZ(QRegExp m, QString line)
     else if(m.cap(2) == "bnez")
     {
         if(labels.contains(m.cap(4))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex[m.cap(3)],0,labels[m.cap(4)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex[m.cap(3)],0,labels[m.cap(4)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(4)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex[m.cap(3)],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex[m.cap(3)],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "bltz")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex["0"],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex["0"],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(4))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(4)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "bgez")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex["0"],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex[m.cap(3)],registerIndex["0"],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(4))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(4)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "bgtz")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex["0"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex["0"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(4))){
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(4)));
-            instructions.push_back(Instruction("bne",&registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
     }
     else if(m.cap(2) == "blez")
     {
-        instructions.push_back(Instruction("slt",&registers,opcode["slt"],registerIndex["0"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
+        instructions.push_back(Instruction("slt",registers,opcode["slt"],registerIndex["0"],registerIndex[m.cap(3)],registerIndex["at"],0,0,RFormat));
         if(labels.contains(m.cap(4))){
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,labels[m.cap(4)]-address-1,0,IFormat));
         }
         else{
             missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),m.cap(4)));
-            instructions.push_back(Instruction("beq",&registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
+            instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
@@ -781,29 +783,29 @@ void Assembler::handlePSI(QRegExp m, QString line)
     {
         int numberToLoad = getNumber(m.cap(3));
         if(numberToLoad > 0xffff){
-            instructions.push_back(Instruction("lui",&registers,opcode["lui"],0,registerIndex[m.cap(3)],0,numberToLoad >> 16,0,IFormat));
-            instructions.push_back(Instruction("ori",&registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,numberToLoad & 0xffff,0,IFormat));
+            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0,numberToLoad >> 16,0,IFormat));
+            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,numberToLoad & 0xffff,0,IFormat));
             if(m.cap(1).size()) labels[m.cap(1)] = address;
             address++;
         }
         else{
-            instructions.push_back(Instruction("addi",&registers,opcode["addi"],registerIndex["0"],registerIndex[m.cap(3)],0,numberToLoad,0,IFormat));
+            instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex["0"],registerIndex[m.cap(3)],0,numberToLoad,0,IFormat));
             if(m.cap(1).size()) labels[m.cap(1)] = address;
         }
     }
     else if(m.cap(2) == "ror")
     {
-        instructions.push_back(Instruction("srl",&registers,opcode["srl"],0,registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),RFormat));
-        instructions.push_back(Instruction("sll",&registers,opcode["sll"],0,registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,32 - getNumber(m.cap(4)),RFormat));
-        instructions.push_back(Instruction("or" ,&registers,opcode["or" ],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("srl",registers,opcode["srl"],0,registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),RFormat));
+        instructions.push_back(Instruction("sll",registers,opcode["sll"],0,registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,32 - getNumber(m.cap(4)),RFormat));
+        instructions.push_back(Instruction("or" ,registers,opcode["or" ],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
     }
     else if(m.cap(2) == "rol")
     {
-        instructions.push_back(Instruction("sll",&registers,opcode["sll"],0,registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),RFormat));
-        instructions.push_back(Instruction("srl",&registers,opcode["srl"],0,registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,32 - getNumber(m.cap(4)),RFormat));
-        instructions.push_back(Instruction("or" ,&registers,opcode["or" ],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("sll",registers,opcode["sll"],0,registerIndex[m.cap(3)],registerIndex["at"],0,getNumber(m.cap(4)),RFormat));
+        instructions.push_back(Instruction("srl",registers,opcode["srl"],0,registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,32 - getNumber(m.cap(4)),RFormat));
+        instructions.push_back(Instruction("or" ,registers,opcode["or" ],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
     }
@@ -812,24 +814,24 @@ void Assembler::handlePDR(QRegExp m, QString line)
 {
     if(m.cap(2) == "not")
     {
-        instructions.push_back(Instruction("nor",&registers,opcode["nor"],registerIndex[m.cap(4)],registerIndex["0"],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("nor",registers,opcode["nor"],registerIndex[m.cap(4)],registerIndex["0"],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "neg")
     {
-        instructions.push_back(Instruction("sub",&registers,opcode["sub"],registerIndex["0"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("sub",registers,opcode["sub"],registerIndex["0"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size() > 0) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "move")
     {
-        instructions.push_back(Instruction("addu",&registers,opcode["addu"],registerIndex[m.cap(4)],registerIndex["0"],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("addu",registers,opcode["addu"],registerIndex[m.cap(4)],registerIndex["0"],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size() > 0) labels[m.cap(1)] = address;
     }
     else if(m.cap(2) == "abs")
     {
-        instructions.push_back(Instruction("sra",&registers,opcode["sra"],registerIndex[m.cap(4)],registerIndex["at"],0,0,31,IFormat));
-        instructions.push_back(Instruction("xor",&registers,opcode["xor"],registerIndex["at"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,0,RFormat));
-        instructions.push_back(Instruction("subu",&registers,opcode["subu"],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("sra",registers,opcode["sra"],registerIndex[m.cap(4)],registerIndex["at"],0,0,31,IFormat));
+        instructions.push_back(Instruction("xor",registers,opcode["xor"],registerIndex["at"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("subu",registers,opcode["subu"],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
         address += 2;
     }
 }
@@ -837,7 +839,7 @@ void Assembler::handlePSR(QRegExp m, QString line)
 {
     if(m.cap(2) == "clear")
     {
-        instructions.push_back(Instruction("add",&registers,opcode["add"],registerIndex["0"],registerIndex["0"],registerIndex[m.cap(3)],0,0,RFormat));
+        instructions.push_back(Instruction("add",registers,opcode["add"],registerIndex["0"],registerIndex["0"],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size() > 0) labels[m.cap(1)] = address;
     }
 }
@@ -845,12 +847,10 @@ void Assembler::handlePI(QRegExp m, QString line)
 {
     if(m.cap(2) == "subi")
     {
-        instructions.push_back(Instruction("addi",&registers,opcode["addi"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,-getNumber(m.cap(5)),getNumber(m.cap(5)),IFormat));
+        instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,-getNumber(m.cap(5)),getNumber(m.cap(5)),IFormat));
         if(m.cap(1).size() > 0) labels[m.cap(1)] = address;
     }
 }
-
-//Assembler::~Assembler(){}
 
 
 Assembler::Assembler(){}
@@ -974,8 +974,8 @@ void Assembler::initializeRegisters()
     opcode["ll"] = 48;
     opcode["sc"] = 56;
 
-    foreach (int r, registers) r = 0;
-    registers[28] = 0x10008000;
-    registers[29] = 0x7FFFEFFC;
+    registers = new QVector<int>(32,0);
+    (*registers)[28] = 0x10008000;
+    (*registers)[29] = 0x7FFFEFFC;
 }
 
