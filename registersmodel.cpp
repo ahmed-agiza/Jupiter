@@ -76,7 +76,7 @@ void RegistersModel::updateData()
 
 RegistersModel::~RegistersModel()
 {
-    delete regs;
+    //delete regs;          // I commented this out. you're deleting regs which was not created in this class. It crashes the program
     //delete tableData;
 }
 

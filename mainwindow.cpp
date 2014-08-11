@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableMainRegisters->setModel(regModel);
 
     assem = NULL;
+    assemblerInitialized = false;
 }
 
 bool MainWindow::eventFilter(QObject *, QEvent *e)
@@ -55,14 +56,14 @@ bool MainWindow::eventFilter(QObject *, QEvent *e)
 MainWindow::~MainWindow()
 {
     delete memory;
-    delete ui;
-    if (assem)
+    if(assemblerInitialized)
         delete assem;
+    delete ui;
 }
 
 void MainWindow::on_actionSimulate_triggered()
 {
-    if (assem){
+    if (assemblerInitialized){
         assem->simulate();
         mainProcessorRegisters = *assem->registers;
     }
@@ -124,8 +125,10 @@ void MainWindow::on_actionAssemble_triggered()
             {
                 qDebug() << E->toPlainText();
                 QStringList instrs = E->toPlainText().split("\n");
+                if(assemblerInitialized)
+                    delete assem;
                 assem = new Assembler(&instrs, memory);
-
+                assemblerInitialized = true;
             }
             else
                 QMessageBox::critical(this, "Error", "Error 1");

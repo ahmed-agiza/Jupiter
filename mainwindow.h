@@ -42,6 +42,7 @@ private:
     TileSetViewer *tileSetViewer;
     QVector<int> mainProcessorRegisters;
     Assembler *assem;
+    bool assemblerInitialized;
     //Menus
 };
 

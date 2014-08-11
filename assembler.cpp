@@ -389,8 +389,8 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
 }
 Assembler::~Assembler()
 {
-    delete mem;
-    delete engine;
+    //delete mem;
+    //delete engine;
     delete registers;
 }
 
