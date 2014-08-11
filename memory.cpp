@@ -41,8 +41,8 @@ unsigned int Memory::getByteSegment(unsigned int addr) const
         return DATA_SEGMENT;
     else if(addr >= heapSegmentBaseAddress && addr < heapSegmentBaseAddress + heapSegmentPhysicalSize)
         return HEAP_SEGMENT;
-    else if(addr >= stackSegmentLimitAddress - stackSegmentPhysicalSize && addr < stackSegmentLimitAddress)
-        return STACK_SEGMENT;
+    //else if(addr >= stackSegmentLimitAddress - stackSegmentPhysicalSize && addr < stackSegmentLimitAddress)
+    //    return STACK_SEGMENT;
     else if(addr >= tileMapBaseAddress && addr < tileMapBaseAddress + tileMapPhysicalSize)
         return TILE_MAP;
     else if(addr >= backgroundTileSetBaseAddress && addr < backgroundTileSetBaseAddress + backgroundTileSetPhysicalSize)
@@ -75,19 +75,19 @@ unsigned int Memory::getWordSegment(unsigned int addr) const
     return firstByte;
 }
 
-Memory::Memory():   textSegmentBaseAddress (0x4000000),
-                    dataSegmentBaseAddress (0x10010000),
-                    heapSegmentBaseAddress (0x10500000),
-                    stackSegmentLimitAddress (0x80000000),
-                    spriteRamBaseAddress (0x10400000),
-                    paletteBaseAddress (0x104FF000),
-                    tileMapBaseAddress (0x10100000),
-                    spritesTileSetBaseAddress (0x10030000),
-                    backgroundTileSetBaseAddress (0x10020000),
+Memory::Memory():   textSegmentBaseAddress (0x00000000),
+                    dataSegmentBaseAddress (0x00010000),
+                    heapSegmentBaseAddress (0x00020000),
+                    //stackSegmentLimitAddress (0x80000000),
+                    spriteRamBaseAddress (0x00123000),
+                    paletteBaseAddress (0x00123200),
+                    tileMapBaseAddress (0x00120000),
+                    spritesTileSetBaseAddress (0x00110000),
+                    backgroundTileSetBaseAddress (0x00100000),
                     textSegmentPhysicalSize (64 * 1024),
                     dataSegmentPhysicalSize (64 * 1024),
-                    heapSegmentPhysicalSize (128 * 1024),
-                    stackSegmentPhysicalSize (128 * 1024),
+                    heapSegmentPhysicalSize (896 * 1024),
+                    //stackSegmentPhysicalSize (128 * 1024),
                     spriteRamPhysicalSize (512),
                     palettePhysicalSize (1 * 1024),
                     screenWidth(512),
@@ -110,11 +110,11 @@ Memory::Memory():   textSegmentBaseAddress (0x4000000),
     textSegment.resize(textSegmentPhysicalSize);
     dataSegment.resize(dataSegmentPhysicalSize);
     heapSegment.resize(heapSegmentPhysicalSize);
-    stackSegment.resize(stackSegmentPhysicalSize);
+    //stackSegment.resize(stackSegmentPhysicalSize);
     textSegment.fill(0);
     dataSegment.fill(0);
     heapSegment.fill(0);
-    stackSegment.fill(0);
+    //stackSegment.fill(0);
 
     for(int i=0; i<backgroundTileSet.size(); i++)
         backgroundTileSet[i].setPalette(&palette);
@@ -148,8 +148,8 @@ void Memory::storeByte(unsigned int addr, char data)
         dataSegment[addr - dataSegmentBaseAddress] = data;
     else if(segment == HEAP_SEGMENT)
         heapSegment[addr - heapSegmentBaseAddress] = data;
-    else if(segment == STACK_SEGMENT)
-        stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = data;
+    //else if(segment == STACK_SEGMENT)
+    //    stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)] = data;
     else if(segment == TILE_MAP){
         int w = screenWidth/TILE_SIZE * getScreensWidthCount();
         int r = (addr - tileMapBaseAddress)/w;
@@ -186,8 +186,8 @@ char Memory::loadByte(unsigned int addr) const
         return dataSegment[addr - dataSegmentBaseAddress];
     else if(segment == HEAP_SEGMENT)
         return heapSegment[addr - heapSegmentBaseAddress];
-    else if(segment == STACK_SEGMENT)
-        return stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
+    //else if(segment == STACK_SEGMENT)
+    //    return stackSegment[addr - (stackSegmentLimitAddress - stackSegmentPhysicalSize)];
     else if(segment == TILE_MAP){
         int w = screenWidth/TILE_SIZE * getScreensWidthCount();
         int r = (addr - tileMapBaseAddress)/w;
@@ -377,7 +377,8 @@ int Memory::claculateLoadSize(const QVector<bool>& segments)
         totalSize += spriteRamPhysicalSize;
     if(segments[6])
         totalSize += palettePhysicalSize;
-
+    if(segments[7])
+        totalSize += heapSegmentPhysicalSize;
     return totalSize;
 }
 

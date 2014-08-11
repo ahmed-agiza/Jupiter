@@ -76,7 +76,7 @@ public:
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
     const unsigned int heapSegmentBaseAddress;
-    const unsigned int stackSegmentLimitAddress;
+    //const unsigned int stackSegmentLimitAddress;
 
     const unsigned int spriteRamBaseAddress;
     const unsigned int paletteBaseAddress;
@@ -87,7 +87,7 @@ public:
     const unsigned int textSegmentPhysicalSize;
     const unsigned int dataSegmentPhysicalSize;
     const unsigned int heapSegmentPhysicalSize;
-    const unsigned int stackSegmentPhysicalSize;
+    //const unsigned int stackSegmentPhysicalSize;
 
     const unsigned int spriteRamPhysicalSize;
     unsigned int palettePhysicalSize;
