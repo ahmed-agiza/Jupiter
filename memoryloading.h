@@ -32,6 +32,8 @@ private:
     QFrame* MainFrame;
     TileSetViewer *tileSetViewer;
     TileRenderWindow *tileRenderWindow;
+
+    int claculateMemorySize(const QVector<bool> &segments);
 };
 
 #endif // MEMORYLOADING_H

@@ -4,6 +4,7 @@ bool saved = 0;
 #define TILE_SIZE 16
 TileEngine::TileEngine(QWidget* parent, const QPoint& position, const QSize& size, Memory* mem) : QRenderWindow(parent, position, size, 20)
 {
+    this->setWindowTitle("Game Screen");
     memory = mem;
     connect(memory, SIGNAL(renderNow()), this, SLOT(repaint()));
 

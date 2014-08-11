@@ -71,6 +71,7 @@ private:
     QByteArray stackSegment;
 
     TileEngine* engine;
+    int claculateLoadSize(const QVector<bool>&);
 public:
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;

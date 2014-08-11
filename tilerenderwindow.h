@@ -20,7 +20,7 @@ private:
     unsigned char tileIndex;
     Memory *memory;
 signals:
-
+    void renderScreen();
 public slots:
 
 };

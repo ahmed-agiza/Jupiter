@@ -17,10 +17,18 @@ public:
     explicit TileSetViewer(QWidget *parent, Memory *);
     ~TileSetViewer();
 
+private slots:
+    void on_pushButton_clicked();
+
+    void on_horizontalSlider_valueChanged(int value);
+
 private:
     Ui::TileSetViewer *ui;
     Memory* memory;
     TileRenderWindow *tileRenderWindow;
+
+signals:
+    void renderScreen();
 };
 
 #endif // TILESETVIEWER_H

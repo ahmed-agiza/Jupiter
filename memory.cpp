@@ -360,6 +360,27 @@ void Memory::saveMemory(QString fileName, QVector<bool> segmentsToLoad)
     out.close();
 }
 
+int Memory::claculateLoadSize(const QVector<bool>& segments)
+{
+    int totalSize = 0;
+    if(segments[0])
+        totalSize += textSegmentPhysicalSize;
+    if(segments[1])
+        totalSize += dataSegmentPhysicalSize;
+    if(segments[2])
+        totalSize += backgroundTileSetPhysicalSize;
+    if(segments[3])
+        totalSize += spritesTileSetPhysicalSize;
+    if(segments[4])
+        totalSize += tileMapPhysicalSize;
+    if(segments[5])
+        totalSize += spriteRamPhysicalSize;
+    if(segments[6])
+        totalSize += palettePhysicalSize;
+
+    return totalSize;
+}
+
 void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
 {
     int count = 0;
@@ -372,6 +393,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<textSegmentPhysicalSize; i++){
             in.getChar(byte);
             storeByte(textSegmentBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -379,6 +402,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<dataSegmentPhysicalSize; i++){
             in.getChar(byte);
             storeByte(dataSegmentBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -387,6 +412,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<backgroundTileSetPhysicalSize; i++){
             in.getChar(byte);
             storeByte(backgroundTileSetBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -395,6 +422,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<spritesTileSetPhysicalSize; i++){
             in.getChar(byte);
             storeByte(spritesTileSetBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -403,6 +432,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<tileMapPhysicalSize; i++){
             in.getChar(byte);
             storeByte(tileMapBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -411,6 +442,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<spriteRamPhysicalSize; i++){
             in.getChar(byte);
             storeByte(spriteRamBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -419,6 +452,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<palettePhysicalSize; i++){
             in.getChar(byte);
             storeByte(paletteBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -426,6 +461,8 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
         for(int i=0; i<heapSegmentPhysicalSize; i++){
             in.getChar(byte);
             storeByte(heapSegmentBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
             count++;
         }
     }
@@ -433,7 +470,9 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
 
     qDebug() << "loaded: "<<count<<" bytes\n";
     in.close();
-    emit loadingNumberChanged(64);
+    emit loadingNumberChanged((claculateLoadSize(segmentsToLoad) + 1024 - 1)/1024);
+
+
 }
 
 void Memory::setTileEngine(TileEngine *engine)

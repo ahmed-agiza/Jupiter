@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     installEventFilter(this);
 
     memory = new Memory;
-    memoryLoading = new MemoryLoading(this, this->memory);
+    memoryLoading = new MemoryLoading(0, this->memory);
     memoryLoading->show();
 
     for (int i = 0; i < 32; i++){
@@ -67,6 +67,10 @@ void MainWindow::on_actionSimulate_triggered()
         assem->simulate();
         mainProcessorRegisters = *assem->registers;
     }
+
+    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
+    memory->setTileEngine(engine);
+    engine->show();
 }
 
 void MainWindow::on_actionNew_triggered()

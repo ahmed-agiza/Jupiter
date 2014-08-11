@@ -14,12 +14,40 @@ MemoryLoading::~MemoryLoading()
     delete ui;
 }
 
+int MemoryLoading::claculateMemorySize(const QVector<bool>& segments)
+{
+    int totalSize = 0;
+    if(segments[0])
+        totalSize += mem->textSegmentPhysicalSize;
+    if(segments[1])
+        totalSize += mem->dataSegmentPhysicalSize;
+    if(segments[2])
+        totalSize += mem->backgroundTileSetPhysicalSize;
+    if(segments[3])
+        totalSize += mem->spritesTileSetPhysicalSize;
+    if(segments[4])
+        totalSize += mem->tileMapPhysicalSize;
+    if(segments[5])
+        totalSize += mem->spriteRamPhysicalSize;
+    if(segments[6])
+        totalSize += mem->palettePhysicalSize;
+
+    return totalSize;
+}
+
 void MemoryLoading::on_pushButton_pressed()
 {
-    //engine = new TileEngine(this, QPoint(0,0), QSize(512,384));
-    //mem->setTileEngine(engine);
     connect(mem, SIGNAL(loadingNumberChanged(int)), this, SLOT(onLoadingNumberChanged(int)));
-    myThread = new LoadMemoryThread();
+    ui->pushButton->setEnabled(false);
+    QVector<bool> segmentsToLoad(8);
+    segmentsToLoad.fill(0);
+    segmentsToLoad[2] = 1;
+    segmentsToLoad[3] = 1;
+    segmentsToLoad[4] = 1;
+    segmentsToLoad[5] = 1;
+    segmentsToLoad[6] = 1;
+    ui->progressBar->setMaximum((claculateMemorySize(segmentsToLoad) + 1024 - 1)/1024);
+    myThread = new LoadMemoryThread(this,segmentsToLoad);
     myThread->memory = mem;
     myThread->start();
 
@@ -27,12 +55,5 @@ void MemoryLoading::on_pushButton_pressed()
 
 void MemoryLoading::onLoadingNumberChanged(int number)
 {
-    this->resize(552, 424);
-    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), mem);
-    mem->setTileEngine(engine);
-    engine->show();
-    tileSetViewer = new TileSetViewer(this, mem);
-    tileSetViewer->show();
-    //tileRenderWindow = new TileRenderWindow(0, mem);
-    //tileRenderWindow->show();
+    ui->progressBar->setValue(number);
 }
