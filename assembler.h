@@ -32,7 +32,7 @@ private:
     QMap<QString, int> labels;
     QMap<QString, int> opcode;
     QMap<QString, int (*)(fParam2)> functionsMap;
-    QVector<int> registers;
+
 
     Memory *mem;
     TileEngine *engine;
@@ -58,6 +58,7 @@ public:
     void handlePI(QRegExp m, QString line);
 
     void simulate();
+    QVector<int> registers;
     ~Assembler();
     Assembler();
 

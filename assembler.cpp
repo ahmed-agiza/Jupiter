@@ -867,6 +867,8 @@ void Assembler::simulate()
 }
 
 
+
+
 int Assembler::getNumber(QString s)
 {
     bool f;

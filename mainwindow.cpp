@@ -13,6 +13,9 @@
 #include <QVector>
 #include <QMessageBox>
 #include <iostream>
+#include "registersmodel.h"
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -27,6 +30,15 @@ MainWindow::MainWindow(QWidget *parent) :
     memory = new Memory;
     memoryLoading = new MemoryLoading(this, this->memory);
     memoryLoading->show();
+
+    for (int i = 0; i < 32; i++){
+        mainProcessorRegisters.append(0);
+    }
+
+    RegistersModel *regModel = new RegistersModel(&mainProcessorRegisters, this);
+    ui->tableMainRegisters->setModel(regModel);
+
+    assem = NULL;
 }
 
 bool MainWindow::eventFilter(QObject *, QEvent *e)
@@ -42,11 +54,16 @@ MainWindow::~MainWindow()
 {
     delete memory;
     delete ui;
+    if (assem)
+        delete assem;
 }
 
 void MainWindow::on_actionSimulate_triggered()
 {
-
+    if (assem){
+        assem->simulate();
+        mainProcessorRegisters = assem->registers;
+    }
 }
 
 void MainWindow::on_actionNew_triggered()
@@ -90,7 +107,7 @@ void MainWindow::on_actionNew_triggered()
 
 void MainWindow::printS()
 {
-    qDebug() << "Test slot";
+
 }
 
 void MainWindow::on_actionAssemble_triggered()
@@ -105,7 +122,8 @@ void MainWindow::on_actionAssemble_triggered()
             {
                 qDebug() << E->toPlainText();
                 QStringList instrs = E->toPlainText().split("\n");
-                Assembler A(&instrs, memory);
+                assem = new Assembler(&instrs, memory);
+
             }
             else
                 QMessageBox::critical(this, "Error", "Error 1");

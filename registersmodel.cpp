@@ -1,5 +1,7 @@
 #include "registersmodel.h"
 
+#include <QDebug>
+
 RegistersModel::RegistersModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
@@ -7,10 +9,13 @@ RegistersModel::RegistersModel(QObject *parent) :
 }
 
 
-RegistersModel::RegistersModel(QVector<int> &r, QObject *parent=0) : QAbstractTableModel(parent)
+RegistersModel::RegistersModel(QVector<int> *r, QObject *parent=0) : QAbstractTableModel(parent)
 {
    regs = r;
    constructMap();
+   //tableData = new QList<QPair<int, int*> >;
+  // constructData();
+
 }
 
 void RegistersModel::constructMap()
@@ -50,10 +55,36 @@ void RegistersModel::constructMap()
 
 }
 
+
+
+/*void RegistersModel::constructData()
+{
+    tableData->clear();
+    for (int i = 0; i < regs->size(); i++){
+        QPair<int, int> mPair;
+        mPair.first = i;
+        mPair.second = regs->at(i);
+        qDebug() << i << "  " << regs->at(i);
+        tableData->append(mPair);
+    }
+}*/
+
+void RegistersModel::updateData()
+{
+    //constructData();
+}
+
+RegistersModel::~RegistersModel()
+{
+    delete regs;
+    //delete tableData;
+}
+
+
 int RegistersModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return tableData->size();
+    return regs->size();
 }
 int RegistersModel::columnCount(const QModelIndex &parent) const
 {
@@ -65,12 +96,19 @@ QVariant RegistersModel::data(const QModelIndex &index, int role) const
 {
     Q_UNUSED(role);
 
-    if (!index.isValid() || index.row() >= tableData->size() || index.row() < 0 || index.column() < 0 || index.column() > 2)
+    if (!index.isValid() || index.row() >= regs->size() || index.row() < 0 || index.column() < 0 || index.column() > 2)
         return QVariant();
 
-    if (role == Qt::DisplayRole)
-        return QVariant(regs[index.row()]);
+    if (role == Qt::DisplayRole){
+        if (index.column() == 0)
+            return registersMap[index.row()];
+        else if (index.column() == 1)
+            return regs->at(index.row());
+        else
+         return QVariant();
+    }
 
+        //return "3";
     return QVariant();
 }
 
@@ -97,25 +135,25 @@ QVariant RegistersModel::headerData(int section, Qt::Orientation orientation, in
 }
 Qt::ItemFlags RegistersModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid())
-             return Qt::ItemIsEnabled;
+    /*if (!index.isValid())
+             return Qt::ItemIsEnabled;*/
 
-         return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+         return QAbstractTableModel::flags(index);// | Qt::ItemIsEditable;
 }
-bool RegistersModel::setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole)
+/*bool RegistersModel::setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole)
 {
 
     if (index.isValid() && role == Qt::EditRole)
     {
-            QPair<int, int> p = tableData->value(index.row());
+             //QPair<int, int> p = tableData->value(index.row());
              if(index.column() == 0)
-                    p.first = value.toInt();
+                    registersMap[index.row()] = value.toString();
              else if (index.column() == 1)
-                    p.second = value.toInt();
+                    (*regs)[index.row()] = value.toInt();
              else
                  return false;
 
-             tableData->replace(index.row(), p);
+             //tableData->replace(index.row(), p);
 
              emit(dataChanged(index, index));
 
@@ -123,16 +161,17 @@ bool RegistersModel::setData(const QModelIndex &index, const QVariant &value, in
     }
 
     return false;
-}
+}*/
 
-bool RegistersModel::insertRows(int position, int rows, const QModelIndex &index=QModelIndex())
+/*bool RegistersModel::insertRows(int position, int rows, const QModelIndex &index=QModelIndex())
 {
     Q_UNUSED(index);
     beginInsertRows(QModelIndex(), position, position+rows-1);
 
-    QPair<int, int> r; r.first = 0; r.second = 0;
+    //<int, int> r; r.first = 0; r.second = 0;
     for (int row=0; row < rows; row++)
-       tableData->insert(position, r);
+       //tableData->insert(position, r);
+
 
 
     endInsertRows();
@@ -151,8 +190,19 @@ bool RegistersModel::removeRows(int position, int rows, const QModelIndex &index
 
      endRemoveRows();
      return true;
-}
-QList<QPair<int, int> > *RegistersModel::getAllData()
+}*/
+
+QList<QPair<QString, int> > RegistersModel::getAllData()
 {
+    QList<QPair<QString, int>> tableData;
+    for (int i = 0; i < regs->size(); i++){
+        QPair <QString, int> p;
+        p.first = registersMap[i];
+        p.second = regs->at(i);
+
+        tableData.append(p);
+    }
+
     return tableData;
 }
+

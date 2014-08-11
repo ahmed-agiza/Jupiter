@@ -40,6 +40,8 @@ private:
     MemoryLoading* memoryLoading;
     Memory* memory;
     TileSetViewer *tileSetViewer;
+    QVector<int> mainProcessorRegisters;
+    Assembler *assem;
     //Menus
 };
 
