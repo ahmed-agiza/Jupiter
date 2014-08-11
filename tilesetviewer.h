@@ -22,6 +22,8 @@ private slots:
 
     void on_horizontalSlider_valueChanged(int value);
 
+    void on_verticalSlider_valueChanged(int value);
+
 private:
     Ui::TileSetViewer *ui;
     Memory* memory;

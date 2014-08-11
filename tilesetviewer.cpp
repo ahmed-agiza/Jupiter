@@ -43,3 +43,9 @@ void TileSetViewer::on_horizontalSlider_valueChanged(int value)
     emit renderScreen();
     ui->label->setText(QString::number(tileRenderWindow->getTileIndex()));
 }
+
+void TileSetViewer::on_verticalSlider_valueChanged(int value)
+{
+    tileRenderWindow->setScaleFactor(value);
+    emit renderScreen();
+}

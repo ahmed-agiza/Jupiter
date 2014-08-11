@@ -14,11 +14,14 @@ public:
     void setTileIndex(unsigned char);
     bool getTileSetToRender();
     unsigned char getTileIndex();
+    void setScaleFactor(unsigned int scaleFactor);
+    unsigned int getScaleFactor();
 private:
     sf::Sprite tileToRender;
     bool tileSetToRender;
     unsigned char tileIndex;
     Memory *memory;
+    unsigned int scaleFactor;
 signals:
     void renderScreen();
 public slots:
