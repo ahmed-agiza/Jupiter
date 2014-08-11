@@ -152,9 +152,12 @@ void MainWindow::on_actionClose_triggered()
 
 void MainWindow::on_actionTileset_viewer_triggered()
 {
-    //memoryLoading = new MemoryLoading(this, this->memory);
-    //memoryLoading->show();
-
     tileSetViewer = new TileSetViewer(this, memory);
     tileSetViewer->show();
+}
+
+void MainWindow::on_actionPalette_Viewer_triggered()
+{
+    paletteViewer = new PaletteViewer(this, memory);
+    paletteViewer->show();
 }

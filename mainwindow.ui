@@ -176,6 +176,7 @@
     <addaction name="actionBase_Converter"/>
     <addaction name="separator"/>
     <addaction name="actionTileset_viewer"/>
+    <addaction name="actionPalette_Viewer"/>
     <addaction name="separator"/>
     <addaction name="actionConfigure"/>
    </widget>
@@ -558,6 +559,11 @@
   <action name="actionTileset_viewer">
    <property name="text">
     <string>Tileset Viewer</string>
+   </property>
+  </action>
+  <action name="actionPalette_Viewer">
+   <property name="text">
+    <string>Palette Viewer</string>
    </property>
   </action>
  </widget>

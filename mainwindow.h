@@ -8,6 +8,7 @@
 #include "loadmemorythread.h"
 #include "memoryloading.h"
 #include "tilesetviewer.h"
+#include "paletteviewer.h"
 namespace Ui {
 class MainWindow;
 }
@@ -33,6 +34,8 @@ private slots:
 
     void on_actionTileset_viewer_triggered();
 
+    void on_actionPalette_Viewer_triggered();
+
     void printS();
 
 private:
@@ -40,6 +43,7 @@ private:
     MemoryLoading* memoryLoading;
     Memory* memory;
     TileSetViewer *tileSetViewer;
+    PaletteViewer *paletteViewer;
     TileEngine *engine;
     QVector<int> mainProcessorRegisters;
     Assembler *assem;
