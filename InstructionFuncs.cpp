@@ -1,5 +1,6 @@
 #include "instruction.h"
 #include "InstructionFuncs.h"
+#include <QDebug>
 
 //#define fParam2 QVector<__int32> *base, int rs, int rt, int rd, __int16 imm, int shamt, int &PC, Memory *mem
 #define UNUSE_R Q_UNUSED(imm); Q_UNUSED(PC); Q_UNUSED(mem);
@@ -261,9 +262,12 @@ int sc(fParam2)
 
 int addi(fParam2)
 {
+    qDebug() << "Addi";
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
+    qDebug() << "Rtr: " << Rtr;
+    qDebug() << "Imm: " << imm;
     __int32 res = Rtr + imm;
 
     if ((Rtr > 0 && imm > 0 && res <0) || (Rtr < 0 && imm < 0 && res > 0))

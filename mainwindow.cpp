@@ -15,6 +15,8 @@
 #include <iostream>
 #include "registersmodel.h"
 
+#include "InstructionFuncs.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -41,7 +43,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableMainRegisters->setModel(regModel);
 
     assem = NULL;
-    assemblerInitialized = false;
+    assemblerInitialized = false;  
+
 }
 
 bool MainWindow::eventFilter(QObject *, QEvent *e)

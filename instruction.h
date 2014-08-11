@@ -6,8 +6,8 @@
 #include <QString>
 #include <QObject>
 #include "memory.h"
+#include "InstructionFuncs.h"
 
-#define fParam QVector<int> *, int, int, int, __int16, int , int &, Memory *
 
 enum InstructionFormat {RFormat, IFormat, JFormat};
 

@@ -3,6 +3,7 @@
 #include "instruction.h"
 
 
+#define fParam QVector<int> *, int, int, int, __int16, int , int &, Memory *
 
 #define fParam2 QVector<__int32> *base, int rs, int rt, int rd, __int16 imm, int shamt, int &PC, Memory *mem
 

@@ -208,9 +208,11 @@ int Instruction::getShamt() const
 
 void Instruction::execute(int &inPC)
 {
-   int x = (*func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
-   if(x != 0)
-       emit raiseException(x);
+
+   qDebug() << addi(registers, rs, rt, rd, imm, shamt, inPC, mem);
+   //int x = (*func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
+   /*if(x != 0)
+       emit raiseException(x);*/
 
 }
 

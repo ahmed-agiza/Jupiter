@@ -382,8 +382,9 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
         ins.setMem(mem);
         mem->storeWord(addr,ins.getWord());
         addr += 4;
-        ins.setFunc(functionsMap[ins.getName()]);
-        QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
+        ins.setFunc(functionsMap[ins.getName().trimmed()]);
+
+        //QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }
 
 }
@@ -862,6 +863,7 @@ void Assembler::simulate()
 
     while (PC != -1 && PC <= instructions.size())
     {
+        qDebug() << "Executing: " << instructions[PC - 1].getName();
         instructions[PC - 1].execute(PC);
     }
 }
