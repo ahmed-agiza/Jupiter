@@ -388,21 +388,11 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
 
     }
 
-<<<<<<< HEAD
+
     for (int i = 0; i<errorList.size(); i++)
     {
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
-
-    unsigned int addr = mem->textSegmentBaseAddress;
-    foreach(Instruction ins,  instructions)
-    {
-        ins.setMem(mem);
-        mem->storeWord(addr,ins.getWord());
-        addr += 4;
-        ins.setFunc(functionsMap[ins.getName().trimmed()]);
-=======
->>>>>>> origin/master
 
 
 }
