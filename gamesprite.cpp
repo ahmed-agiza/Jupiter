@@ -159,3 +159,8 @@ void GameSprite::setTileSet(QVector<Tile>* tileSet)
     this->tileSetPointer = tileSet;
     makeImage();
 }
+
+ int GameSprite::getPriority()
+ {
+     return ((memoryBytes[7]>>4)&0x3);
+ }

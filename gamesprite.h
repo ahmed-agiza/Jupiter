@@ -19,6 +19,7 @@ public:
     Sprite sprite;
     QVector<unsigned char> memoryBytes;
     void makeImage();
+    int getPriority();
 private:
     QVector<Tile> *tileSetPointer;
     Texture texture;

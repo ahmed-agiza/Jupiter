@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
         mainProcessorRegisters.append(0);
     }
     mainProcessorRegisters[28] = 0x10008000;
-    mainProcessorRegisters[29] = 0x7FFFEFFC;
+    mainProcessorRegisters[29] = 0x7FFFFFFC;
 
     RegistersModel *regModel = new RegistersModel(&mainProcessorRegisters, this);
     ui->tableMainRegisters->setModel(regModel);

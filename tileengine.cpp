@@ -50,12 +50,12 @@ void TileEngine::renderFrame()
             RenderWindow::draw(memory->backgroundMatrix[i][j]);
         }
 
-    for(int i=0; i<64; i++){
-        if(memory->spriteRam[i].shouldRender()){
-            RenderWindow::draw(memory->spriteRam[i].sprite);
+    for(int priority=0; priority<4; priority++)
+        for(int i=0; i<64; i++){
+            if(memory->spriteRam[i].shouldRender() && memory->spriteRam[i].getPriority() == priority){
+                RenderWindow::draw(memory->spriteRam[i].sprite);
+            }
         }
-    }
-
 }
 
 TileEngine::~TileEngine()

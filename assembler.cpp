@@ -400,7 +400,7 @@ Assembler::~Assembler()
 {
     //delete mem;
     //delete engine;
-    delete registers;
+    //delete registers;
 }
 
 void Assembler::initializeFunctions()
