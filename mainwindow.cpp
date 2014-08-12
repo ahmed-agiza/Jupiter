@@ -43,8 +43,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableMainRegisters->setModel(regModel);
 
     assem = NULL;
-    assemblerInitialized = false;  
-
+    assemblerInitialized = false;
+    this->setMouseTracking(true);
 }
 
 bool MainWindow::eventFilter(QObject *, QEvent *e)

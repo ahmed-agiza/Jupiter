@@ -10,12 +10,9 @@ public:
     ~PaletteRenderWindow();
     void initialize();
     void update();
-    void setPaletteIndex(unsigned char);
-    unsigned char getPaletteIndex();
 private:
     Memory *memory;
-    unsigned char paletteIndex;
-    sf::Color color;
+    QVector< QVector<sf::Sprite> > screen;
 signals:
     void renderScreen();
 };

@@ -1,5 +1,6 @@
 #include "paletteviewer.h"
 #include "ui_paletteviewer.h"
+#include <QGraphicsScene>
 
 PaletteViewer::PaletteViewer(QWidget *parent, Memory * memory) :
     QDialog(parent),
@@ -12,9 +13,12 @@ PaletteViewer::PaletteViewer(QWidget *parent, Memory * memory) :
 
     paletteRenderWindow = new PaletteRenderWindow(this,this->memory);
     ui->scrollArea->setWidget(paletteRenderWindow);
-    connect(this, SIGNAL(renderScreen()), paletteRenderWindow, SLOT(repaint()));
+    ui->scrollArea->setMouseTracking(true);
+    this->setMouseTracking(true);
+    paletteRenderWindow->setMouseTracking(true);
 
-    changeValue(0);
+    connect(this, SIGNAL(firstTimeRender()), paletteRenderWindow, SLOT(repaint()));
+    emit firstTimeRender();
 }
 
 PaletteViewer::~PaletteViewer()
@@ -22,18 +26,27 @@ PaletteViewer::~PaletteViewer()
     delete ui;
 }
 
-void PaletteViewer::on_horizontalSlider_valueChanged(int value)
+
+void PaletteViewer::changeValue(Vector2i mousePosition)
 {
-    changeValue(value);
+    int value = ((mousePosition.y/32) * 16) + (mousePosition.x / 32);
+
+    sf::Color color = memory->palette[value].getColor();
+    ui->redValue->setText(QString::number(color.r));
+    ui->greenValue->setText(QString::number(color.g));
+    ui->blueValue->setText(QString::number(color.b));
+    ui->alphaValue->setText(QString::number(color.a));
+    ui->colorNumber->setText(QString::number(value));
 }
 
-void PaletteViewer::changeValue(int value)
+void PaletteViewer::update()
 {
-    paletteRenderWindow->setPaletteIndex(value);
-    ui->redValue->setText(QString::number(memory->palette[value].getColor().r));
-    ui->greenValue->setText(QString::number(memory->palette[value].getColor().g));
-    ui->blueValue->setText(QString::number(memory->palette[value].getColor().b));
-    ui->alphaValue->setText(QString::number(memory->palette[value].getColor().a));
-    ui->colorNumber->setText(QString::number(value));
-    emit renderScreen();
+    Vector2i position = sf::Mouse::getPosition(*paletteRenderWindow);
+    if(position.x >= 0 && position.x < 512 && position.y >= 0 && position.y < 512)
+        changeValue(position);
+}
+
+void PaletteViewer::mouseMoveEvent(QMouseEvent* event)
+{
+    update();
 }

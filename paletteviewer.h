@@ -2,6 +2,7 @@
 #define PALETTEVIEWER_H
 
 #include <QDialog>
+#include <QMouseEvent>
 #include "memory.h"
 #include "paletterenderwindow.h"
 
@@ -16,18 +17,17 @@ class PaletteViewer : public QDialog
 public:
     explicit PaletteViewer(QWidget *parent, Memory *);
     ~PaletteViewer();
-
-private slots:
-    void on_horizontalSlider_valueChanged(int value);
-
+public slots:
+    void update();
+    void mouseMoveEvent(QMouseEvent* event);
 private:
     Ui::PaletteViewer *ui;
     Memory* memory;
     PaletteRenderWindow *paletteRenderWindow;
-    void changeValue(int);
 
+    void changeValue(Vector2i mousePosition);
 signals:
-    void renderScreen();
+    void firstTimeRender();
 };
 
 #endif // PALETTEVIEWER_H
