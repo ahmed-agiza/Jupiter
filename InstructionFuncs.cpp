@@ -262,18 +262,15 @@ int sc(fParam2)
 
 int addi(fParam2)
 {
-    qDebug() << "Addi";
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    qDebug() << "Rtr: " << Rtr;
-    qDebug() << "Imm: " << imm;
     __int32 res = Rtr + imm;
 
     if ((Rtr > 0 && imm > 0 && res <0) || (Rtr < 0 && imm < 0 && res > 0))
         return OVExNo;
 
-    Rdr = res;
+    Rtr = res;
 
     incPC;
     return 0;
@@ -284,7 +281,7 @@ int addiu(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rdr = Rtr - imm;
+    Rtr = Rsr - imm;
     incPC;
     return 0;
 }
@@ -293,7 +290,7 @@ int andi(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rdr = Rtr & imm;
+    Rtr = Rsr & imm;
     incPC;
     return 0;
 }
@@ -302,7 +299,7 @@ int ori(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rdr = Rtr | imm;
+    Rtr = Rsr | imm;
     incPC;
     return 0;
 }
@@ -311,7 +308,7 @@ int nori(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rdr = ~(Rtr | imm);
+    Rtr = ~(Rsr | imm);
     incPC;
     return 0;
 }
@@ -320,7 +317,7 @@ int xori(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rdr = Rtr ^ imm;
+    Rtr = Rsr ^ imm;
     incPC;
     return 0;
 }
@@ -352,7 +349,7 @@ int slti(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rdr = (Rsr < imm);
+    Rtr = (Rsr < imm);
     incPC;
     return 0;
 }
@@ -361,7 +358,7 @@ int sltiu(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rdr = (((uint)Rsr) < ((uint) imm));
+    Rtr = (((uint)Rsr) < ((uint) imm));
     incPC;
     return 0;
 }
