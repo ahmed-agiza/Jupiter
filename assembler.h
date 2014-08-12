@@ -10,7 +10,7 @@
 #include <QMap>
 #include <QTextEdit>
 #include "memory.h"
-#include "InstructionFuncs.h"
+//#include "InstructionFuncs.h"
 #include "tileengine.h"
 
 class Error
@@ -44,7 +44,7 @@ private:
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
 
 public:
-    Assembler(QStringList *stringList, Memory *memory);
+    Assembler(QStringList *stringList, Memory *memory, QVector<int> *mRegisters);
     int getNumber(QString);
     void initializeRegisters();
     void initializeFunctions();

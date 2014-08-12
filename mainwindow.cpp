@@ -134,7 +134,7 @@ void MainWindow::on_actionAssemble_triggered()
                 QStringList instrs = E->toPlainText().split("\n");
                 if(assemblerInitialized)
                     delete assem;
-                assem = new Assembler(&instrs, memory);
+                assem = new Assembler(&instrs, memory, &mainProcessorRegisters);
                 assemblerInitialized = true;
             }
             else

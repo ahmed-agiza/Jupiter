@@ -1,6 +1,6 @@
 #ifndef INSTRUCTIONFUNCS_H
 #define INSTRUCTIONFUNCS_H
-#include "instruction.h"
+//#include "instruction.h"
 
 
 #define fParam QVector<int> *, int, int, int, __int16, int , int &, Memory *

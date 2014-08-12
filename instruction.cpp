@@ -24,44 +24,28 @@ Instruction::Instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
         instructionWord = (opcode << 26)|im;
     }
 
-    for (int i = 0; i < 32; i++)        // this was 31 I changed it to 32
-       registers->push_back(i);
+    /*for (int i = 0; i < 32; i++)        // this was 31 I changed it to 32
+       registers->push_back(i);*/
 
-   /* qDebug() << "Before:";
-    qDebug() << (*registers)[rs];
-    qDebug() << (*registers)[rt];
-    qDebug() << (*registers)[rd];
-
-
-
-    int x;
-    execute(x);
-
-    qDebug() << "After:";
-    qDebug() << (*registers)[rs];
-    qDebug() << (*registers)[rt];
-    qDebug() << (*registers)[rd];*/
+    func = NULL;
 
 }
 
 Instruction::Instruction(const Instruction &inst)
-{
-    registers = inst.registers;
-    name = inst.name;
-    rs = inst.rs;
-    rd = inst.rd;
-    rt = inst.rt;
-    imm = inst.imm;
-    shamt = inst.shamt;
-    MIPSV = inst.MIPSV;
-    func = inst.func;
-    opcode = inst.opcode;
-
-    mem = inst.mem;
-    format = inst.format;
-
-    instructionWord = inst.instructionWord;
-}
+    :registers(inst.registers),
+    name(inst.name),
+    rs(inst.rs),
+    rd(inst.rd),
+    rt(inst.rt),
+    imm(inst.imm),
+    shamt(inst.shamt),
+    MIPSV(inst.MIPSV),
+    func(inst.func),
+    opcode(inst.opcode),
+    mem(inst.mem),
+    format(inst.format),
+    instructionWord(inst.instructionWord)
+{}
 
 Instruction::Instruction()
 {
@@ -157,7 +141,7 @@ void Instruction::setShamt(int sh)
 
 void Instruction::setFunc(int (*sFunc)(fParam))
 {
-    func = sFunc;
+    func =  sFunc;
 }
 
 QString Instruction::getName() const
@@ -208,11 +192,26 @@ int Instruction::getShamt() const
 
 void Instruction::execute(int &inPC)
 {
+    qDebug() << "Before excecuting " << this->name;
+    for (int i = 0; i < registers->size(); i++){
+        qDebug() << i << ": " << registers->at(i);
+    }
+    qDebug() << "------------------";
 
-   qDebug() << addi(registers, rs, rt, rd, imm, shamt, inPC, mem);
-   //int x = (*func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
-   /*if(x != 0)
-       emit raiseException(x);*/
+    int x = -1;
+    if (func != NULL)
+        x = (* func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
+    else
+        qDebug() << "Null function!";
+
+    qDebug() << "After excecuting " << this->name;
+    for (int i = 0; i < registers->size(); i++){
+        qDebug() << i << ": " << registers->at(i);
+    }
+    qDebug() << "------------------";
+
+   if(x != 0)
+       emit raiseException(x);
 
 }
 

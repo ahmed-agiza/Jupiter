@@ -221,13 +221,14 @@ QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensit
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 
 
-Assembler::Assembler(QStringList* stringList, Memory *memory)
+Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRegisters)
 {
     this->mem = memory;
+    this->registers = mRegisters;
     initializeRegisters();
     initializeFunctions();
     address = lineNumber = 0;
-    this->registers = registers;
+
 
     foreach (QString line, *stringList)
     {
@@ -365,6 +366,15 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
         }
     }
 
+    unsigned int addr = mem->textSegmentBaseAddress;
+    for (int i = 0; i < instructions.size(); i++){
+            instructions[i].setMem(mem);
+            mem->storeWord(addr,instructions[i].getWord());
+            addr += 4;
+            //QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
+   }
+
+
     for (int i = 0; i < instructions.size(); i++)
     {
         qDebug() << "********* instruction " + QString::number(i) + " ********";
@@ -378,6 +388,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
 
     }
 
+<<<<<<< HEAD
     for (int i = 0; i<errorList.size(); i++)
     {
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
@@ -390,9 +401,9 @@ Assembler::Assembler(QStringList* stringList, Memory *memory)
         mem->storeWord(addr,ins.getWord());
         addr += 4;
         ins.setFunc(functionsMap[ins.getName().trimmed()]);
+=======
+>>>>>>> origin/master
 
-        //QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
-    }
 
 }
 Assembler::~Assembler()
@@ -864,12 +875,20 @@ Assembler::Assembler(){}
 
 void Assembler::simulate()
 {
-    PC = 1;
+    for (int i = 0; i < registers->size(); i++)
+        (*registers)[i] = 0;
+    (*registers)[28] = 0x10008000;
+    (*registers)[29] = 0x7FFFEFFC;
 
-    while (PC != -1 && PC <= instructions.size())
+    PC = 1;
+    int i = 0;
+    int activePC = (PC - 1)/4;
+    while (PC != -1 && ((PC - 1)/4) < instructions.size() && i < 100)
     {
-        qDebug() << "Executing: " << instructions[PC - 1].getName();
-        instructions[PC - 1].execute(PC);
+        activePC = ((PC - 1)/4);
+        instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
+        instructions[activePC].execute(PC);
+        i++;
     }
 }
 
@@ -981,8 +1000,7 @@ void Assembler::initializeRegisters()
     opcode["ll"] = 48;
     opcode["sc"] = 56;
 
-    registers = new QVector<int>(32,0);
-    (*registers)[28] = 0x10008000;
-    (*registers)[29] = 0x7FFFEFFC;
+    //registers = new QVector<int>(32,0);
+
 }
 
