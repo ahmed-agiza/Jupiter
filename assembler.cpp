@@ -27,10 +27,10 @@ QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 QString numberRegex = "(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)";
 QRegExp registerRegExp(registerRegex, Qt::CaseInsensitive);
 QRegExp numberRegExp(numberRegex, Qt::CaseInsensitive);
-QRegExp threeArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?");
-QRegExp twoArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?");
-QRegExp oneArgInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?");
-QRegExp memoryArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + + "[ \\t]*\\([ \\t]*" + "([\\w$]+)" + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?");
+QRegExp threeArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?$");
+QRegExp twoArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?$");
+QRegExp oneArgInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?$");
+QRegExp memoryArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "[ \\t]*\\([ \\t]*" + "([\\w$]+)" + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?$");
 
 //  instruction $register, $register, $register
 //    add
@@ -490,7 +490,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                         }else{
                             errorList.push_back(Error("Second argument must be a register",lineNumber));
                         }
-                    }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) == -1){
+                    }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != 0){
                         if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
                                 (
                                     instructionName == "addi"    ||
@@ -589,7 +589,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                         }else{
                             errorList.push_back(Error("First argument must be a register",lineNumber));
                         }
-                    }else if(numberRegExp.indexIn(twoArgsInstruction.cap(4)) == -1){
+                    }else if(numberRegExp.indexIn(twoArgsInstruction.cap(4)) != 0){
                         if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) != -1){
                             if(instructionName == "rol" || instructionName == "ror"){
                                 errorList.push_back(Error("Second Argument must be a number, cannot rotate by a register",lineNumber));
@@ -660,8 +660,30 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 }
             }else if((memoryArgsInstruction.indexIn(line, 0)) != -1){
                 QString instructionName = memoryArgsInstruction.cap(2).toLower();
-                if(QRegExp(memoryInstructions, Qt::CaseInsensitive).indexIn(instructionName != -1)){
-
+                qDebug() << memoryArgsInstruction.cap(2) << " " << memoryArgsInstruction.cap(3) << " " << memoryArgsInstruction.cap(4) << " " << memoryArgsInstruction.cap(5);
+                if(QRegExp(memoryInstructions, Qt::CaseInsensitive).indexIn(instructionName,0) != -1){
+                    if(registerRegExp.indexIn(memoryArgsInstruction.cap(3)) == -1){
+                        if(memoryArgsInstruction.cap(3)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+memoryArgsInstruction.cap(3)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                        }
+                    }else if(numberRegExp.indexIn(memoryArgsInstruction.cap(4)) != 0){
+                        if(registerRegExp.indexIn(memoryArgsInstruction.cap(4)) != -1){
+                            errorList.push_back(Error("Memory offset cannot be a register, use an immediate value instead",lineNumber));
+                        }else{
+                            errorList.push_back(Error("Memory offset must be an immediate value",lineNumber));
+                        }
+                    }else if(registerRegExp.indexIn(memoryArgsInstruction.cap(5)) == -1){
+                        if(memoryArgsInstruction.cap(5)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+memoryArgsInstruction.cap(5)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("Memory base address must be stored in a register",lineNumber));
+                        }
+                    }else{
+                        qDebug() << "shit";
+                        errorList.push_back(Error("Syntax Error",lineNumber));
+                    }
                 }else if(instructionSet.contains(instructionName)){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" is not a memory instruction",lineNumber));
                 }else{
