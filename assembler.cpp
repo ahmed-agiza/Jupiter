@@ -24,15 +24,23 @@ QString cstringsRegex = "\".*?[^\\\\]\"";
 // Matches strings
 QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 
+QString numberRegex = "(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)";
+QRegExp registerRegExp(registerRegex, Qt::CaseInsensitive);
+QRegExp numberRegExp(numberRegex, Qt::CaseInsensitive);
+QRegExp threeArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?");
+QRegExp twoArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?");
+QRegExp oneArgInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?");
+QRegExp memoryArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + + "[ \\t]*\\([ \\t]*" + "([\\w$]+)" + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?");
+
 //  instruction $register, $register, $register
 //    add
 //    addu
-//    sub
-//    subu
 //    and
 //    or
 //    nor
 //    xor
+//    sub
+//    subu
 //    srlv
 //    sllv
 //    srav
@@ -40,7 +48,7 @@ QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 //    sltu
 
 QString registerInstructions = "(add|addu|sub|subu|and|or|nor|xor|srlv|sllv|srav|slt|sltu)";
-QString registerFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + registerInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString registerFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + registerInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, imm($register)
@@ -60,7 +68,7 @@ QString registerFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + registerIn
 //      sc
 
 QString memoryInstructions = "(sb|lb|lbu|sh|lh|lhu|sw|lw|lwl|lwr|swl|swr|ll|sc)";
-QString memoryFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?";
+QString memoryFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, immediate
@@ -70,16 +78,16 @@ QString memoryFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + memoryInstru
 //    ori
 //    nori
 //    xori
+//    slti
+//    sltiu
 //    srl
 //    sll
 //    sra
-//    slti
-//    sltiu
 //    beq
 //    bne
 
 QString immInstructions = "(addi|addiu|andi|ori|nori|xori|srl|sll|sra|slti|sltiu|beq|bne)";
-QString immFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + immInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
+QString immFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + immInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, label
@@ -87,14 +95,14 @@ QString immFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + immInstructions
 //      bne
 
 QString labelInstructions = "(beq|bne)";
-QString labelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + labelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString labelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + labelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, immediate
 //      lui
 
 QString singleimmInstructions = "(lui)";
-QString singleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
+QString singleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register
@@ -106,7 +114,7 @@ QString singleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleimm
 //      mthi
 
 QString singleRegisterInstructions = "(jr|jalr|mfhi|mflo|mtlo|mthi)";
-QString singleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString singleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register
@@ -116,22 +124,21 @@ QString singleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + sing
 //      divu
 
 QString doubleRegisterInstructions = "(mult|multu|div|divu)";
-QString doubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + doubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString doubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + doubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction label
 //      j
 //      jal
-
 QString jumpInstructions = "(j|jal)";
-QString jumpFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + jumpInstructions + "[ \\t]+([a-zA-Z_]\\w*)" + "(?:[ \\t]+" + commentRegex + ")?";
+QString jumpFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + jumpInstructions + "[ \\t]+([a-zA-Z_]\\w*)" + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction
 //      syscall
 //      nop
 
-QString standaloneInstructions = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "(syscall|nop)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString standaloneInstructions = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "(syscall|nop)"+ "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, label
@@ -145,7 +152,7 @@ QString standaloneInstructions = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "(
 //  bgeu
 
 QString pLabelInstructions = "(blt|bgt|ble|bge|bltu|bgtu|bleu|bgeu)";
-QString pLabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pLabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString pLabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pLabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, immediate, label
@@ -159,7 +166,7 @@ QString pLabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pLabelInstru
 //  bgeiu
 
 QString pRILInstructions = "(blti|bgti|blei|bgei|bltiu|bgtiu|bleiu|bgeiu)";
-QString pRILFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRILInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)+[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString pRILFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRILInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)+[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, label
@@ -172,7 +179,7 @@ QString pRILFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRILInstructio
 //  la
 
 QString pZlabelInstructions = "(beqz|bnez|bltz|bgtz|blez|bgez)";
-QString pZlabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pZlabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?";
+QString pZlabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pZlabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, immediate
@@ -181,7 +188,7 @@ QString pZlabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pZlabelInst
 //  rol
 
 QString pSingleimmInstructions = "(li|ror|rol)";
-QString pSingleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pSingleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?";
+QString pSingleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pSingleimmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)" + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register
@@ -189,9 +196,8 @@ QString pSingleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pSinglei
 //  neg
 //  move
 //  abs
-
 QString pDoubleRegisterInstructions = "(not|neg|move|abs)";
-QString pDoubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pDoubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString pDoubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pDoubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, $register
@@ -200,26 +206,65 @@ QString pDoubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pDo
 //  rem
 
 QString pRegisterInstructions = "(mul|div|rem)";
-QString pRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString pRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register
 //  clear
-
 QString pSingleRegisterInstructions = "(clear)";
-QString pSingleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pSingleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?";
+QString pSingleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pSingleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, immediate
 //  subi
 
 QString pImmInstructions = "(subi)";
-QString pImmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pImmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?";
+QString pImmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pImmInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?$";
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Errors!!
+
+//    addi
+//    addiu
+//    andi
+//    ori
+//    nori
+//    xori
+//    slti
+//    sltiu
+QString invalidRegisterInstructions = "(add|addu|and|or|nor|xor|slt|sltu)";
+QString invalidRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + invalidRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)(?:[ \\t]+" + commentRegex + ")?$";
+
+//      sb
+//      lb
+//      lbu
+//      sh
+//      lh
+//      lhu
+//      sw
+//      lw
+//      lwl
+//      lwr
+//      swl
+//      swr
+//      ll
+//      sc
+QString invalidMemoryFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*"+ registerRegex +"[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?$";
+
+QString invalidImmediateInstructions = "(addi|addiu|andi|ori|nori|xori|slti|sltiu)";
+QString invalidImmediateFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + invalidImmediateInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
+
+//    srl
+//    sll
+//    sra
+QString invalidShiftInstructions = "(srl|sll|sra)";
+QString invalidShiftFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + invalidShiftInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensitive), I(immFormat, Qt::CaseInsensitive), L(labelFormat, Qt::CaseInsensitive), SR(singleRegisterFormat, Qt::CaseInsensitive), SI(singleimmFormat, Qt::CaseInsensitive), DR(doubleRegisterFormat, Qt::CaseInsensitive), J(jumpFormat, Qt::CaseInsensitive), SA(standaloneInstructions, Qt::CaseInsensitive), LBL(labelRegexCapture, Qt::CaseInsensitive), CMT(commentRegex, Qt::CaseInsensitive), WHITSPACE("^[ \\t]+$", Qt::CaseInsensitive);
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
-
+QRegExp invalidR(invalidRegisterFormat, Qt::CaseInsensitive), invalidM(invalidMemoryFormat, Qt::CaseInsensitive), invalidI(invalidImmediateFormat, Qt::CaseInsensitive), invalidSh(invalidShiftFormat, Qt::CaseInsensitive);
 
 Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRegisters)
 {
@@ -341,10 +386,293 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
         else
         {
             address--;
-            errorList.push_back(Error("Invalid Syntax",lineNumber));
+            if((threeArgsInstruction.indexIn(line, 0)) != -1){
+                QString instructionName = threeArgsInstruction.cap(2).toLower();
+                if(
+                        instructionName == "add"    ||
+                        instructionName == "addu"   ||
+                        instructionName == "and"    ||
+                        instructionName == "or"     ||
+                        instructionName == "nor"    ||
+                        instructionName == "xor"    ||
+                        instructionName == "slt"    ||
+                        instructionName == "sltu"   ||
+                        instructionName == "sub"    ||
+                        instructionName == "subu"   ||
+                        instructionName == "srlv"   ||
+                        instructionName == "sllv"   ||
+                        instructionName == "srav"   ||
+                        instructionName == "mul"    ||
+                        instructionName == "div"    ||
+                        instructionName == "rem"
+                        ){
+                    if(registerRegExp.indexIn(threeArgsInstruction.cap(3)) == -1){
+                        if(threeArgsInstruction.cap(3)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                        }
+                    }else if(registerRegExp.indexIn(threeArgsInstruction.cap(4)) == -1){
+                        if(threeArgsInstruction.cap(4)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("Second argument must be a register",lineNumber));
+                        }
+                    }else if(registerRegExp.indexIn(threeArgsInstruction.cap(5)) == -1){
+                        if(threeArgsInstruction.cap(5)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(5)+"\"",lineNumber));
+                        }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != -1 &&
+                                 (
+                                     instructionName == "add"    ||
+                                     instructionName == "sub"    ||
+                                     instructionName == "addu"   ||
+                                     instructionName == "and"    ||
+                                     instructionName == "or"     ||
+                                     instructionName == "nor"    ||
+                                     instructionName == "xor"    ||
+                                     instructionName == "slt"    ||
+                                     instructionName == "sltu"
+                                     )){
+                            bool uFlag = false;
+                            if(instructionName.endsWith("u")){
+                                instructionName = instructionName.mid(0,instructionName.size()-1);
+                                uFlag = true;
+                            }
+                            errorList.push_back(Error("Third operand must be a register, use \""+instructionName+"i"+(uFlag? "u":"")+"\" instead of \""+instructionName+(uFlag? "u":"")+"\"",lineNumber));
+
+                        }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != -1 &&
+                                 (
+                                     instructionName == "sllv"    ||
+                                     instructionName == "srlv"   ||
+                                     instructionName == "srav"
+                                     )){
+                            errorList.push_back(Error("Third operand must be a register, use \""+instructionName.remove(instructionName.size()-1,1)+"\" instead of \""+instructionName+"v\"",lineNumber));
+
+                        }else{
+                            errorList.push_back(Error("Third argument must be a register",lineNumber));
+                        }
+                    }else{
+                        errorList.push_back(Error("Syntax Error",lineNumber));
+                    }
+                }else if(
+                         instructionName == "addi"    ||
+                         instructionName == "subi"    ||
+                         instructionName == "addiu"   ||
+                         instructionName == "andi"    ||
+                         instructionName == "ori"     ||
+                         instructionName == "nori"    ||
+                         instructionName == "xori"    ||
+                         instructionName == "slti"    ||
+                         instructionName == "sltiu"   ||
+                         instructionName == "srl"     ||
+                         instructionName == "sra"     ||
+                         instructionName == "sll"     ||
+                         instructionName == "beq"     ||
+                         instructionName == "bne"     ||
+                         instructionName == "blt"     ||
+                         instructionName == "bgt"     ||
+                         instructionName == "ble"     ||
+                         instructionName == "bge"     ||
+                         instructionName == "bltu"    ||
+                         instructionName == "bgtu"    ||
+                         instructionName == "bleu"    ||
+                         instructionName == "bgeu"
+                         ){
+                    if(registerRegExp.indexIn(threeArgsInstruction.cap(3)) == -1){
+                        if(threeArgsInstruction.cap(3)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                        }
+                    }else if(registerRegExp.indexIn(threeArgsInstruction.cap(4)) == -1){
+                        if(threeArgsInstruction.cap(4)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("Second argument must be a register",lineNumber));
+                        }
+                    }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) == -1){
+                        if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
+                                (
+                                    instructionName == "addi"    ||
+                                    instructionName == "subi"    ||
+                                    instructionName == "addiu"   ||
+                                    instructionName == "andi"    ||
+                                    instructionName == "ori"     ||
+                                    instructionName == "nori"    ||
+                                    instructionName == "xori"    ||
+                                    instructionName == "slti"    ||
+                                    instructionName == "sltiu"
+                                    )
+                                ){
+                            QString instructionName2 = instructionName;
+                            instructionName.remove(instructionName.indexOf("i"),1);
+                            errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"\" instead of \""+instructionName2+"\"",lineNumber));
+                        }else if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
+                                 (
+                                     instructionName == "sll"    ||
+                                     instructionName == "srl"   ||
+                                     instructionName == "sra"
+                                     )
+                                 ){
+                            errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"v\" instead of \""+instructionName+"\"",lineNumber));
+                        }else if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
+                                 (
+                                     instructionName == "beq"     ||
+                                     instructionName == "bne"     ||
+                                     instructionName == "blt"     ||
+                                     instructionName == "bgt"     ||
+                                     instructionName == "ble"     ||
+                                     instructionName == "bge"     ||
+                                     instructionName == "bltu"    ||
+                                     instructionName == "bgtu"    ||
+                                     instructionName == "bleu"    ||
+                                     instructionName == "bgeu"
+                                     )
+                                 ){
+                            errorList.push_back(Error("Branch value cannot be a register, use a label or a number",lineNumber));
+                        }else if(
+                                 instructionName == "beq"     ||
+                                 instructionName == "bne"     ||
+                                 instructionName == "blt"     ||
+                                 instructionName == "bgt"     ||
+                                 instructionName == "ble"     ||
+                                 instructionName == "bge"     ||
+                                 instructionName == "bltu"    ||
+                                 instructionName == "bgtu"    ||
+                                 instructionName == "bleu"    ||
+                                 instructionName == "bgeu"
+                                 ){
+                            errorList.push_back(Error("Invalid label \""+threeArgsInstruction.cap(5)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
+                        }
+                    }
+                }else if(instructionSet.contains(instructionName)){
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take three arguments",lineNumber));
+                }else{
+                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                }
+            }else if((twoArgsInstruction.indexIn(line, 0)) != -1){
+                QString instructionName = twoArgsInstruction.cap(2).toLower();
+                if(
+                        instructionName == "mult"   ||
+                        instructionName == "multu"  ||
+                        instructionName == "div"    ||
+                        instructionName == "divu"   ||
+                        instructionName == "not"    ||
+                        instructionName == "neg"    ||
+                        instructionName == "move"   ||
+                        instructionName == "abs"
+                        ){
+                    if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
+                        if(twoArgsInstruction.cap(3)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                        }
+                    }else if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) == -1){
+                        if(twoArgsInstruction.cap(4)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(4)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("Second argument must be a register",lineNumber));
+                        }
+                    }else{
+                        errorList.push_back(Error("Syntax Error",lineNumber));
+                    }
+                }else if(
+                         instructionName == "lui"   ||
+                         instructionName == "li"    ||
+                         instructionName == "ror"   ||
+                         instructionName == "rol"
+                         ){
+                    if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
+                        if(twoArgsInstruction.cap(3)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                        }
+                    }else if(numberRegExp.indexIn(twoArgsInstruction.cap(4)) == -1){
+                        if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) != -1){
+                            if(instructionName == "rol" || instructionName == "ror"){
+                                errorList.push_back(Error("Second Argument must be a number, cannot rotate by a register",lineNumber));
+                            }else{
+                                errorList.push_back(Error("Second argument must be a number, use \"move\" instead of \""+instructionName+"\"",lineNumber));
+                            }
+                        }else{
+                            errorList.push_back(Error("Second argument must be a number",lineNumber));
+                        }
+                    }else{
+                        errorList.push_back(Error("Syntax Error",lineNumber));
+                    }
+                }else if(
+                         instructionName == "beqz"  ||
+                         instructionName == "bnez"  ||
+                         instructionName == "bltz"  ||
+                         instructionName == "bgtz"  ||
+                         instructionName == "blez"  ||
+                         instructionName == "bgez"  ||
+                         instructionName == "la"
+                         ){
+                    if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
+                        if(twoArgsInstruction.cap(3)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                        }
+                    }else if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) != -1){
+                        errorList.push_back(Error("Branch value cannot be a register, use a label instead",lineNumber));
+                    }else{
+                        errorList.push_back(Error("Invalid label \""+twoArgsInstruction.cap(4)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
+                    }
+                }else if(instructionSet.contains(instructionName)){
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take two arguments",lineNumber));
+                }else{
+                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                }
+
+            }else if((oneArgInstruction.indexIn(line, 0)) != -1){
+                QString instructionName = oneArgInstruction.cap(2).toLower();
+                if(
+                        instructionName == "jr"     ||
+                        instructionName == "jalr"   ||
+                        instructionName == "mfhi"   ||
+                        instructionName == "mflo"   ||
+                        instructionName == "mtlo"   ||
+                        instructionName == "mthi"   ||
+                        instructionName == "clear"
+                        ){
+                    if(registerRegExp.indexIn(oneArgInstruction.cap(3)) == -1){
+                        if(oneArgInstruction.cap(3)[0] == '$'){
+                            errorList.push_back(Error("Invalid register \""+oneArgInstruction.cap(3)+"\"",lineNumber));
+                        }else{
+                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                        }
+                    }else{
+                        errorList.push_back(Error("Syntax Error",lineNumber));
+                    }
+                }else if(
+                         instructionName == "j"     ||
+                         instructionName == "jal"
+                         ){
+                    errorList.push_back(Error("Invalid label \""+oneArgInstruction.cap(3)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
+                }else if(instructionSet.contains(instructionName)){
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take one argument",lineNumber));
+                }else{
+                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                }
+            }else if((memoryArgsInstruction.indexIn(line, 0)) != -1){
+                QString instructionName = memoryArgsInstruction.cap(2).toLower();
+                if(QRegExp(memoryInstructions, Qt::CaseInsensitive).indexIn(instructionName != -1)){
+
+                }else if(instructionSet.contains(instructionName)){
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" is not a memory instruction",lineNumber));
+                }else{
+                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                }
+            }else{
+                errorList.push_back(Error("Syntax Error",lineNumber));
+            }
+            address++;
+            lineNumber++;
         }
-        address++;
-        lineNumber++;
     }
 
     for (int i=0; i<missingBranchLabels.size(); i++)
@@ -368,11 +696,11 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
 
     unsigned int addr = mem->textSegmentBaseAddress;
     for (int i = 0; i < instructions.size(); i++){
-            instructions[i].setMem(mem);
-            mem->storeWord(addr,instructions[i].getWord());
-            addr += 4;
-            //QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
-   }
+        instructions[i].setMem(mem);
+        mem->storeWord(addr,instructions[i].getWord());
+        addr += 4;
+        //QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
+    }
 
 
     for (int i = 0; i < instructions.size(); i++)
@@ -396,12 +724,14 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
 
 
 }
+
 Assembler::~Assembler()
 {
     //delete mem;
     //delete engine;
     //delete registers;
 }
+
 
 void Assembler::initializeFunctions()
 {
@@ -465,7 +795,98 @@ void Assembler::initializeFunctions()
     functionsMap["syscall"] = &syscall;
     functionsMap["nop"] = &nop;
 
+    instructionSet.insert("add");
+    instructionSet.insert("addu");
+    instructionSet.insert("sub");
+    instructionSet.insert("subu");
+    instructionSet.insert("and");
+    instructionSet.insert("or");
+    instructionSet.insert("nor");
+    instructionSet.insert("xor");
+    instructionSet.insert("srlv");
+    instructionSet.insert("sllv");
+    instructionSet.insert("srav");
+    instructionSet.insert("slt");
+    instructionSet.insert("sltu");
+    instructionSet.insert("sb");
+    instructionSet.insert("lb");
+    instructionSet.insert("lbu");
+    instructionSet.insert("sh");
+    instructionSet.insert("lh");
+    instructionSet.insert("lhu");
+    instructionSet.insert("sw");
+    instructionSet.insert("lw");
+    instructionSet.insert("lwl");
+    instructionSet.insert("lwr");
+    instructionSet.insert("swl");
+    instructionSet.insert("swr");
+    instructionSet.insert("ll");
+    instructionSet.insert("sc");
+    instructionSet.insert("addi");
+    instructionSet.insert("addiu");
+    instructionSet.insert("andi");
+    instructionSet.insert("ori");
+    instructionSet.insert("nori");
+    instructionSet.insert("xori");
+    instructionSet.insert("srl");
+    instructionSet.insert("sll");
+    instructionSet.insert("sra");
+    instructionSet.insert("slti");
+    instructionSet.insert("sltiu");
+    instructionSet.insert("beq");
+    instructionSet.insert("bne");
+    instructionSet.insert("lui");
+    instructionSet.insert("jr");
+    instructionSet.insert("jalr");
+    instructionSet.insert("mfhi");
+    instructionSet.insert("mflo");
+    instructionSet.insert("mtlo");
+    instructionSet.insert("mthi");
+    instructionSet.insert("mult");
+    instructionSet.insert("multu");
+    instructionSet.insert("div");
+    instructionSet.insert("divu");
+    instructionSet.insert("j");
+    instructionSet.insert("jal");
+    instructionSet.insert("syscall");
+    instructionSet.insert("nop");
+
+    instructionSet.insert("blt");
+    instructionSet.insert("bgt");
+    instructionSet.insert("ble");
+    instructionSet.insert("bge");
+    instructionSet.insert("bltu");
+    instructionSet.insert("bgtu");
+    instructionSet.insert("bleu");
+    instructionSet.insert("bgeu");
+    instructionSet.insert("blti");
+    instructionSet.insert("bgti");
+    instructionSet.insert("blei");
+    instructionSet.insert("bgei");
+    instructionSet.insert("bltiu");
+    instructionSet.insert("bgtiu");
+    instructionSet.insert("bleiu");
+    instructionSet.insert("bgeiu");
+    instructionSet.insert("beqz");
+    instructionSet.insert("bnez");
+    instructionSet.insert("bltz");
+    instructionSet.insert("bgtz");
+    instructionSet.insert("blez");
+    instructionSet.insert("bgez");
+    instructionSet.insert("li");
+    instructionSet.insert("ror");
+    instructionSet.insert("rol");
+    instructionSet.insert("not");
+    instructionSet.insert("neg");
+    instructionSet.insert("move");
+    instructionSet.insert("abs");
+    instructionSet.insert("mul");
+    instructionSet.insert("div");
+    instructionSet.insert("rem");
+    instructionSet.insert("clear");
+    instructionSet.insert("subi");
 }
+
 
 void Assembler::handlePR(QRegExp m, QString line)
 {
@@ -491,6 +912,7 @@ void Assembler::handlePR(QRegExp m, QString line)
         address++;
     }
 }
+
 void Assembler::handlePRIL(QRegExp m, QString line)
 {
     if(m.cap(2) == "blti")
@@ -602,6 +1024,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         address++;
     }
 }
+
 void Assembler::handlePL(QRegExp m, QString line)
 {
     if(m.cap(2) == "blt")
@@ -703,6 +1126,7 @@ void Assembler::handlePL(QRegExp m, QString line)
     }
     address++;
 }
+
 void Assembler::handlePZ(QRegExp m, QString line)
 {
     if(m.cap(2) == "beqz")
@@ -784,6 +1208,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
 
     }
 }
+
 void Assembler::handlePSI(QRegExp m, QString line)
 {
     if(m.cap(2) == "li")
@@ -817,6 +1242,7 @@ void Assembler::handlePSI(QRegExp m, QString line)
         address += 2;
     }
 }
+
 void Assembler::handlePDR(QRegExp m, QString line)
 {
     if(m.cap(2) == "not")
@@ -842,6 +1268,7 @@ void Assembler::handlePDR(QRegExp m, QString line)
         address += 2;
     }
 }
+
 void Assembler::handlePSR(QRegExp m, QString line)
 {
     if(m.cap(2) == "clear")
@@ -850,6 +1277,7 @@ void Assembler::handlePSR(QRegExp m, QString line)
         if(m.cap(1).size() > 0) labels[m.cap(1)] = address;
     }
 }
+
 void Assembler::handlePI(QRegExp m, QString line)
 {
     if(m.cap(2) == "subi")
@@ -860,8 +1288,9 @@ void Assembler::handlePI(QRegExp m, QString line)
 }
 
 
-Assembler::Assembler(){}
+Assembler::Assembler(){
 
+}
 
 void Assembler::simulate()
 {
@@ -885,6 +1314,7 @@ void Assembler::simulate()
 
 
 
+
 int Assembler::getNumber(QString s)
 {
     bool f;
@@ -895,6 +1325,7 @@ int Assembler::getNumber(QString s)
         return s.mid(2).toUInt(&f,2);
     else return s.toInt();
 }
+
 
 
 void Assembler::initializeRegisters()
@@ -993,4 +1424,3 @@ void Assembler::initializeRegisters()
     //registers = new QVector<int>(32,0);
 
 }
-

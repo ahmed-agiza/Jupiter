@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <QMap>
+#include <QSet>
 #include <QTextEdit>
 #include "memory.h"
 //#include "InstructionFuncs.h"
@@ -62,6 +63,7 @@ public:
     ~Assembler();
     Assembler();
 
+     QSet<QString> instructionSet;
 private slots:
     void exceptionHandler(int);
 };
