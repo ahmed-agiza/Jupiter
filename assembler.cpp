@@ -716,6 +716,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
         }
     }
 
+
     unsigned int addr = mem->textSegmentBaseAddress;
     for (int i = 0; i < instructions.size(); i++){
         instructions[i].setMem(mem);
@@ -1326,6 +1327,84 @@ void Assembler::simulate()
     int activePC = (PC - 1)/4;
     while (PC != -1 && ((PC - 1)/4) < instructions.size() && i < 100)
     {
+        sf::Event event;
+        while(mem->getTileEngine()->pollEvent(event))
+        {
+            if(event.type == sf::Event::KeyPressed){
+                qDebug() << event.key.code << " pressed";
+                switch(event.key.code){
+                case Keyboard::Down:
+                    emit buttonPressed(DOWN_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::Left:
+                    emit buttonPressed(LEFT_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::Right:
+                    emit buttonPressed(RIGHT_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::Up:
+                    emit buttonPressed(UP_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::Z:
+                    emit buttonPressed(A_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::X:
+                    emit buttonPressed(B_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::D:
+                    emit buttonPressed(R_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::A:
+                    emit buttonPressed(L_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::Return:
+                    emit buttonPressed(START_KEY_INDEX,0,1);
+                    break;
+                case Keyboard::BackSpace:
+                    emit buttonPressed(SELECT_KEY_INDEX,0,1);
+                    break;
+                }
+            } else if(event.type == sf::Event::KeyReleased){
+                qDebug() << event.key.code << " released";
+                switch(event.key.code){
+                case Keyboard::Down:
+                    emit buttonPressed(DOWN_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::Left:
+                    emit buttonPressed(LEFT_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::Right:
+                    emit buttonPressed(RIGHT_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::Up:
+                    emit buttonPressed(UP_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::Z:
+                    emit buttonPressed(A_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::X:
+                    emit buttonPressed(B_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::D:
+                    emit buttonPressed(R_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::A:
+                    emit buttonPressed(L_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::Return:
+                    emit buttonPressed(START_KEY_INDEX,0,0);
+                    break;
+                case Keyboard::BackSpace:
+                    emit buttonPressed(SELECT_KEY_INDEX,0,0);
+                    break;
+                }
+            } else if(event.type == sf::Event::JoystickButtonPressed){
+                qDebug() << event.joystickButton.button << " pressed";
+            } else if(event.type == sf::Event::JoystickButtonReleased){
+                qDebug() << event.joystickButton.button << " released";
+            }
+        }
+
         activePC = ((PC - 1)/4);
         instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
         instructions[activePC].execute(PC);

@@ -60,16 +60,21 @@ public:
     QVector< PaletteColor > palette;
 
     void setTileEngine(TileEngine *);
+    TileEngine *getTileEngine() const;
 signals:
     void raiseException(int);
     void loadingNumberChanged(int);
     void renderNow();
+
+public slots:
+    void updateKey(int, int, bool);
 private:
     QByteArray textSegment;
     QByteArray dataSegment;
     QByteArray heapSegment;
     QByteArray stackSegment;
 
+    QVector<unsigned short> inputMemory;
     TileEngine* engine;
     int claculateLoadSize(const QVector<bool>&);
 public:
@@ -83,10 +88,12 @@ public:
     const unsigned int tileMapBaseAddress;
     const unsigned int spritesTileSetBaseAddress;
     const unsigned int backgroundTileSetBaseAddress;
+    const unsigned int inputMemoryBaseAddress;
 
     const unsigned int textSegmentPhysicalSize;
     const unsigned int dataSegmentPhysicalSize;
     const unsigned int heapSegmentPhysicalSize;
+    const unsigned int inputMemoryPhysicalSize;
     //const unsigned int stackSegmentPhysicalSize;
 
     const unsigned int spriteRamPhysicalSize;

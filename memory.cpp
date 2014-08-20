@@ -10,11 +10,15 @@
 #define SP_TILE_SET 7
 #define SPRITE_RAM 8
 #define PALETTE 9
+#define INPUT_BUTTON 10
 #define OUT_OF_RANGE 0
+
+#define NO_OF_SPRITES 64
 
 #define OUT_OF_RANGE_EX_NO 4
 #define NOT_HWORD_ALIGN_EX_NO 5
 #define NOT_WORD_ALIGN_EX_NO 6
+#define WRITE_IN_READ_ONLY_MEMORY_EX_NO 7
 
 #define TILE_SIZE 16
 
@@ -53,6 +57,8 @@ unsigned int Memory::getByteSegment(unsigned int addr) const
         return SPRITE_RAM;
     else if(addr >= paletteBaseAddress && addr < paletteBaseAddress + palettePhysicalSize)
         return PALETTE;
+    else if(addr >= inputMemoryBaseAddress && addr < inputMemoryBaseAddress + inputMemoryPhysicalSize)
+        return INPUT_BUTTON;
     else
         return OUT_OF_RANGE;
 }
@@ -90,6 +96,8 @@ Memory::Memory():   textSegmentBaseAddress (0x00000000),
                     //stackSegmentPhysicalSize (128 * 1024),
                     spriteRamPhysicalSize (512),
                     palettePhysicalSize (1 * 1024),
+                    inputMemoryPhysicalSize(4),
+                    inputMemoryBaseAddress(0xffff0000),
                     screenWidth(512),
                     screenHeight(384)
 {
@@ -104,12 +112,13 @@ Memory::Memory():   textSegmentBaseAddress (0x00000000),
     tileMap.fill( QVector<char>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
     backgroundMatrix.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
     backgroundMatrix.fill( QVector<sf::Sprite>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
-    spriteRam.resize(64);
+    spriteRam.resize(NO_OF_SPRITES);
     palette.resize(256);
 
     textSegment.resize(textSegmentPhysicalSize);
     dataSegment.resize(dataSegmentPhysicalSize);
     heapSegment.resize(heapSegmentPhysicalSize);
+    inputMemory.resize(inputMemoryPhysicalSize / 2);
     //stackSegment.resize(stackSegmentPhysicalSize);
     textSegment.fill(0);
     dataSegment.fill(0);
@@ -171,6 +180,9 @@ void Memory::storeByte(unsigned int addr, char data)
     }else if(segment == PALETTE){
         palette[(addr - paletteBaseAddress)>>2].storeByte(addr&0x3,data);
         emit renderNow();
+    }else if(segment == INPUT_BUTTON){
+        //emit raiseException(WRITE_IN_READ_ONLY_MEMORY_EX_NO);
+        return;
     }
 }
 
@@ -201,7 +213,9 @@ char Memory::loadByte(unsigned int addr) const
         return spriteRam[(addr - spriteRamBaseAddress)>>3].loadByte(addr);
     else if(segment == PALETTE)
         return palette[(addr - paletteBaseAddress)>>2].loadByte(addr&0x3);
-    else return 0;
+    else if(segment == INPUT_BUTTON){
+        return (((addr % 2) ^ !isLittleEndian())?  (inputMemory[(addr - inputMemoryBaseAddress)/2]>>8)&0xff : inputMemory[(addr - inputMemoryBaseAddress)/2]&0xff);
+    }else return 0;
 }
 
 unsigned char Memory::loadByteU(unsigned int addr) const
@@ -479,6 +493,22 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
 void Memory::setTileEngine(TileEngine *engine)
 {
     this->engine = engine;
+}
+
+TileEngine* Memory::getTileEngine() const
+{
+    return engine;
+}
+
+void Memory::updateKey(int keyCode, int controllerId, bool value)
+{
+    if(value){
+        Uint16 mask = (Uint16(1) << keyCode);
+        inputMemory[controllerId] = inputMemory[controllerId] | mask;
+    } else{
+        Uint16 mask = ~(Uint16(1) << keyCode);
+        inputMemory[controllerId] = inputMemory[controllerId] & mask;
+    }
 }
 
 /*
