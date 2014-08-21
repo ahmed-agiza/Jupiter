@@ -55,7 +55,8 @@ HEADERS  += mainwindow.h \
     tilesetviewer.h \
     tilerenderwindow.h \
     paletteviewer.h \
-    paletterenderwindow.h
+    paletterenderwindow.h \
+    trie.h
 
 FORMS    += \
     mainwindow.ui \

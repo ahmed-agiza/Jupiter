@@ -545,7 +545,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                             errorList.push_back(Error("Invalid label \""+threeArgsInstruction.cap(5)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
                         }
                     }
-                }else if(instructionSet.contains(instructionName)){
+                }else if(instructionSet.search(instructionName.toStdString())){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" does not take three arguments",lineNumber));
                 }else{
                     int i;
@@ -630,7 +630,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                     }else{
                         errorList.push_back(Error("Invalid label \""+twoArgsInstruction.cap(4)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
                     }
-                }else if(instructionSet.contains(instructionName)){
+                }else if(instructionSet.search(instructionName.toStdString())){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" does not take two arguments",lineNumber));
                 }else{
                     int i;
@@ -670,7 +670,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                          instructionName == "jal"
                          ){
                     errorList.push_back(Error("Invalid label \""+oneArgInstruction.cap(3)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
-                }else if(instructionSet.contains(instructionName)){
+                }else if(instructionSet.search(instructionName.toStdString())){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" does not take one argument",lineNumber));
                 }else{
                     int i;
@@ -710,7 +710,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                         qDebug() << "shit";
                         errorList.push_back(Error("Syntax Error",lineNumber));
                     }
-                }else if(instructionSet.contains(instructionName)){
+                }else if(instructionSet.search(instructionName.toStdString())){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" is not a memory instruction",lineNumber));
                 }else{
                     int i;

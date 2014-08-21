@@ -13,7 +13,7 @@
 #include "memory.h"
 //#include "InstructionFuncs.h"
 #include "tileengine.h"
-
+#include "trie.h"
 
 #define DOWN_KEY_INDEX 0
 #define LEFT_KEY_INDEX 1
@@ -77,7 +77,7 @@ public:
     ~Assembler();
     Assembler();
 
-     QSet<QString> instructionSet;
+     Trie instructionSet;
      QVector<QString> instructionList;
 private slots:
     void exceptionHandler(int);
