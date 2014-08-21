@@ -37,6 +37,7 @@ public:
 
 class Assembler: public QObject
 {
+    Q_OBJECT
 private:
     QVector<Instruction> instructions;
     QVector<Error> errorList;
@@ -55,6 +56,8 @@ private:
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
 
+    int stringDistance(std::string, std::string);
+    int minimum4(int, int, int, int);
 public:
     Assembler(QStringList *stringList, Memory *memory, QVector<int> *mRegisters);
     int getNumber(QString);
@@ -75,6 +78,7 @@ public:
     Assembler();
 
      QSet<QString> instructionSet;
+     QVector<QString> instructionList;
 private slots:
     void exceptionHandler(int);
 signals:

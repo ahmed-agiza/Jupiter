@@ -3,7 +3,6 @@
 #include <iostream>
 
 
-
 // matches valid register names
 QString registerRegex = "\\$((?:[12]?[\\d])|(?:3[012])|(?:zero)|(?:at)|(?:v[01])|(?:a[0-3])|(?:t\\d)|(?:s[0-7])|(?:k[01])|gp|fp|ra|sp)";
 // invalid register name: matches $str where the str is not a valid register name
@@ -274,6 +273,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
     initializeFunctions();
     address = lineNumber = 0;
 
+    connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
 
     foreach (QString line, *stringList)
     {
@@ -548,7 +548,15 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 }else if(instructionSet.contains(instructionName)){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" does not take three arguments",lineNumber));
                 }else{
-                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    int i;
+                    for(i=0; i<instructionList.size(); i++){
+                        if(stringDistance(instructionName.toStdString(), instructionList[i].toStdString()) == 1)
+                            break;
+                    }
+                    if(i == instructionList.size())
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    else
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
                 }
             }else if((twoArgsInstruction.indexIn(line, 0)) != -1){
                 QString instructionName = twoArgsInstruction.cap(2).toLower();
@@ -625,7 +633,16 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 }else if(instructionSet.contains(instructionName)){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" does not take two arguments",lineNumber));
                 }else{
-                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    int i;
+                    for(i=0; i<instructionList.size(); i++){
+                        if(stringDistance(instructionName.toStdString(), instructionList[i].toStdString()) == 1)
+                            break;
+                    }
+                    if(i == instructionList.size())
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    else
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
+
                 }
 
             }else if((oneArgInstruction.indexIn(line, 0)) != -1){
@@ -656,7 +673,16 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 }else if(instructionSet.contains(instructionName)){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" does not take one argument",lineNumber));
                 }else{
-                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    int i;
+                    for(i=0; i<instructionList.size(); i++){
+                        if(stringDistance(instructionName.toStdString(), instructionList[i].toStdString()) == 1)
+                            break;
+                    }
+                    if(i == instructionList.size())
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    else
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
+
                 }
             }else if((memoryArgsInstruction.indexIn(line, 0)) != -1){
                 QString instructionName = memoryArgsInstruction.cap(2).toLower();
@@ -687,7 +713,15 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 }else if(instructionSet.contains(instructionName)){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" is not a memory instruction",lineNumber));
                 }else{
-                    errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    int i;
+                    for(i=0; i<instructionList.size(); i++){
+                        if(stringDistance(instructionName.toStdString(), instructionList[i].toStdString()) == 1)
+                            break;
+                    }
+                    if(i == instructionList.size())
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                    else
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
                 }
             }else{
                 errorList.push_back(Error("Syntax Error",lineNumber));
@@ -908,6 +942,97 @@ void Assembler::initializeFunctions()
     instructionSet.insert("rem");
     instructionSet.insert("clear");
     instructionSet.insert("subi");
+
+
+    instructionList.append("addiu");
+    instructionList.append("addu");
+    instructionList.append("addi");
+    instructionList.append("add");
+    instructionList.append("andi");
+    instructionList.append("ori");
+    instructionList.append("nori");
+    instructionList.append("xori");
+    instructionList.append("sub");
+    instructionList.append("subu");
+    instructionList.append("and");
+    instructionList.append("or");
+    instructionList.append("nor");
+    instructionList.append("xor");
+    instructionList.append("srlv");
+    instructionList.append("sllv");
+    instructionList.append("srav");
+    instructionList.append("slt");
+    instructionList.append("sltu");
+    instructionList.append("sw");
+    instructionList.append("lw");
+    instructionList.append("sb");
+    instructionList.append("lb");
+    instructionList.append("lbu");
+    instructionList.append("sh");
+    instructionList.append("lh");
+    instructionList.append("lhu");
+    instructionList.append("srl");
+    instructionList.append("sll");
+    instructionList.append("sra");
+    instructionList.append("slti");
+    instructionList.append("sltiu");
+    instructionList.append("beq");
+    instructionList.append("bne");
+    instructionList.append("lui");
+    instructionList.append("jalr");
+    instructionList.append("mfhi");
+    instructionList.append("mflo");
+    instructionList.append("mtlo");
+    instructionList.append("mthi");
+    instructionList.append("multu");
+    instructionList.append("mult");
+    instructionList.append("div");
+    instructionList.append("divu");
+    instructionList.append("jr");
+    instructionList.append("jal");
+    instructionList.append("j");
+    instructionList.append("syscall");
+    instructionList.append("blt");
+    instructionList.append("bgt");
+    instructionList.append("ble");
+    instructionList.append("bge");
+    instructionList.append("bltu");
+    instructionList.append("bgtu");
+    instructionList.append("bleu");
+    instructionList.append("bgeu");
+    instructionList.append("blti");
+    instructionList.append("bgti");
+    instructionList.append("blei");
+    instructionList.append("bgei");
+    instructionList.append("bltiu");
+    instructionList.append("bgtiu");
+    instructionList.append("bleiu");
+    instructionList.append("bgeiu");
+    instructionList.append("beqz");
+    instructionList.append("bnez");
+    instructionList.append("bltz");
+    instructionList.append("bgtz");
+    instructionList.append("blez");
+    instructionList.append("bgez");
+    instructionList.append("li");
+    instructionList.append("ror");
+    instructionList.append("rol");
+    instructionList.append("not");
+    instructionList.append("neg");
+    instructionList.append("move");
+    instructionList.append("abs");
+    instructionList.append("mul");
+    instructionList.append("div");
+    instructionList.append("rem");
+    instructionList.append("clear");
+    instructionList.append("subi");
+    instructionList.append("nop");
+    instructionList.append("lwl");
+    instructionList.append("lwr");
+    instructionList.append("swl");
+    instructionList.append("swr");
+    instructionList.append("ll");
+    instructionList.append("sc");
 }
 
 
@@ -1334,69 +1459,73 @@ void Assembler::simulate()
                 qDebug() << event.key.code << " pressed";
                 switch(event.key.code){
                 case Keyboard::Down:
-                    emit buttonPressed(DOWN_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, true);
                     break;
                 case Keyboard::Left:
-                    emit buttonPressed(LEFT_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, true);
                     break;
                 case Keyboard::Right:
-                    emit buttonPressed(RIGHT_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, true);
                     break;
                 case Keyboard::Up:
-                    emit buttonPressed(UP_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(UP_KEY_INDEX,0, true);
                     break;
                 case Keyboard::Z:
-                    emit buttonPressed(A_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(A_KEY_INDEX,0, true);
                     break;
                 case Keyboard::X:
-                    emit buttonPressed(B_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(B_KEY_INDEX,0, true);
                     break;
                 case Keyboard::D:
-                    emit buttonPressed(R_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(R_KEY_INDEX,0, true);
                     break;
                 case Keyboard::A:
-                    emit buttonPressed(L_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(L_KEY_INDEX,0, true);
                     break;
                 case Keyboard::Return:
-                    emit buttonPressed(START_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(START_KEY_INDEX,0, true);
                     break;
                 case Keyboard::BackSpace:
-                    emit buttonPressed(SELECT_KEY_INDEX,0,1);
+                    emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, true);
                     break;
+                default:
+                    qDebug() << "Another button was pressed";
                 }
             } else if(event.type == sf::Event::KeyReleased){
                 qDebug() << event.key.code << " released";
                 switch(event.key.code){
                 case Keyboard::Down:
-                    emit buttonPressed(DOWN_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, false);
                     break;
                 case Keyboard::Left:
-                    emit buttonPressed(LEFT_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, false);
                     break;
                 case Keyboard::Right:
-                    emit buttonPressed(RIGHT_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, false);
                     break;
                 case Keyboard::Up:
-                    emit buttonPressed(UP_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(UP_KEY_INDEX,0, false);
                     break;
                 case Keyboard::Z:
-                    emit buttonPressed(A_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(A_KEY_INDEX,0, false);
                     break;
                 case Keyboard::X:
-                    emit buttonPressed(B_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(B_KEY_INDEX,0, false);
                     break;
                 case Keyboard::D:
-                    emit buttonPressed(R_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(R_KEY_INDEX,0, false);
                     break;
                 case Keyboard::A:
-                    emit buttonPressed(L_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(L_KEY_INDEX,0, false);
                     break;
                 case Keyboard::Return:
-                    emit buttonPressed(START_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(START_KEY_INDEX,0, false);
                     break;
                 case Keyboard::BackSpace:
-                    emit buttonPressed(SELECT_KEY_INDEX,0,0);
+                    emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, false);
                     break;
+                default:
+                    qDebug() << "Another button was released";
                 }
             } else if(event.type == sf::Event::JoystickButtonPressed){
                 qDebug() << event.joystickButton.button << " pressed";
@@ -1523,5 +1652,54 @@ void Assembler::initializeRegisters()
     opcode["sc"] = 56;
 
     //registers = new QVector<int>(32,0);
+
+}
+
+
+
+int Assembler::minimum4(int n1, int n2, int n3, int n4)
+{
+    int min1 = std::min(n1, n2);
+    int min2 = std::min(n3, n4);
+    return std::min(min1, min2);
+}
+
+int Assembler::stringDistance(std::string s, std::string t){
+    int i, j, cost, k, i1,j1,DB;
+    int INFINITY = s.length() + t.length();
+    QVector<int> DA(256);
+    QVector< QVector<int> > dpMatrix(s.length()+2, QVector<int>(t.length()+2));
+    for(i = 0; i < s.length()+1; i++) {
+        dpMatrix[i+1][1] = i ;
+        dpMatrix[i+1][0] = INFINITY;
+    }
+    for(j = 0; j<t.length()+1; j++) {
+        dpMatrix[1][j+1] = j ;
+        dpMatrix[0][j+1]= INFINITY;
+    }
+    for(k = 0; k < DA.size(); k++) DA[k] = 0;
+    for(i = 1; i< s.length()+1; i++) {
+        DB = 0;
+        for(j = 1; j< t.length()+1; j++) {
+            i1 = DA[t[j-1]];
+            j1 = DB;
+            cost = (s[i-1]!=t[j-1]);
+            if(cost==0) DB = j;
+            dpMatrix[i+1][j+1] =
+                    minimum4(
+                        dpMatrix[i][j]+cost,
+                        dpMatrix[i+1][j] + 1,
+                        dpMatrix[i][j+1]+1,
+                        dpMatrix[i1][j1] + (i-i1-1) + 1 + (j-j1-1)
+                    );
+        }
+        DA[s[i-1]] = i;
+    }
+    cost = dpMatrix[s.length()+1][t.length()+1];
+    return cost;
+}
+
+void Assembler::exceptionHandler(int exceptionNumber)
+{
 
 }
