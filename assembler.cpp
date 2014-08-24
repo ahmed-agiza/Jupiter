@@ -281,12 +281,23 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
         {
             instructions.push_back(Instruction(R.cap(2),registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
             //qDebug()<<R.cap(1)<<" "<<R.cap(2)<<" "<<R.cap(3)<<" "<<R.cap(4)<<" "<<R.cap(5)<<"\n";
-            if(R.cap(1).size()) labels[R.cap(1)] = address;
+            if(R.cap(1).size()){
+                if(labels.contains(R.cap(1))){
+                    errorList.append(Error("Label \""+R.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[R.cap(1)] = address;
+            }
         }
         else if((M.indexIn(line, 0)) != -1)
         {
             instructions.push_back(Instruction(M.cap(2),registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
-            if(M.cap(1).size()) labels[M.cap(1)] = address;
+            QString labelName = I.cap(1);
+            if(M.cap(1).size()){
+                if(labels.contains(M.cap(1))){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[M.cap(1)] = address;
+            }
         }
         else if((I.indexIn(line, 0)) != -1)
         {
@@ -294,7 +305,13 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 instructions.push_back(Instruction(I.cap(2),registers,opcode[I.cap(2)],0,registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),RFormat));
             else
                 instructions.push_back(Instruction(I.cap(2),registers,opcode[I.cap(2)],registerIndex[I.cap(4)],registerIndex[I.cap(3)],0,getNumber(I.cap(5)),0,IFormat));
-            if(I.cap(1).size() > 0) labels[I.cap(1)] = address;
+            QString labelName = I.cap(1);
+            if(labelName.size()){
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[labelName] = address;
+            }
         }
         else if((L.indexIn(line, 0)) != -1)
         {
@@ -305,7 +322,13 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),L.cap(5)));
                 instructions.push_back(Instruction(L.cap(2),registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
             }
-            if(L.cap(1).size()) labels[L.cap(1)] = address;
+            QString labelName = L.cap(1);
+            if(labelName.size()){
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[labelName] = address;
+            }
         }
         else if((SR.indexIn(line, 0)) != -1)
         {
@@ -313,17 +336,35 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 instructions.push_back(Instruction(SR.cap(2),registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,0,0,0,RFormat));
             else
                 instructions.push_back(Instruction(SR.cap(2),registers,opcode[SR.cap(2)],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
-            if(SR.cap(1).size()) labels[SR.cap(1)] = address;
+            QString labelName = SR.cap(1);
+            if(labelName.size()){
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[labelName] = address;
+            }
         }
         else if((SI.indexIn(line, 0)) != -1)
         {
             instructions.push_back(Instruction(SI.cap(2),registers,opcode[SI.cap(2)],0,registerIndex[SI.cap(3)],0,getNumber(SI.cap(4)),0,IFormat));
-            if(SI.cap(1).size()) labels[SI.cap(1)] = address;
+            QString labelName = SI.cap(1);
+            if(labelName.size()){
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[labelName] = address;
+            }
         }
         else if((DR.indexIn(line, 0)) != -1)
         {
             instructions.push_back(Instruction(DR.cap(2),registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
-            if(DR.cap(1).size()) labels[DR.cap(1)] = address;
+            QString labelName = DR.cap(1);
+            if(labelName.size()){
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[labelName] = address;
+            }
         }
         else if((J.indexIn(line, 0)) != -1)
         {
@@ -335,12 +376,24 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
                 missingJumpLabels.push_back(qMakePair(qMakePair(address,lineNumber),J.cap(3)));
                 instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,0,0,JFormat));
             }
-            if(J.cap(1).size()) labels[J.cap(1)] = address;
+            QString labelName = J.cap(1);
+            if(labelName.size()){
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[labelName] = address;
+            }
         }
         else if((SA.indexIn(line, 0)) != -1)
         {
             instructions.push_back(Instruction(SA.cap(2),registers,opcode[SA.cap(2)],0,0,0,0,0,RFormat));
-            if(SA.cap(1).size()) labels[SA.cap(1)] = address;
+            QString labelName = SA.cap(1);
+            if(labelName.size()){
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                }
+                labels[labelName] = address;
+            }
         }
         else if(PR.indexIn(line, 0) != -1)
         {
@@ -1042,21 +1095,39 @@ void Assembler::handlePR(QRegExp m, QString line)
     {
         instructions.push_back(Instruction("mult",registers,opcode["mult"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
         instructions.push_back(Instruction("mflo",registers,opcode["mflo"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address++;
     }
     else if(m.cap(2) == "div")
     {
         instructions.push_back(Instruction("div",registers,opcode["div"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
         instructions.push_back(Instruction("mflo",registers,opcode["mflo"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address++;
     }
     else if(m.cap(2) == "rem")
     {
         instructions.push_back(Instruction("div",registers,opcode["div"],registerIndex[m.cap(4)],registerIndex[m.cap(5)],0,0,0,RFormat));
         instructions.push_back(Instruction("mfhi",registers,opcode["mfhi"],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address++;
     }
 }
@@ -1073,7 +1144,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address++;
     }
     else if(m.cap(2) == "bgti")
@@ -1087,7 +1164,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+2,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address += 2;
     }
     else if(m.cap(2) == "blei")
@@ -1101,7 +1184,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+2,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address += 2;
     }
     else if(m.cap(2) == "bgei")
@@ -1114,7 +1203,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address++;
     }
     else if(m.cap(2) == "bltiu")
@@ -1127,7 +1222,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address++;
     }
     else if(m.cap(2) == "bgtiu")
@@ -1141,7 +1242,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+2,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address += 2;
     }
     else if(m.cap(2) == "bleiu")
@@ -1155,7 +1262,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+2,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address += 2;
     }
     else if(m.cap(2) == "bgeiu")
@@ -1168,7 +1281,13 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
         address++;
     }
 }
@@ -1185,7 +1304,13 @@ void Assembler::handlePL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
     }
     else if(m.cap(2) == "bgt")
     {
@@ -1197,8 +1322,13 @@ void Assembler::handlePL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
-
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
     }
     else if(m.cap(2) == "ble")
     {
@@ -1210,7 +1340,13 @@ void Assembler::handlePL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
     }
     else if(m.cap(2) == "bge")
     {
@@ -1222,7 +1358,13 @@ void Assembler::handlePL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("beq",registers,opcode["beq"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
     }
     else if(m.cap(2) == "bltu")
     {
@@ -1234,7 +1376,13 @@ void Assembler::handlePL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
     }
     else if(m.cap(2) == "bgtu")
     {
@@ -1246,7 +1394,13 @@ void Assembler::handlePL(QRegExp m, QString line)
             missingBranchLabels.push_back(qMakePair(qMakePair(address+1,lineNumber),m.cap(5)));
             instructions.push_back(Instruction("bne",registers,opcode["bne"],registerIndex["0"],registerIndex["at"],0,0,0,IFormat));
         }
-        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        QString labelName = m.cap(1);
+        if(labelName.size()){
+            if(labels.contains(labelName)){
+                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+            }
+            labels[labelName] = address;
+        }
     }
     else if(m.cap(2) == "bleu")
     {
