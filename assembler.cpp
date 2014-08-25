@@ -1606,7 +1606,7 @@ void Assembler::simulate()
     int activePC = (PC - 1)/4;
     while (PC != -1 && ((PC - 1)/4) < instructions.size() && i < 100)
     {
-        sf::Event event;
+        /*sf::Event event;
         while(mem->getTileEngine()->pollEvent(event))
         {
             if(event.type == sf::Event::KeyPressed){
@@ -1686,7 +1686,7 @@ void Assembler::simulate()
             } else if(event.type == sf::Event::JoystickButtonReleased){
                 qDebug() << event.joystickButton.button << " released";
             }
-        }
+        }*/
 
         activePC = ((PC - 1)/4);
         instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
@@ -1820,16 +1820,16 @@ int Assembler::minimum4(int n1, int n2, int n3, int n4)
 
 int Assembler::stringDistance(std::string s, std::string t){
     int i, j, cost, k, i1,j1,DB;
-    int INFINITY = s.length() + t.length();
+    int _INFINITY = s.length() + t.length();
     QVector<int> DA(256);
     QVector< QVector<int> > dpMatrix(s.length()+2, QVector<int>(t.length()+2));
     for(i = 0; i < s.length()+1; i++) {
         dpMatrix[i+1][1] = i ;
-        dpMatrix[i+1][0] = INFINITY;
+        dpMatrix[i+1][0] = _INFINITY;
     }
     for(j = 0; j<t.length()+1; j++) {
         dpMatrix[1][j+1] = j ;
-        dpMatrix[0][j+1]= INFINITY;
+        dpMatrix[0][j+1]= _INFINITY;
     }
     for(k = 0; k < DA.size(); k++) DA[k] = 0;
     for(i = 1; i< s.length()+1; i++) {

@@ -18,7 +18,8 @@ private:
     QTextEdit *lCounter;
     void focusInEvent(QFocusEvent *);
     void keyPressEvent(QKeyEvent *);
-
+    QTextCursor deleteCurrentLine();
+    QString getCurrentLine();
 
 signals:
 

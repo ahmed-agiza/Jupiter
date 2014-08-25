@@ -39,6 +39,7 @@ CodeEditor::CodeEditor(QWidget *parent) :
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounter()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(highlightLine()));
+    QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightLine()));
 }
 
 
@@ -49,6 +50,8 @@ void CodeEditor::focusInEvent(QFocusEvent *e)
          codeCompleter->setWidget(this);
      QTextEdit::focusInEvent(e);
  }
+
+
 
 void CodeEditor::keyPressEvent(QKeyEvent *e)
 {
@@ -63,8 +66,103 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         e->ignore();
         return;
     }
-    else
+    else if (e->key() == Qt::Key_D && (e->modifiers() & Qt::ControlModifier)){
+            qDebug() << "Delete line.";
+            deleteCurrentLine();
+
+    } else if (e->key() == Qt::Key_Up && (e->modifiers() & Qt::AltModifier)){
+            qDebug() << "Copy line up.";
+            QTextCursor currentPos = textCursor();
+            textCursor().setKeepPositionOnInsert(true);
+            currentPos.select(QTextCursor::LineUnderCursor);
+            QString line = currentPos.selectedText();
+            currentPos = textCursor();
+            currentPos.movePosition(QTextCursor::EndOfLine);
+            currentPos.insertText('\n' + line);
+            currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
+            setTextCursor(currentPos);
+
+    }else if (e->key() == Qt::Key_Up && (e->modifiers() & Qt::ControlModifier)) {
+            qDebug() << "Move line up.";
+            QString line = getCurrentLine();
+            QTextCursor currentPos = deleteCurrentLine();
+            currentPos.movePosition(QTextCursor::StartOfLine);
+            currentPos.insertText(line + '\n');
+            currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
+            setTextCursor(currentPos);
+
+    } else if (e->key() == Qt::Key_Down && (e->modifiers() & Qt::AltModifier)){
+            qDebug() << "Copy line down.";
+            QTextCursor currentPos = textCursor();
+            textCursor().setKeepPositionOnInsert(true);
+            currentPos.select(QTextCursor::LineUnderCursor);
+            QString line = currentPos.selectedText();
+            currentPos = textCursor();
+            currentPos.movePosition(QTextCursor::EndOfLine);
+            currentPos.insertText('\n' + line);
+            currentPos.movePosition(QTextCursor::EndOfBlock);
+            setTextCursor(currentPos);
+    }else if (e->key() == Qt::Key_Down && (e->modifiers() & Qt::ControlModifier)){
+            qDebug() << "Move line down.";
+            QString line = getCurrentLine();
+            QTextCursor cursCopy = textCursor();
+            QTextCursor currentPos = deleteCurrentLine();
+            //QTextCursor currentPos = textCursor();
+            currentPos.movePosition(QTextCursor::EndOfLine);
+            if (!cursCopy.selectionStart() == 0)
+                currentPos.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, line.length() + 1);
+            currentPos.insertText('\n' + line);
+            setTextCursor(currentPos);
+    }else if (e->key() == Qt::Key_Space &&(e->modifiers() & Qt::ControlModifier)){
+            qDebug() << "Pop suggestions";
+            QRect popRect = this->cursorRect();
+            popRect.setWidth(50);
+            codeCompleter->complete(popRect);
+            codeCompleter->setCurrentRow(3);
+            codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));
+    }else if (e->key() == Qt::Key_3 && (e->modifiers() & Qt::ControlModifier)){
+        QTextCursor currentPos = textCursor();
+        currentPos.movePosition(QTextCursor::StartOfLine);
+        QTextCursor tempCursor(currentPos);
+        tempCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+        if (tempCursor.selectedText() == "#")
+            tempCursor.removeSelectedText();
+        else
+             currentPos.insertText("#");
+    } else
         QTextEdit::keyPressEvent(e);
+
+
+
+
+}
+
+QTextCursor CodeEditor::deleteCurrentLine()
+{
+    QTextCursor currentPos = textCursor();
+    currentPos.select(QTextCursor::BlockUnderCursor);
+
+    if (currentPos.selectedText() == ""){
+        if (currentPos.selectionStart() == 0){
+            currentPos.deleteChar();
+        }else{
+            currentPos.deletePreviousChar();
+         }
+        currentPos.removeSelectedText();
+    }
+    else{
+        currentPos.removeSelectedText();
+        if (currentPos.selectionStart() == 0)
+            currentPos.deleteChar();
+    }
+    return currentPos;
+}
+
+QString CodeEditor::getCurrentLine()
+{
+    QTextCursor currentPos = textCursor();
+    currentPos.select(QTextCursor::LineUnderCursor);
+    return currentPos.selectedText();
 }
 
 void CodeEditor::insertCompletion(QString completion)
@@ -126,7 +224,6 @@ void CodeEditor::completerPop()
     {
         if ((codeCompleter->completionCount() != 1) || (currenCom != sel.selectedText() && !regS) || (regS && currenCom != "$" + sel.selectedText()))
         {
-
             QRect popRect = this->cursorRect();
             popRect.setWidth(50);
             codeCompleter->complete(popRect);
