@@ -14,8 +14,9 @@
 #include <QMessageBox>
 #include <iostream>
 #include "registersmodel.h"
-
+#include "memory.h"
 #include "InstructionFuncs.h"
+#include "memorymodel.h"
 
 
 
@@ -31,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     memory = new Memory;
     memoryLoading = new MemoryLoading(0, this->memory);
-    memoryLoading->show();
+    //memoryLoading->show();
 
     for (int i = 0; i < 32; i++){
         mainProcessorRegisters.append(0);
@@ -45,7 +46,23 @@ MainWindow::MainWindow(QWidget *parent) :
     assem = NULL;
     assemblerInitialized = false;
     this->setMouseTracking(true);
+
+    Memory testMemory;
+    int location = testMemory.dataSegmentBaseAddress;
+    testMemory.storeWord(location, 1561614);
+    testMemory.storeWord(location + 4, 545);
+    testMemory.storeByte(location + 5, '5');
+    testMemory.storeByte(location + 6, '6');
+    testMemory.storeByte(location + 7, '7');
+    testMemory.storeByte(location + 8, '8');
+
+    MemoryModel *memModel = new MemoryModel(&testMemory, this, DataSegment, Word, IntegerBase);
+    //MemoryModel::MemoryModel(Memory *m, QObject *parent=0, MemorySegment ms, DisplayMode dispMode, MemoryBase memBase)
+   // : QAbstractTableModel(parent), memoryType(ms), memory(m), dm(dispMode), mb(memBase)
+    //ui->dataTable->setModel(memModel);
+
 }
+
 
 bool MainWindow::eventFilter(QObject *, QEvent *e)
 {

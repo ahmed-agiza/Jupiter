@@ -76,3 +76,6 @@ INCLUDEPATH += C:/SFML/include
 DEPENDPATH += C:/SFML/include
 
 CONFIG += c++11
+
+QMAKE_CFLAGS += -Wno-unused
+QMAKE_CFLAGS += -Wno-unused-parameter

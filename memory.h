@@ -59,6 +59,11 @@ public:
     QVector< QVector< char > > tileMap;
     QVector< PaletteColor > palette;
 
+    int getTextSegmentSize();
+    int getDataSegmentSize();
+    int getHeapSegmentSize();
+    int getStackSegmentSize();
+
     void setTileEngine(TileEngine *);
     TileEngine *getTileEngine() const;
 signals:

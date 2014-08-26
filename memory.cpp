@@ -144,6 +144,26 @@ Memory::~Memory()
 
 }
 
+int Memory::getTextSegmentSize()
+{
+    return textSegment.size();
+}
+
+int Memory::getDataSegmentSize()
+{
+    return dataSegment.size();
+}
+
+int Memory::getHeapSegmentSize()
+{
+    return heapSegment.size();
+}
+
+int Memory::getStackSegmentSize()
+{
+    return stackSegment.size();
+}
+
 
 void Memory::storeByte(unsigned int addr, char data)
 {
@@ -252,9 +272,9 @@ short Memory::loadHWord(unsigned int addr) const
         return 0;
     }
     if(isLittleEndian())
-        return ((unsigned short)(loadByte(addr + 1) << 8) & loadByteU(addr));
+        return ((unsigned short)(loadByte(addr + 1) << 8) | loadByteU(addr));
     else
-        return ((unsigned short)(loadByte(addr) << 8) & loadByteU(addr + 1));
+        return ((unsigned short)(loadByte(addr) << 8) | loadByteU(addr + 1));
 }
 
 unsigned short Memory::loadHWordU(unsigned int addr) const
@@ -266,9 +286,11 @@ void Memory::storeWord(unsigned int addr, int data)
 {
     if(getWordSegment(addr) == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
+        qDebug() << "Out of range.";
         return;
     }if((addr & 3) != 0){
         //emit raiseException(NOT_WORD_ALIGN_EX_NO);
+        qDebug() << "Unallgined.";
         return;
     }
     if(isLittleEndian()) {
@@ -288,15 +310,17 @@ int Memory::loadWord(unsigned int addr) const
 {
     if(getWordSegment(addr) == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
+        qDebug() << "Out of range.";
         return 0;
     }if((addr & 3) != 0){
         //emit raiseException(NOT_WORD_ALIGN_EX_NO);
+         qDebug() << "Unallgined.";
         return 0;
     }
     if(isLittleEndian()) {
-        return (((unsigned int)(loadByte(addr + 3)) << 24) & ((unsigned int)(loadByteU(addr + 2)) << 16) & ((unsigned int)(loadByteU(addr + 1)) << 8) & (loadByteU(addr)));
+        return (((unsigned int)(loadByte(addr + 3)) << 24) | ((unsigned int)(loadByteU(addr + 2)) << 16) | ((unsigned int)(loadByteU(addr + 1)) << 8) | (loadByteU(addr)));
     } else {
-        return (((unsigned int)(loadByte(addr)) << 24) & ((unsigned int)(loadByteU(addr + 1)) << 16) & ((unsigned int)(loadByteU(addr + 2)) << 8) & (loadByteU(addr + 3)));
+        return (((unsigned int)(loadByte(addr)) << 24) | ((unsigned int)(loadByteU(addr + 1)) << 16) | ((unsigned int)(loadByteU(addr + 2)) << 8) | (loadByteU(addr + 3)));
     }
 }
 
