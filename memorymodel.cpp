@@ -57,13 +57,13 @@ int MemoryModel::columnCount(const QModelIndex &parent) const
 QVariant MemoryModel::data(const QModelIndex &index, int role) const
 {
     Q_UNUSED(role);
-    qDebug() << "Getting Data at (" << index.row() << ", " << index.column() << ")";
+ //   qDebug() << "Getting Data at (" << index.row() << ", " << index.column() << ")";
     if (!index.isValid() || index.row() >= rCount || index.row() < 0 || index.column() < 0 || index.column() > 2)
         return QVariant();
 
     if (role == Qt::DisplayRole){
         if (index.column() == 0){
-            /*int baseAddress;
+            int baseAddress;
             switch (memoryType) {
             case DataSegment:
                 baseAddress = memory->dataSegmentBaseAddress;
@@ -79,13 +79,25 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                 baseAddress = 0; //memory->StackSegmentBaseAddress
                 break;
             }
-            return baseAddress + index.row();*/
-            return "Column 0";
+            return baseAddress + 4*index.row();
         }
-        else if (index.column() == 1){/*
+        else if (index.column() == 1){
             switch(dm){
                  case(Word):
-                    return memory->loadWord(index.row());
+
+                    /* try{
+                        return memory->loadWord(index.row());
+                    }catch(std::exception e){
+                        qDebug() << e.what();
+                        return "-1";
+                    }
+
+                    if (index.row() < 16)
+                       return memory->loadWord(index.row());
+                    else */
+                    qDebug() << index.row();
+                    return "-1";
+
                     break;
                  case(UnsignedWord):
                     return memory->loadWordU(index.row());
@@ -97,8 +109,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                  default:
                     return memory->loadByteU(index.row());
                     break;
-                }*/
-            return "Column 1";
+                }
         }
         else
          return QVariant();

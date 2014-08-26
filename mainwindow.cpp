@@ -57,10 +57,10 @@ MainWindow::MainWindow(QWidget *parent) :
     testMemory.storeByte(location + 8, '8');
 
     MemoryModel *memModel = new MemoryModel(&testMemory, this, DataSegment, Word, IntegerBase);
-    //MemoryModel::MemoryModel(Memory *m, QObject *parent=0, MemorySegment ms, DisplayMode dispMode, MemoryBase memBase)
-   // : QAbstractTableModel(parent), memoryType(ms), memory(m), dm(dispMode), mb(memBase)
-    //ui->dataTable->setModel(memModel);
-
+    ui->dataTable->setModel(memModel);
+    for(int i = 0; i < 16; i++){
+        qDebug() << testMemory.loadByte(i);
+    }
 }
 
 
