@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     MemoryModel *memModel = new MemoryModel(&testMemory, this, DataSegment, Word, IntegerBase);
     ui->dataTable->setModel(memModel);
     for(int i = 0; i < 16; i++){
-        qDebug() << testMemory.loadByte(i);
+    //    qDebug() << testMemory.loadByte(i);
     }
 }
 

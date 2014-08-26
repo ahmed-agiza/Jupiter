@@ -276,7 +276,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
 
     parseDataSegment(stringList);
-    parseTextSegment(stringList);
+    //parseTextSegment(stringList);
 
 }
 
@@ -317,7 +317,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                             labels[labelName] = address;
                         }
                     }else{
-                        errorList.append(Error(".align directive must take a number between 0 and 4", lineNumber));
+                        errorList.append(Error(".align directive must be followed by a number between 0 and 4", lineNumber));
                     }
                 }else if(directiveName == "ascii" || directiveName == "asciiz"){
                     if(QRegExp(cstringsRegex).indexIn(parameters) == 0){
@@ -406,6 +406,21 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     }else{
                         errorList.append(Error("Syntax error", lineNumber));
                     }
+                }else if(directiveName == "space"){
+                    int spaceNumber = getNumber(parameters);
+                    if(numberRegExp.indexIn(parameters) == 0){
+                        if(labelName.size()){
+                            if(labels.contains(labelName)){
+                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                            }
+                            labels[labelName] = address;
+                        }
+                        address += spaceNumber;
+                    }else{
+                        errorList.append(Error(".space directive must be followed by the number of bytes to reserve", lineNumber));
+                    }
+                }else if(directiveName == "float" || directiveName == "double"){
+                    qDebug() << "FPU not yet implemented";
                 }
             }else{
                 errorList.push_back(Error("Invalid type specifier \""+directiveName+"\"", lineNumber));
@@ -415,6 +430,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
         }
         lineNumber++;
     }
+
+    for (int i = 0; i<errorList.size(); i++)
+    {
+        qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
+    }
+
 }
 
 void Assembler::parseTextSegment(QStringList* stringList)
@@ -1987,8 +2008,8 @@ int Assembler::stringDistance(std::string s, std::string t){
                     minimum4(
                         dpMatrix[i][j]+cost,
                         dpMatrix[i+1][j] + 1,
-                        dpMatrix[i][j+1]+1,
-                        dpMatrix[i1][j1] + (i-i1-1) + 1 + (j-j1-1)
+                    dpMatrix[i][j+1]+1,
+                    dpMatrix[i1][j1] + (i-i1-1) + 1 + (j-j1-1)
                     );
         }
         DA[s[i-1]] = i;

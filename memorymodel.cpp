@@ -95,7 +95,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                     if (index.row() < 16)
                        return memory->loadWord(index.row());
                     else */
-                    qDebug() << index.row();
+                    //qDebug() << index.row();  // I commented this out
                     return "-1";
 
                     break;
