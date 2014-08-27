@@ -334,6 +334,9 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         errorList.append(Error("Invalid string", lineNumber));
                     }
                 }else if(directiveName == "half" || directiveName == "word"){
+                    int alignNumber = ((directiveName == "half")? 1:2);
+                    int factor = std::pow(2, alignNumber);
+                    address = ((address + factor - 1) / factor ) * factor;
                     if(parameters.contains(':')){
                         int start = getNumber(parameters.mid(0,parameters.indexOf(':')));
                         int end = getNumber(parameters.mid(parameters.indexOf(':')+1));
