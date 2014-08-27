@@ -275,8 +275,8 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
 
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
 
-    parseDataSegment(stringList);
-    //parseTextSegment(stringList);
+    //parseDataSegment(stringList);
+    parseTextSegment(stringList);
 
 }
 
@@ -1774,7 +1774,7 @@ void Assembler::simulate()
     int activePC = (PC - 1)/4;
     while (PC != -1 && ((PC - 1)/4) < instructions.size() && i < 100)
     {
-        /*sf::Event event;
+        sf::Event event;
         while(mem->getTileEngine()->pollEvent(event))
         {
             if(event.type == sf::Event::KeyPressed){
@@ -1854,7 +1854,7 @@ void Assembler::simulate()
             } else if(event.type == sf::Event::JoystickButtonReleased){
                 qDebug() << event.joystickButton.button << " released";
             }
-        }*/
+        }
 
         activePC = ((PC - 1)/4);
         instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);

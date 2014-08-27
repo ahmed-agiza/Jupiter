@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     memory = new Memory;
     memoryLoading = new MemoryLoading(0, this->memory);
-    //memoryLoading->show();
+    memoryLoading->show();
 
     for (int i = 0; i < 32; i++){
         mainProcessorRegisters.append(0);
@@ -83,14 +83,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionSimulate_triggered()
 {
+    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
+    memory->setTileEngine(engine);
+    engine->show();
     if (assemblerInitialized){
         assem->simulate();
         mainProcessorRegisters = *assem->registers;
     }
-
-    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
-    memory->setTileEngine(engine);
-    engine->show();
 }
 
 void MainWindow::on_actionNew_triggered()
