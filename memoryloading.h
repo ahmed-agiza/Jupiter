@@ -12,12 +12,12 @@ namespace Ui {
 class MemoryLoading;
 }
 
-class MemoryLoading : public QWidget
+class MemoryLoading : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MemoryLoading(QWidget *parent, Memory*);
+    explicit MemoryLoading(QDialog *parent, Memory*);
     bool isInit();
     ~MemoryLoading();
 signals:

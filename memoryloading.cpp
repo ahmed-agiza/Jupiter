@@ -1,8 +1,8 @@
 #include "memoryloading.h"
 #include "ui_memoryloading.h"
 
-MemoryLoading::MemoryLoading(QWidget *parent, Memory *mem) :
-    QWidget(parent),
+MemoryLoading::MemoryLoading(QDialog *parent, Memory *mem) :
+    QDialog(parent),
     ui(new Ui::MemoryLoading)
 {
     ui->setupUi(this);

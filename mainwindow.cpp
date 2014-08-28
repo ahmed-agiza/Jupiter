@@ -189,7 +189,9 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered()
 {
     if(ui->actionEnable_Graphics_Engine->isChecked()){
         if(memoryLoading == NULL || !memoryLoading->isInit()){
-            memoryLoading = new MemoryLoading(0, this->memory);
+            if (memoryLoading == NULL)
+                memoryLoading = new MemoryLoading(0, this->memory);
+            memoryLoading->setModal(true);
             memoryLoading->show();
         }
         ui->actionTileset_viewer->setEnabled(true);
@@ -208,8 +210,16 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered()
 
 void MainWindow::on_actionReload_Tiles_Memory_triggered()
 {
-    if (memoryLoading != NULL)
+
+    if (memoryLoading != NULL){
+        if (memoryLoading->isVisible()){
+            memoryLoading->show();
+            return;
+        }
         delete memoryLoading;
+    }
+
     memoryLoading = new MemoryLoading(0, this->memory);
+    memoryLoading->setModal(true);
     memoryLoading->show();
 }
