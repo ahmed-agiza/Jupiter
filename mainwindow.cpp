@@ -59,14 +59,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     MemoryModel *memModel = new MemoryModel(testMemory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
     ui->dataTable->setModel(memModel);
-<<<<<<< HEAD
-    for(int i = location; i < location + 32; i+=4){
+    /*for(int i = location; i < location + 32; i+=4){
         qDebug() << "i: " << i << ":  " << (int) testMemory->loadWordU(i) << "\n";
-=======
-    for(int i = 0; i < 16; i++){
-    //    qDebug() << testMemory.loadByte(i);
->>>>>>> origin/master
-    }
+    }*/
 }
 
 
