@@ -175,6 +175,7 @@
     <addaction name="actionBitmap_Display"/>
     <addaction name="actionBase_Converter"/>
     <addaction name="separator"/>
+    <addaction name="actionTile_loader"/>
     <addaction name="actionTileset_viewer"/>
     <addaction name="actionPalette_Viewer"/>
     <addaction name="separator"/>
@@ -646,6 +647,11 @@
   <action name="actionPalette_Viewer">
    <property name="text">
     <string>Palette Viewer</string>
+   </property>
+  </action>
+  <action name="actionTile_loader">
+   <property name="text">
+    <string>Tile Loader</string>
    </property>
   </action>
  </widget>

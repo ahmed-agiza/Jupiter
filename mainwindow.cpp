@@ -181,3 +181,9 @@ void MainWindow::on_actionPalette_Viewer_triggered()
     paletteViewer = new PaletteViewer(this, memory);
     paletteViewer->show();
 }
+
+void MainWindow::on_actionTile_loader_triggered()
+{
+    tileLoader = new TileLoader(this, memory);
+    tileLoader->show();
+}
