@@ -10,7 +10,7 @@ class RegistersModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit RegistersModel(QObject *parent );
+    explicit RegistersModel(QObject *parent);
     explicit RegistersModel(QVector<int> *r, QObject *parent);
     void setRegs(QVector<int> *r);
     int rowCount(const QModelIndex &parent) const;

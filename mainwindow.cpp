@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(ui->dockCode);
     installEventFilter(this);
 
-    memory = new Memory;
+    memory = new Memory(this);
     memoryLoading = new MemoryLoading(0, this->memory);
     //memoryLoading->show();
 
@@ -47,19 +47,20 @@ MainWindow::MainWindow(QWidget *parent) :
     assemblerInitialized = false;
     this->setMouseTracking(true);
 
-    Memory testMemory;
-    int location = testMemory.dataSegmentBaseAddress;
-    testMemory.storeWord(location, 1561614);
-    testMemory.storeWord(location + 4, 545);
-    testMemory.storeByte(location + 5, '5');
-    testMemory.storeByte(location + 6, '6');
-    testMemory.storeByte(location + 7, '7');
-    testMemory.storeByte(location + 8, '8');
+    Memory *testMemory = new Memory(this);
+    int location = testMemory->dataSegmentBaseAddress;
+    testMemory->storeWord(location, 15614);
+    testMemory->storeWord(location + 4, 1179010630);
+   /*testMemory->storeByte(location + 5, '5');
+    testMemory->storeByte(location + 6, '6');
+    testMemory->storeByte(location + 7, '7');
+    testMemory->storeByte(location + 8, '8');*/
 
-    MemoryModel *memModel = new MemoryModel(&testMemory, this, DataSegment, Word, IntegerBase);
+
+    MemoryModel *memModel = new MemoryModel(testMemory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
     ui->dataTable->setModel(memModel);
-    for(int i = 0; i < 16; i++){
-        qDebug() << testMemory.loadByte(i);
+    for(int i = location; i < location + 32; i+=4){
+        qDebug() << "i: " << i << ":  " << (int) testMemory->loadWordU(i) << "\n";
     }
 }
 

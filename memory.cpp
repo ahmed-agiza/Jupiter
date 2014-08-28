@@ -81,7 +81,8 @@ unsigned int Memory::getWordSegment(unsigned int addr) const
     return firstByte;
 }
 
-Memory::Memory():   textSegmentBaseAddress (0x00000000),
+Memory::Memory(QObject *parent): QObject(parent),
+                    textSegmentBaseAddress (0x00000000),
                     dataSegmentBaseAddress (0x00010000),
                     heapSegmentBaseAddress (0x00020000),
                     //stackSegmentLimitAddress (0x80000000),
@@ -308,6 +309,7 @@ void Memory::storeWord(unsigned int addr, int data)
 
 int Memory::loadWord(unsigned int addr) const
 {
+   // return 5;
     if(getWordSegment(addr) == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
         qDebug() << "Out of range.";

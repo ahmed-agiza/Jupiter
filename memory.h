@@ -21,7 +21,8 @@ class Memory : public QObject
 {
     Q_OBJECT
 public:
-    Memory ();
+    Memory (QObject *parent);
+    Memory (const Memory &);
     void storeByte(unsigned int, char);
     char loadByte(unsigned int) const;
     unsigned char loadByteU(unsigned int) const;
