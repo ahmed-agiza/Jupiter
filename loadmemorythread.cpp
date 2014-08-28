@@ -10,6 +10,6 @@ void LoadMemoryThread::run()
 {
     //QMutex mutex;
     qDebug() << "Started!";
-    memory->loadMemory("C:/memory.bin",segmentsToLoad);
+    memory->loadMemory(":/memory/memory.bin",segmentsToLoad);
     qDebug() << "Done :)\n";
 }

@@ -68,7 +68,8 @@ FORMS    += \
     tileloader.ui
 
 RESOURCES += \
-    qdarkstyle/style.qrc
+    qdarkstyle/style.qrc \
+    res.qrc
 
 LIBS += -LC:/SFML/lib
 

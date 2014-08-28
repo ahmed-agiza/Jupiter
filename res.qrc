@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/memory">
+        <file>memory.bin</file>
+    </qresource>
+</RCC>
