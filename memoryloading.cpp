@@ -68,4 +68,5 @@ void MemoryLoading::onLoadingNumberChanged(int number)
 void MemoryLoading::loadComplete()
 {
     initialized = true;
+    this->hide();
 }
