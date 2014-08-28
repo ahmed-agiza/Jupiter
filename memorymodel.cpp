@@ -21,28 +21,15 @@ MemoryModel::MemoryModel(QObject *parent) :
 MemoryModel::MemoryModel(Memory *m, QObject *parent=0, MemorySegment ms = DataSegment)
     : QAbstractTableModel(parent), memory(m), memoryType(ms)
 {
-    qDebug() << "Constructing..";
-
-    qDebug() << memory;
     int totalSize = initMemorySegment();
     updateCount(totalSize);
-
-    qDebug() << "Contructed..";
 }
 
 MemoryModel::MemoryModel(Memory *m, QObject *parent, MemorySegment ms, QComboBox *ab, QComboBox *mm, QComboBox *mb)
     : QAbstractTableModel(parent), memory(m), memoryType(ms), addressBase(ab), memoryMode(mm), memoryBase(mb)
 {
-    qDebug() << "Constructing..";
-
-    qDebug() << memory;
     int totalSize = initMemorySegment();
     updateCount(totalSize);
-    qDebug() << "Data: " <<memory->getDataSegmentSize();
-    qDebug() << "Text: " <<memory->getTextSegmentSize();
-    qDebug() << "Stack: " <<memory->getStackSegmentSize();
-    qDebug() << "Heap: " <<memory->getHeapSegmentSize();
-    qDebug() << "Contructed.." << rCount;
 }
 
 
