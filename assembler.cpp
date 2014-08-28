@@ -1,6 +1,7 @@
 #include "Assembler.h"
 #include <QDebug>
 #include <iostream>
+#include <math.h>
 
 
 // matches valid register names
@@ -15,7 +16,7 @@ QString labelRegexCapture = "(" + labelRegex +"):";
 // Matches invalid labels (start with a number or an invalid character)
 QString invalidLabelRegex = "\\b[^a-zA-Z_]\\w*:\\b";
 // Matches valid directives' names
-QString directivesRegex = "\\.(align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
+QString dataSegmentDirectives = "\\.(align|asciiz?|byte|double|float|half|space|word)";
 // Matches invalid directives
 QString invalidDirectivesRegex = "\\.(?!align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
 // Matches strings
@@ -271,10 +272,178 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
     this->registers = mRegisters;
     initializeRegisters();
     initializeFunctions();
-    address = lineNumber = 0;
 
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
 
+    //parseDataSegment(stringList);
+    parseTextSegment(stringList);
+
+}
+
+void Assembler::parseDataSegment(QStringList* stringList)
+{
+    "(align|asciiz?|byte|double|float|half|space|word)";
+    QSet<QString> validDirectives;
+    validDirectives.insert("align");
+    validDirectives.insert("ascii");
+    validDirectives.insert("asciiz");
+    validDirectives.insert("byte");
+    validDirectives.insert("double");
+    validDirectives.insert("float");
+    validDirectives.insert("half");
+    validDirectives.insert("space");
+    validDirectives.insert("word");
+    lineNumber = 0;
+    address = 0;
+
+    QRegExp directivesRegex( "(?:[\\t ]*(" + labelRegex + "):[\\t ]*)?\\.([a-zA-Z]+)[\\t ]+([^\\r\\n]+)(?:#.+)?", Qt::CaseInsensitive);
+    foreach (QString line, *stringList)
+    {
+        if(directivesRegex.indexIn(line, 0) != -1){
+            QString directiveName = directivesRegex.cap(2);
+            QString labelName = directivesRegex.cap(1);
+            QString parameters = directivesRegex.cap(3);
+
+            if(validDirectives.contains(directiveName)){
+                if(directiveName == "align"){
+                    int alignNumber = getNumber(parameters);
+                    if(numberRegExp.indexIn(parameters) == 0 && alignNumber >= 0 && alignNumber <= 4){
+                        int factor = std::pow(2, alignNumber);
+                        address = ((address + factor - 1) / factor ) * factor;
+                        if(labelName.size()){
+                            if(labels.contains(labelName)){
+                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                            }
+                            labels[labelName] = address;
+                        }
+                    }else{
+                        errorList.append(Error(".align directive must be followed by a number between 0 and 4", lineNumber));
+                    }
+                }else if(directiveName == "ascii" || directiveName == "asciiz"){
+                    if(QRegExp(cstringsRegex).indexIn(parameters) == 0){
+                        std::string actualString = parameters.mid(1,parameters.length()-2).toStdString();
+                        int i;
+                        for(i=address; i<actualString.size() + address; i++){
+                            mem->storeByte(i + mem->dataSegmentBaseAddress , actualString[i]);
+                        }
+                        address = i;
+                        if(directiveName.endsWith("z")) mem->storeByte(address++ + mem->dataSegmentBaseAddress , NULL);
+                    }else if(QRegExp(invalidCstringsRegex).indexIn(parameters) == 0){
+                        errorList.append(Error("Invalid string, missing closing quote", lineNumber));
+                    }else{
+                        errorList.append(Error("Invalid string", lineNumber));
+                    }
+                }else if(directiveName == "half" || directiveName == "word"){
+                    int alignNumber = ((directiveName == "half")? 1:2);
+                    int factor = std::pow(2, alignNumber);
+                    address = ((address + factor - 1) / factor ) * factor;
+                    if(parameters.contains(':')){
+                        int start = getNumber(parameters.mid(0,parameters.indexOf(':')));
+                        int end = getNumber(parameters.mid(parameters.indexOf(':')+1));
+                        if(end > 0xffff && directiveName == "half"){
+                            errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber));
+                        }
+                        for(int i=0; i<=(end-start+1); i++){
+                            if (directiveName == "half")
+                                mem->storeHWord(mem->dataSegmentBaseAddress + address, start + i);
+                            else
+                                mem->storeWord(mem->dataSegmentBaseAddress + address, start + i);
+                            address += ((directiveName == "half")? 2:4);
+                        }
+                    }else if(parameters.contains(',')){
+                        QStringList variables = parameters.remove(' ').remove('\t').split(',', QString::SkipEmptyParts);
+                        foreach (QString immediateNumber, variables) {
+                            if (directiveName == "half")
+                                mem->storeHWord(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
+                            else
+                                mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
+                            address += ((directiveName == "half")? 2:4);
+                            if(getNumber(immediateNumber) > 0xffff && directiveName == "half"){
+                                errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber));
+                            }
+                        }
+                    }else if(numberRegExp.indexIn(parameters) == 0){
+                        if(getNumber(parameters) > 0xffff && directiveName == "half"){
+                            errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber));
+                        }
+                        if (directiveName == "half")
+                            mem->storeHWord(mem->dataSegmentBaseAddress + address, getNumber(parameters));
+                        else
+                            mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(parameters));
+                        address += ((directiveName == "half")? 2:4);
+                    }else{
+                        errorList.append(Error("Syntax error", lineNumber));
+                    }
+                }else if(directiveName == "byte"){
+                    if(parameters.contains(':')){
+                        int start = getNumber(parameters.mid(0,parameters.indexOf(':')));
+                        int end = getNumber(parameters.mid(parameters.indexOf(':')+1));
+                        if(end > 0xff){
+                            errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber));
+                        }
+                        for(int i=0; i<=(end-start+1); i++){
+                            mem->storeByte(mem->dataSegmentBaseAddress + address, start + i);
+                            address++;
+                        }
+                    }else if(parameters.contains(',')){
+                        QStringList variables = parameters.remove(' ').remove('\t').split(',', QString::SkipEmptyParts);
+                        foreach (QString immediateNumber, variables) {
+                            QRegExp character("'([^\\n\\r']|(?:\\'))'");
+                            if(character.indexIn(immediateNumber) == 0)
+                                mem->storeByte(mem->dataSegmentBaseAddress + address, character.cap(1).toStdString()[character.cap(1).size()-1]);
+                            else if(numberRegExp.indexIn(immediateNumber) == 0)
+                                mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
+                            else
+                                errorList.append(Error("Syntax error", lineNumber));
+                            address++;
+                            if(getNumber(immediateNumber) > 0xff){
+                                errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber));
+                            }
+                        }
+                    }else if(numberRegExp.indexIn(parameters) == 0){
+                        if(getNumber(parameters) > 0xff){
+                            errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber));
+                        }
+                        mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(parameters));
+                        address++;
+                    }else{
+                        errorList.append(Error("Syntax error", lineNumber));
+                    }
+                }else if(directiveName == "space"){
+                    int spaceNumber = getNumber(parameters);
+                    if(numberRegExp.indexIn(parameters) == 0){
+                        if(labelName.size()){
+                            if(labels.contains(labelName)){
+                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                            }
+                            labels[labelName] = address;
+                        }
+                        address += spaceNumber;
+                    }else{
+                        errorList.append(Error(".space directive must be followed by the number of bytes to reserve", lineNumber));
+                    }
+                }else if(directiveName == "float" || directiveName == "double"){
+                    qDebug() << "FPU not yet implemented";
+                }
+            }else{
+                errorList.push_back(Error("Invalid type specifier \""+directiveName+"\"", lineNumber));
+            }
+        }else if((CMT.indexIn(line, 0)) == -1 && WHITSPACE.indexIn(line, 0) == -1 && line.size() != 0){
+
+        }
+        lineNumber++;
+    }
+
+    for (int i = 0; i<errorList.size(); i++)
+    {
+        qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
+    }
+
+}
+
+void Assembler::parseTextSegment(QStringList* stringList)
+{
+    address = lineNumber = 0;
     foreach (QString line, *stringList)
     {
         if((R.indexIn(line, 0)) != -1)
@@ -291,12 +460,12 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
         else if((M.indexIn(line, 0)) != -1)
         {
             instructions.push_back(Instruction(M.cap(2),registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
-            QString labelName = I.cap(1);
+            QString labelName = M.cap(1);
             if(M.cap(1).size()){
-                if(labels.contains(M.cap(1))){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                if(labels.contains(labelName)){
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
-                labels[M.cap(1)] = address;
+                labels[labelName] = address;
             }
         }
         else if((I.indexIn(line, 0)) != -1)
@@ -308,7 +477,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             QString labelName = I.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
                 labels[labelName] = address;
             }
@@ -325,7 +494,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             QString labelName = L.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
                 labels[labelName] = address;
             }
@@ -339,7 +508,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             QString labelName = SR.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
                 labels[labelName] = address;
             }
@@ -350,7 +519,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             QString labelName = SI.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
                 labels[labelName] = address;
             }
@@ -361,7 +530,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             QString labelName = DR.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
                 labels[labelName] = address;
             }
@@ -379,7 +548,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             QString labelName = J.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
                 labels[labelName] = address;
             }
@@ -390,7 +559,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             QString labelName = SA.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                 }
                 labels[labelName] = address;
             }
@@ -432,7 +601,7 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
             labels[LBL.cap(1)] = address;
             address--;
         }
-        else if((CMT.indexIn(line, 0)) != -1 || line.size()==0)
+        else if((CMT.indexIn(line, 0)) != -1 || WHITSPACE.indexIn(line, 0) != -1 || line.size()==0)
         {
             address--;
         }
@@ -832,7 +1001,6 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
 
-
 }
 
 Assembler::~Assembler()
@@ -1098,7 +1266,7 @@ void Assembler::handlePR(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1111,7 +1279,7 @@ void Assembler::handlePR(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1124,7 +1292,7 @@ void Assembler::handlePR(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1147,7 +1315,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1167,7 +1335,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1187,7 +1355,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1206,7 +1374,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1225,7 +1393,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1245,7 +1413,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1265,7 +1433,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1284,7 +1452,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1307,7 +1475,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1325,7 +1493,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1343,7 +1511,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1361,7 +1529,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1379,7 +1547,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1397,7 +1565,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+M.cap(1)+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
             }
             labels[labelName] = address;
         }
@@ -1606,7 +1774,7 @@ void Assembler::simulate()
     int activePC = (PC - 1)/4;
     while (PC != -1 && ((PC - 1)/4) < instructions.size() && i < 100)
     {
-        /*sf::Event event;
+        sf::Event event;
         while(mem->getTileEngine()->pollEvent(event))
         {
             if(event.type == sf::Event::KeyPressed){
@@ -1686,7 +1854,7 @@ void Assembler::simulate()
             } else if(event.type == sf::Event::JoystickButtonReleased){
                 qDebug() << event.joystickButton.button << " released";
             }
-        }*/
+        }
 
         activePC = ((PC - 1)/4);
         instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
@@ -1843,8 +2011,8 @@ int Assembler::stringDistance(std::string s, std::string t){
                     minimum4(
                         dpMatrix[i][j]+cost,
                         dpMatrix[i+1][j] + 1,
-                        dpMatrix[i][j+1]+1,
-                        dpMatrix[i1][j1] + (i-i1-1) + 1 + (j-j1-1)
+                    dpMatrix[i][j+1]+1,
+                    dpMatrix[i1][j1] + (i-i1-1) + 1 + (j-j1-1)
                     );
         }
         DA[s[i-1]] = i;

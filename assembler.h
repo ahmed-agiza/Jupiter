@@ -60,6 +60,8 @@ private:
     int minimum4(int, int, int, int);
 public:
     Assembler(QStringList *stringList, Memory *memory, QVector<int> *mRegisters);
+    void parseTextSegment(QStringList*);
+    void parseDataSegment(QStringList*);
     int getNumber(QString);
     void initializeRegisters();
     void initializeFunctions();

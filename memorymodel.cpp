@@ -118,6 +118,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                 return "0b" + QString::number(adr, 2);
         }
         else if (index.column() == 1){
+<<<<<<< HEAD
             int value;
             if (memoryMode->currentText() == UWORD)
                 value = memory->loadWordU(adr);
@@ -133,6 +134,35 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                 }else{
                     QString untrimmed = QString::number(value, 16);
                     return "0x" + untrimmed.mid(untrimmed.size() -8).toUpper();
+=======
+            switch(dm){
+                 case(Word):
+
+                    /* try{
+                        return memory->loadWord(index.row());
+                    }catch(std::exception e){
+                        qDebug() << e.what();
+                        return "-1";
+                    }
+
+                    if (index.row() < 16)
+                       return memory->loadWord(index.row());
+                    else */
+                    //qDebug() << index.row();  // I commented this out
+                    return "-1";
+
+                    break;
+                 case(UnsignedWord):
+                    return memory->loadWordU(index.row());
+                    break;
+                 case (Byte):
+                    return memory->loadByte(index.row());
+                    break;
+                 case (UnsignedByte):
+                 default:
+                    return memory->loadByteU(index.row());
+                    break;
+>>>>>>> origin/master
                 }
             }else if (memoryBase->currentText() == B02){
                 return "0b" + QString::number(value, 2);

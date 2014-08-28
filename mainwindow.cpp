@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     memory = new Memory(this);
     memoryLoading = new MemoryLoading(0, this->memory);
-    //memoryLoading->show();
+    memoryLoading->show();
 
     for (int i = 0; i < 32; i++){
         mainProcessorRegisters.append(0);
@@ -59,8 +59,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     MemoryModel *memModel = new MemoryModel(testMemory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
     ui->dataTable->setModel(memModel);
+<<<<<<< HEAD
     for(int i = location; i < location + 32; i+=4){
         qDebug() << "i: " << i << ":  " << (int) testMemory->loadWordU(i) << "\n";
+=======
+    for(int i = 0; i < 16; i++){
+    //    qDebug() << testMemory.loadByte(i);
+>>>>>>> origin/master
     }
 }
 
@@ -84,14 +89,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionSimulate_triggered()
 {
+    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
+    memory->setTileEngine(engine);
+    engine->show();
     if (assemblerInitialized){
         assem->simulate();
         mainProcessorRegisters = *assem->registers;
     }
-
-    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
-    memory->setTileEngine(engine);
-    engine->show();
 }
 
 void MainWindow::on_actionNew_triggered()
