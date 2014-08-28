@@ -21,9 +21,7 @@
 
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+    QMainWindow(parent), ui(new Ui::MainWindow){
 
 
     ui->setupUi(this);
@@ -31,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     installEventFilter(this);
 
     memory = new Memory(this);
-    memoryLoading = new MemoryLoading(0, this->memory);
-    memoryLoading->show();
+
+    memoryLoading = NULL;
 
     for (int i = 0; i < 32; i++){
         mainProcessorRegisters.append(0);
@@ -47,6 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
     assemblerInitialized = false;
     this->setMouseTracking(true);
 
+    ui->actionTileset_viewer->setEnabled(false);
+    ui->actionBitmap_Display->setEnabled(false);
+    ui->actionPalette_Viewer->setEnabled(false);
+    ui->actionReload_Tiles_Memory->setEnabled(false);
+    ui->actionTile_loader->setEnabled(false);
+
     /*Memory *testMemory = new Memory(this);
     int location = testMemory->dataSegmentBaseAddress;
     testMemory->storeWord(location, 15614);
@@ -55,6 +59,8 @@ MainWindow::MainWindow(QWidget *parent) :
     testMemory->storeByte(location + 6, '6');
     testMemory->storeByte(location + 7, '7');
     testMemory->storeByte(location + 8, '8');*/
+
+
 
 
     MemoryModel *textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
@@ -69,11 +75,11 @@ MainWindow::MainWindow(QWidget *parent) :
     /*for(int i = location; i < location + 32; i+=4){
         qDebug() << "i: " << i << ":  " << (int) testMemory->loadWordU(i) << "\n";
     }*/
+
 }
 
 
-bool MainWindow::eventFilter(QObject *, QEvent *e)
-{
+bool MainWindow::eventFilter(QObject *, QEvent *e){
     if (e->type() == QEvent::Show)
         on_actionNew_triggered();
     return false;
@@ -81,16 +87,14 @@ bool MainWindow::eventFilter(QObject *, QEvent *e)
 
 
 
-MainWindow::~MainWindow()
-{
-    delete memory;
+MainWindow::~MainWindow(){
+    //delete memory;
     if(assemblerInitialized)
         delete assem;
     delete ui;
 }
 
-void MainWindow::on_actionSimulate_triggered()
-{
+void MainWindow::on_actionSimulate_triggered(){
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
     engine->show();
@@ -100,10 +104,7 @@ void MainWindow::on_actionSimulate_triggered()
     }
 }
 
-void MainWindow::on_actionNew_triggered()
-{
-
-
+void MainWindow::on_actionNew_triggered(){
 
     QMdiSubWindow *newWindow = new QMdiSubWindow(ui->mdiAreaCode);
     newWindow->setObjectName("newW");
@@ -139,58 +140,76 @@ void MainWindow::on_actionNew_triggered()
 
 }
 
-void MainWindow::printS()
-{
+void MainWindow::printS(){
 
 }
 
-void MainWindow::on_actionAssemble_triggered()
-{
-   if (ui->mdiAreaCode->currentSubWindow())
-   {
+void MainWindow::on_actionAssemble_triggered(){
+    if (ui->mdiAreaCode->currentSubWindow())
+    {
         QWidget *W  = ui->mdiAreaCode->currentSubWindow()->findChild <QWidget *> ("NW");
-        if (W)
-        {
+        if (W){
             CodeEditor  *E = W->findChild  <CodeEditor*> ("CodeE");
-            if (E)
-            {
+            if (E){
                 qDebug() << E->toPlainText();
                 QStringList instrs = E->toPlainText().split("\n");
                 if(assemblerInitialized)
                     delete assem;
                 assem = new Assembler(&instrs, memory, &mainProcessorRegisters);
                 assemblerInitialized = true;
-            }
-            else
+            }else
                 QMessageBox::critical(this, "Error", "Error 1");
-        }
-        else
+        }else
             QMessageBox::critical(this, "Error", "Error 2");
 
-   }
-   else
+    }else
         QMessageBox::critical(this, "Error", "Error 3");
 }
 
-void MainWindow::on_actionClose_triggered()
-{
+void MainWindow::on_actionClose_triggered(){
     ui->mdiAreaCode->closeAllSubWindows();
 }
 
-void MainWindow::on_actionTileset_viewer_triggered()
-{
+void MainWindow::on_actionTileset_viewer_triggered(){
     tileSetViewer = new TileSetViewer(this, memory);
     tileSetViewer->show();
 }
 
-void MainWindow::on_actionPalette_Viewer_triggered()
-{
+void MainWindow::on_actionPalette_Viewer_triggered(){
     paletteViewer = new PaletteViewer(this, memory);
     paletteViewer->show();
 }
 
-void MainWindow::on_actionTile_loader_triggered()
-{
+void MainWindow::on_actionTile_loader_triggered(){
     tileLoader = new TileLoader(this, memory);
     tileLoader->show();
+}
+
+void MainWindow::on_actionEnable_Graphics_Engine_triggered()
+{
+    if(ui->actionEnable_Graphics_Engine->isChecked()){
+        if(memoryLoading == NULL || !memoryLoading->isInit()){
+            memoryLoading = new MemoryLoading(0, this->memory);
+            memoryLoading->show();
+        }
+        ui->actionTileset_viewer->setEnabled(true);
+        ui->actionBitmap_Display->setEnabled(true);
+        ui->actionPalette_Viewer->setEnabled(true);
+        ui->actionReload_Tiles_Memory->setEnabled(true);
+        ui->actionTile_loader->setEnabled(true);
+    }else{
+        ui->actionTileset_viewer->setEnabled(false);
+        ui->actionBitmap_Display->setEnabled(false);
+        ui->actionPalette_Viewer->setEnabled(false);
+        ui->actionReload_Tiles_Memory->setEnabled(false);
+        ui->actionTile_loader->setEnabled(false);
+    }
+}
+
+void MainWindow::on_actionReload_Tiles_Memory_triggered()
+{
+    if (memoryLoading != NULL)
+        delete memoryLoading;
+    memoryLoading = new MemoryLoading(0, this->memory);
+    memoryLoading->show();
 }

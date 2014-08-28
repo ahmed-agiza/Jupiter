@@ -982,7 +982,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
     }
 
 
-    for (int i = 0; i < instructions.size(); i++)
+    /*for (int i = 0; i < instructions.size(); i++)
     {
         qDebug() << "********* instruction " + QString::number(i) + " ********";
         qDebug() << "Name: " << instructions[i].getName();
@@ -993,7 +993,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         qDebug() << "Shamt: " << instructions[i].getShamt();
         qDebug() << "**********************************************";
 
-    }
+    }*/
 
 
     for (int i = 0; i<errorList.size(); i++)

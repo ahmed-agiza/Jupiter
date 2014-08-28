@@ -18,13 +18,16 @@ class MemoryLoading : public QWidget
 
 public:
     explicit MemoryLoading(QWidget *parent, Memory*);
+    bool isInit();
     ~MemoryLoading();
 signals:
     void firstRender();
 private slots:
     void on_pushButton_pressed();
     void onLoadingNumberChanged(int);
+    void loadComplete();
 private:
+    bool initialized;
     Ui::MemoryLoading *ui;
     Memory* mem;
     LoadMemoryThread* myThread;

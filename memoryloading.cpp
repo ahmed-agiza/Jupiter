@@ -7,6 +7,12 @@ MemoryLoading::MemoryLoading(QWidget *parent, Memory *mem) :
 {
     ui->setupUi(this);
     this->mem = mem;
+    initialized = false;
+}
+
+bool MemoryLoading::isInit()
+{
+    return initialized;
 }
 
 MemoryLoading::~MemoryLoading()
@@ -49,6 +55,7 @@ void MemoryLoading::on_pushButton_pressed()
     ui->progressBar->setMaximum((claculateMemorySize(segmentsToLoad) + 1024 - 1)/1024);
     myThread = new LoadMemoryThread(this,segmentsToLoad);
     myThread->memory = mem;
+    QObject::connect(myThread, SIGNAL(loadComplete()), this, SLOT(loadComplete()));
     myThread->start();
 
 }
@@ -56,4 +63,9 @@ void MemoryLoading::on_pushButton_pressed()
 void MemoryLoading::onLoadingNumberChanged(int number)
 {
     ui->progressBar->setValue(number);
+}
+
+void MemoryLoading::loadComplete()
+{
+    initialized = true;
 }

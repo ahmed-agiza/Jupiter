@@ -41,6 +41,10 @@ private slots:
 
     void printS();
 
+    void on_actionEnable_Graphics_Engine_triggered();
+
+    void on_actionReload_Tiles_Memory_triggered();
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;

@@ -17,6 +17,7 @@ public:
 private:
     QVector<bool> segmentsToLoad;
 signals:
+    void loadComplete();
 
 public slots:
 

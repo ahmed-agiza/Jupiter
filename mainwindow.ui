@@ -175,6 +175,8 @@
     <addaction name="actionBitmap_Display"/>
     <addaction name="actionBase_Converter"/>
     <addaction name="separator"/>
+    <addaction name="actionEnable_Graphics_Engine"/>
+    <addaction name="actionReload_Tiles_Memory"/>
     <addaction name="actionTile_loader"/>
     <addaction name="actionTileset_viewer"/>
     <addaction name="actionPalette_Viewer"/>
@@ -807,6 +809,7 @@
    <addaction name="actionPaste"/>
    <addaction name="actionAssemble"/>
    <addaction name="actionSimulate"/>
+   <addaction name="actionEnable_Graphics_Engine"/>
   </widget>
   <action name="actionNew">
    <property name="text">
@@ -980,6 +983,25 @@
   <action name="actionTile_loader">
    <property name="text">
     <string>Tile Loader</string>
+   </property>
+  </action>
+  <action name="actionEnable_Graphics_Engine">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable Graphics Engine</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionReload_Tiles_Memory">
+   <property name="text">
+    <string>Reload Tiles Memory</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
    </property>
   </action>
  </widget>

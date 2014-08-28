@@ -11,5 +11,6 @@ void LoadMemoryThread::run()
     //QMutex mutex;
     qDebug() << "Started!";
     memory->loadMemory(":/memory/memory.bin",segmentsToLoad);
+    emit loadComplete();
     qDebug() << "Done :)\n";
 }
