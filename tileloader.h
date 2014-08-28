@@ -23,6 +23,8 @@ private:
     QString filePath;
     QMap< Uint32, Uint8 > paletteSet;
     sf::Uint8 palettePointer;
+    bool isEmptyTile(const Tile&);
+    int backgroundTileIndexToLoad, spriteTileIndexToLoad;
 private slots:
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();

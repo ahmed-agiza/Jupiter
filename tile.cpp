@@ -7,7 +7,7 @@ Tile::Tile()
     texture.setRepeated(true);
     tileData.resize(TILE_SIZE);
     tileData.fill(QVector<char>(TILE_SIZE,0));
-    image.create(TILE_SIZE,TILE_SIZE,Color(0,0,0,255));
+    image.create(TILE_SIZE,TILE_SIZE,Color(0,0,0,0));
 }
 
 void Tile::setPalette(QVector<PaletteColor> *palette)
