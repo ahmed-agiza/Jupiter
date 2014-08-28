@@ -162,7 +162,7 @@ int Memory::getHeapSegmentSize()
 
 int Memory::getStackSegmentSize()
 {
-    return stackSegment.size();
+    return heapSegment.size();
 }
 
 

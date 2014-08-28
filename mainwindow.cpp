@@ -47,18 +47,25 @@ MainWindow::MainWindow(QWidget *parent) :
     assemblerInitialized = false;
     this->setMouseTracking(true);
 
-    Memory *testMemory = new Memory(this);
+    /*Memory *testMemory = new Memory(this);
     int location = testMemory->dataSegmentBaseAddress;
     testMemory->storeWord(location, 15614);
     testMemory->storeWord(location + 4, 1179010630);
-   /*testMemory->storeByte(location + 5, '5');
+    testMemory->storeByte(location + 5, '5');
     testMemory->storeByte(location + 6, '6');
     testMemory->storeByte(location + 7, '7');
     testMemory->storeByte(location + 8, '8');*/
 
 
-    MemoryModel *memModel = new MemoryModel(testMemory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
-    ui->dataTable->setModel(memModel);
+    MemoryModel *textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
+    MemoryModel *dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
+    MemoryModel *stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
+    MemoryModel *heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
+
+    ui->textTable->setModel(textModel);
+    ui->dataTable->setModel(dataModel);
+    ui->stackTable->setModel(stackModel);
+    ui->heapTable->setModel(heapModel);
     /*for(int i = location; i < location + 32; i+=4){
         qDebug() << "i: " << i << ":  " << (int) testMemory->loadWordU(i) << "\n";
     }*/

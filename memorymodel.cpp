@@ -38,8 +38,11 @@ MemoryModel::MemoryModel(Memory *m, QObject *parent, MemorySegment ms, QComboBox
     qDebug() << memory;
     int totalSize = initMemorySegment();
     updateCount(totalSize);
-
-    qDebug() << "Contructed..";
+    qDebug() << "Data: " <<memory->getDataSegmentSize();
+    qDebug() << "Text: " <<memory->getTextSegmentSize();
+    qDebug() << "Stack: " <<memory->getStackSegmentSize();
+    qDebug() << "Heap: " <<memory->getHeapSegmentSize();
+    qDebug() << "Contructed.." << rCount;
 }
 
 
@@ -67,7 +70,7 @@ int MemoryModel::initMemorySegment()
         break;
     case StackSegment:
     default:
-        baseAddress = 0;
+        baseAddress = memory->heapSegmentBaseAddress;;
         totalSize = memory->getStackSegmentSize();
         break;
     }
@@ -103,10 +106,15 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole){
          int adr;
+         int rowNumber;
+         if (memoryType == StackSegment)
+             rowNumber = rCount - 1 - index.row();
+         else
+             rowNumber = index.row();
          if (memoryMode->currentText() == BYTE || memoryMode->currentText() == UBYTE){
-             adr = baseAddress + index.row();
+             adr = baseAddress + rowNumber;
          }else{
-             adr = baseAddress + 4*index.row();
+             adr = baseAddress + 4*rowNumber;
          }
 
          if (index.column() == 0){
