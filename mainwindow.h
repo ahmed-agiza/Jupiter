@@ -75,6 +75,7 @@ private:
     QStringList projectTextFiles;
     QString projectDataFile;
     QMap<QString, QString> projectConf;
+    QFont editorFont;
 
     void parseProjectXML(QFile &);
     //Menus

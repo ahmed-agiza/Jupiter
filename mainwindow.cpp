@@ -59,6 +59,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionTile_loader->setEnabled(false);
     ui->actionSprite_Editor->setEnabled(false);
 
+    QFontDatabase fontsDB;
+    fontsDB.addApplicationFont(":/font/consolas.ttf");
+    if(fontsDB.families().contains("Consolas")){
+        editorFont = fontsDB.font("Consolas", "Normal", 12);
+    }
+
+
+
+   // editorFont = fontsDB.font("consola")
     /*Memory *testMemory = new Memory(this);
     int location = testMemory->dataSegmentBaseAddress;
     testMemory->storeWord(location, 15614);
@@ -148,6 +157,7 @@ void MainWindow::on_actionNew_triggered(){
     QTextEdit *linesCount = new QTextEdit(newWidgets);
 
     newCode->setObjectName("CodeE");
+    newCode->setFont(editorFont);
 
     linesCount->setEnabled(false);
     linesCount->setMinimumSize(10, 10);

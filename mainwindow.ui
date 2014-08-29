@@ -860,6 +860,7 @@
    <addaction name="actionPaste"/>
    <addaction name="actionAssemble"/>
    <addaction name="actionSimulate"/>
+   <addaction name="actionAssemble_and_Simulate"/>
    <addaction name="actionEnable_Graphics_Engine"/>
   </widget>
   <action name="actionNew">

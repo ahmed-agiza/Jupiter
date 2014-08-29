@@ -5,4 +5,10 @@
     <qresource prefix="/testProject">
         <file>testProject.mpro</file>
     </qresource>
+    <qresource prefix="/font">
+        <file>consola.ttf</file>
+        <file>consolab.ttf</file>
+        <file>consolai.ttf</file>
+        <file>consolaz.ttf</file>
+    </qresource>
 </RCC>
