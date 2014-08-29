@@ -2,4 +2,7 @@
     <qresource prefix="/memory">
         <file>memory.bin</file>
     </qresource>
+    <qresource prefix="/testProject">
+        <file>testProject.mpro</file>
+    </qresource>
 </RCC>

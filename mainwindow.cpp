@@ -6,6 +6,7 @@
 #include <QTextEdit>
 #include <QMdiSubWindow>
 #include <QMdiArea>
+#include <QPair>
 #include "codeeditor.h"
 #include <QHBoxLayout>
 #include <QPalette>
@@ -13,6 +14,11 @@
 #include <QVector>
 #include <QMessageBox>
 #include <iostream>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomText>
 
 #include "memory.h"
 #include "InstructionFuncs.h"
@@ -98,7 +104,7 @@ MainWindow::~MainWindow(){
 }
 
 void MainWindow::on_actionSimulate_triggered(){
-    qDebug() << "Simulating..";
+    // qDebug() << "Simulating..";
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
     if(ui->actionEnable_Graphics_Engine->isChecked()){
@@ -122,7 +128,7 @@ void MainWindow::on_actionSimulate_triggered(){
         ui->dataTable->setModel(dataModel);
         ui->stackTable->setModel(stackModel);
         ui->heapTable->setModel(heapModel);
-         qDebug() << "Simulated.";
+        // qDebug() << "Simulated.";
     }
 
 }
@@ -168,14 +174,14 @@ void MainWindow::printS(){
 }
 
 void MainWindow::on_actionAssemble_triggered(){
-    qDebug() << "Assembling..";
+    // qDebug() << "Assembling..";
     if (ui->mdiAreaCode->currentSubWindow())
     {
         QWidget *W  = ui->mdiAreaCode->currentSubWindow()->findChild <QWidget *> ("NW");
         if (W){
             CodeEditor  *E = W->findChild  <CodeEditor*> ("CodeE");
             if (E){
-                qDebug() << E->toPlainText();
+                //qDebug() << E->toPlainText();
                 QStringList instrs = E->toPlainText().split("\n");
                 if(assemblerInitialized){
                     delete assem;
@@ -195,7 +201,7 @@ void MainWindow::on_actionAssemble_triggered(){
 
     }else
         QMessageBox::critical(this, "Error", "Error 3");
-    qDebug() << "Assembled.";
+    //qDebug() << "Assembled.";
 }
 
 void MainWindow::on_actionClose_triggered(){
@@ -254,4 +260,105 @@ void MainWindow::on_actionReload_Tiles_Memory_triggered()
     memoryLoading = new MemoryLoading(0, this->memory);
     memoryLoading->setModal(true);
     memoryLoading->show();
+}
+
+void MainWindow::on_actionAssemble_and_Simulate_triggered()
+{
+    ui->actionAssemble->trigger();
+    ui->actionSimulate->trigger();
+}
+
+void MainWindow::on_actionOpen_Project_triggered()
+{
+    projectPath = ":/testProject/testProject.mpro";
+    QFile file(projectPath);
+    QString data;
+    if (file.open(QIODevice::ReadOnly)){
+        file.close();
+        parseProjectXML(file);
+    }else{
+        QMessageBox::information(0, "error", file.errorString());
+        qDebug() << "Failed to open!";
+    }
+    qDebug() << data;
+
+}
+
+void MainWindow::parseProjectXML(QFile &data){
+    /*if (data.open(QIODevice::ReadOnly)){
+        QXmlStreamReader xml(&data);
+        while(!xml.atEnd()){
+            if(xml.isStartElement())
+            {
+                // Read the tag name.
+                QString tagName(xml.name().toString());
+                // Check in settings map, whether there's already an entry. If not, insert.
+                QString tagValue(xml.readElementText());
+                qDebug() << tagName << ":  " << tagValue;
+                projectMap[tagName] = tagValue;
+            }
+            xml.readNext();
+        }
+    }*/
+    if(!data.open( QIODevice::ReadOnly | QIODevice::Text ) ){
+        qDebug( "Failed to open!" );
+    }else{
+        QDomDocument domDocument;
+        if(!domDocument.setContent(&data)){
+            qDebug( "Cannot set content" );
+            return;
+        }
+
+        data.close();
+
+        QDomElement domElement = domDocument.documentElement();
+        QDomNode child = domElement.firstChild();
+        while(!child.isNull()) {
+            QDomElement e = child.toElement();
+            if (e.tagName().trimmed() == "ProjectTitle"){
+                projectTitle = e.toElement().text().trimmed();
+                qDebug() << "Title: " << projectTitle;
+            }else if (e.tagName().trimmed() == "TextSegment"){
+                QDomNodeList textL = e.childNodes();
+                projectTextFiles.clear();;
+                for (int i = 0; i < textL.size(); i++){
+                    QString tempTag = textL.at(i).toElement().tagName().trimmed();
+                    QString tempTagValue = textL.at(i).toElement().text().trimmed();
+
+                    if (tempTag == "MainFile"){
+                        qDebug() << "Main: " << tempTagValue;
+                        projectMainFile = tempTagValue;
+                        projectTextFiles.append(tempTagValue);
+                    }else if (tempTag == "File"){
+                        projectTextFiles.append(tempTagValue);
+                    }
+                    if (i < projectTextFiles.size())
+                        qDebug() << "Text" << i << ": " << projectTextFiles.at(i);
+                }
+            }else if (e.tagName().trimmed() == "DataSegment"){
+                projectDataFile = e.firstChild().toElement().text().trimmed();
+                qDebug() << "Data: " << projectDataFile;
+            }else if (e.tagName().trimmed() == "Configure"){
+                QDomNodeList confL = e.childNodes();
+                projectConf.clear();
+                for (int i = 0; i < confL.size(); i++){
+                    projectConf[confL.at(i).toElement().tagName().trimmed()] = confL.at(i).toElement().text().trimmed();
+                    qDebug() << confL.at(i).toElement().tagName().trimmed() << ": " << projectConf[confL.at(i).toElement().tagName().trimmed()];
+                }
+            }
+            child = child.nextSibling();
+
+        }
+
+    }
+    /* QString projectPath;
+    QString projectTitle;
+    QString mainFile;
+    QStringList projectTextFiles;
+    QString projectDataFile;
+    QMap<QString, QString> projectConf;*/
+
+
+
+
 }

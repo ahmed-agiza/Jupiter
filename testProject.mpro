@@ -1,0 +1,21 @@
+<MIPSProject>
+
+<ProjectTitle>
+	Some title
+</ProjectTitle>
+
+<TextSegment> 
+	<MainFile>file1.mtxt</MainFile>
+	<File>file2.mtxt</File>
+	<File>file4.mtxt</File>
+</TextSegment>
+
+<DataSegment>
+	<File>file3.mdat</File>
+</DataSegment>
+
+<Configure>
+	<EnableGFX>true</EnableGFX>
+</Configure>
+
+</MIPSProject>

@@ -48,6 +48,10 @@ private slots:
 
     void on_actionReload_Tiles_Memory_triggered();
 
+    void on_actionAssemble_and_Simulate_triggered();
+
+    void on_actionOpen_Project_triggered();
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
@@ -61,6 +65,14 @@ private:
     RegistersModel *regModel;
     MemoryModel *textModel, *dataModel, *stackModel, *heapModel;
     bool assemblerInitialized;
+    QString projectPath;
+    QString projectTitle;
+    QString projectMainFile;
+    QStringList projectTextFiles;
+    QString projectDataFile;
+    QMap<QString, QString> projectConf;
+
+    void parseProjectXML(QFile &);
     //Menus
 };
 

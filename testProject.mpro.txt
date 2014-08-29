@@ -1,0 +1,13 @@
+<ProjectTitle>Some title</ProjectTitle>
+
+<TextSegment> 
+	<MainFile>file1.mtxt</MainFile>
+	<File>file2.mtxt</File>
+	<File>file4.mtxt</File>
+</TextSegment>
+
+<Data><File>file3.mdat<File></Data>
+
+<Configure>
+<EnableGFX>true</EnableGFX>
+</Configure>

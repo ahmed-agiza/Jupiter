@@ -92,19 +92,19 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole){
-         int adr;
-         int rowNumber;
-         if (memoryType == StackSegment)
-             rowNumber = rCount - 1 - index.row();
-         else
-             rowNumber = index.row();
-         if (memoryMode->currentText() == BYTE || memoryMode->currentText() == UBYTE){
-             adr = baseAddress + rowNumber;
-         }else{
-             adr = baseAddress + 4*rowNumber;
-         }
+        int adr;
+        int rowNumber;
+        if (memoryType == StackSegment)
+            rowNumber = rCount - 1 - index.row();
+        else
+            rowNumber = index.row();
+        if (memoryMode->currentText() == BYTE || memoryMode->currentText() == UBYTE){
+            adr = baseAddress + rowNumber;
+        }else{
+            adr = baseAddress + 4*rowNumber;
+        }
 
-         if (index.column() == 0){
+        if (index.column() == 0){
             if(addressBase->currentText() == B10)
                 return adr;
             else if (addressBase->currentText() == B16)
@@ -114,20 +114,44 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
         }
         else if (index.column() == 1){
             int value;
-            if (memoryMode->currentText() == UWORD)
-                value = memory->loadWordU(adr);
-            else if (memoryMode->currentText() == BYTE)
+            unsigned int uvalue;
+            if (memoryMode->currentText() == UWORD){
+                uvalue = memory->loadWordU(adr);
+                if (memoryBase->currentText() == B16){
+
+
+                    if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
+                        return "0x" + QString::number(uvalue, 16).toUpper();
+                    }else{
+                        QString untrimmed = QString::number(uvalue, 16);
+                        return "0x" + untrimmed.mid(untrimmed.size() -8).toUpper();
+                    }
+                }
+
+
+            }else if (memoryMode->currentText() == BYTE){
                 value = memory->loadByte(adr);
-            else if (memoryMode->currentText() == UBYTE)
-                value = memory->loadByteU(adr);
-            else
+            }else if (memoryMode->currentText() == UBYTE){
+                uvalue = memory->loadByteU(adr);
+                if (memoryBase->currentText() == B16){
+
+
+                    if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
+                        return "0x" + QString::number(uvalue, 16).toUpper();
+                    }else{
+                        QString untrimmed = QString::number(uvalue, 16);
+                        return "0x" + untrimmed.mid(untrimmed.size() -8).toUpper();
+                    }
+                }
+            }else{
                 value = memory->loadWord(adr);
+            }
             if (memoryBase->currentText() == B16){
                 if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
                     return "0x" + QString::number(value, 16).toUpper();
                 }else{
                     QString untrimmed = QString::number(value, 16);
-                    return "0x" + untrimmed.mid(untrimmed.size() -8).toUpper();
+                    return "0x" + untrimmed.mid(untrimmed.size() - 8).toUpper();
                 }
             }else if (memoryBase->currentText() == B02){
                 return "0b" + QString::number(value, 2);
