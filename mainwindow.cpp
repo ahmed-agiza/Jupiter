@@ -237,12 +237,14 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered()
         ui->actionPalette_Viewer->setEnabled(true);
         ui->actionReload_Tiles_Memory->setEnabled(true);
         ui->actionTile_loader->setEnabled(true);
+        ui->actionSprite_Editor->setEnabled(true);
     }else{
         ui->actionTileset_viewer->setEnabled(false);
         ui->actionBitmap_Display->setEnabled(false);
         ui->actionPalette_Viewer->setEnabled(false);
         ui->actionReload_Tiles_Memory->setEnabled(false);
         ui->actionTile_loader->setEnabled(false);
+        ui->actionSprite_Editor->setEnabled(false);
     }
 }
 
@@ -266,6 +268,12 @@ void MainWindow::on_actionAssemble_and_Simulate_triggered()
 {
     ui->actionAssemble->trigger();
     ui->actionSimulate->trigger();
+}
+
+void MainWindow::on_actionSprite_Editor_triggered()
+{
+    spriteViewer = new SpriteViewer(this, memory);
+    spriteViewer->show();
 }
 
 void MainWindow::on_actionOpen_Project_triggered()

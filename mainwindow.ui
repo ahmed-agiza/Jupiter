@@ -184,6 +184,7 @@
     <addaction name="actionTile_loader"/>
     <addaction name="actionTileset_viewer"/>
     <addaction name="actionPalette_Viewer"/>
+    <addaction name="actionSprite_Editor"/>
     <addaction name="separator"/>
     <addaction name="actionConfigure"/>
    </widget>
@@ -1076,6 +1077,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
+  <action name="actionSprite_Editor">
+   <property name="text">
+    <string>Sprite Editor</string>
    </property>
   </action>
  </widget>

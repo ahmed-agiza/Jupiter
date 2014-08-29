@@ -12,6 +12,7 @@
 #include "tileloader.h"
 #include "registersmodel.h"
 #include "memorymodel.h"
+#include "spriteviewer.h"
 
 namespace Ui {
 class MainWindow;
@@ -42,6 +43,8 @@ private slots:
 
     void on_actionTile_loader_triggered();
 
+    void on_actionSprite_Editor_triggered();
+
     void printS();
 
     void on_actionEnable_Graphics_Engine_triggered();
@@ -60,6 +63,7 @@ private:
     PaletteViewer *paletteViewer;
     TileLoader* tileLoader;
     TileEngine *engine;
+    SpriteViewer *spriteViewer;
     QVector<int> mainProcessorRegisters;
     Assembler *assem;
     RegistersModel *regModel;
