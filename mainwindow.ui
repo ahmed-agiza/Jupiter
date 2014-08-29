@@ -48,7 +48,7 @@
    </palette>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Mirage</string>
   </property>
   <property name="documentMode">
    <bool>true</bool>
