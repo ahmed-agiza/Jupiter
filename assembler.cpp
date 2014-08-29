@@ -68,7 +68,7 @@ QString registerFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + registerIn
 //      sc
 
 QString memoryInstructions = "(sb|lb|lbu|sh|lh|lhu|sw|lw|lwl|lwr|swl|swr|ll|sc)";
-QString memoryFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?$";
+QString memoryFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + memoryInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)?[ \\t]*\\([ \\t]*" + registerRegex + "[ \\t]*\\)(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register, immediate
@@ -459,7 +459,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         }
         else if((M.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(Instruction(M.cap(2),registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,getNumber(M.cap(4)),0,IFormat));
+            instructions.push_back(Instruction(M.cap(2),registers,opcode[M.cap(2)],registerIndex[M.cap(5)],registerIndex[M.cap(3)],0,(M.cap(4).size()? getNumber(M.cap(4)):0),0,IFormat));
             QString labelName = M.cap(1);
             if(M.cap(1).size()){
                 if(labels.contains(labelName)){
