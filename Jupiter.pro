@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     paletterenderwindow.cpp \
     tileloader.cpp \
     spriteviewer.cpp \
-    spriterenderwindow.cpp
+    spriterenderwindow.cpp \
+    inputmanager.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -62,7 +63,8 @@ HEADERS  += mainwindow.h \
     trie.h \
     tileloader.h \
     spriteviewer.h \
-    spriterenderwindow.h
+    spriterenderwindow.h \
+    inputmanager.h
 
 FORMS    += \
     mainwindow.ui \
@@ -70,7 +72,8 @@ FORMS    += \
     tilesetviewer.ui \
     paletteviewer.ui \
     tileloader.ui \
-    spriteviewer.ui
+    spriteviewer.ui \
+    inputmanager.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \

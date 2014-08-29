@@ -187,6 +187,7 @@
     <addaction name="actionTile_loader"/>
     <addaction name="separator"/>
     <addaction name="actionConfigure"/>
+    <addaction name="actionInput"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1083,6 +1084,11 @@
   <action name="actionSprite_Editor">
    <property name="text">
     <string>Sprite Editor</string>
+   </property>
+  </action>
+  <action name="actionInput">
+   <property name="text">
+    <string>Input</string>
    </property>
   </action>
  </widget>

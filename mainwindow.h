@@ -13,6 +13,7 @@
 #include "registersmodel.h"
 #include "memorymodel.h"
 #include "spriteviewer.h"
+#include "inputmanager.h"
 
 namespace Ui {
 class MainWindow;
@@ -55,6 +56,8 @@ private slots:
 
     void on_actionOpen_Project_triggered();
 
+    void on_actionInput_triggered();
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
@@ -63,6 +66,7 @@ private:
     PaletteViewer *paletteViewer;
     TileLoader* tileLoader;
     TileEngine *engine;
+    InputManager *inputManager;
     SpriteViewer *spriteViewer;
     QVector<int> mainProcessorRegisters;
     Assembler *assem;
