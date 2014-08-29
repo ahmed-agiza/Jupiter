@@ -192,11 +192,11 @@ int Instruction::getShamt() const
 
 void Instruction::execute(int &inPC)
 {
-    qDebug() << "Before excecuting " << this->name;
-    for (int i = 0; i < registers->size(); i++){
-        qDebug() << i << ": " << registers->at(i);
-    }
-    qDebug() << "------------------";
+//    qDebug() << "Before excecuting " << this->name;
+//    for (int i = 0; i < registers->size(); i++){
+//        qDebug() << i << ": " << registers->at(i);
+//    }
+//    qDebug() << "------------------";
 
     int x = -1;
     if (func != NULL)
@@ -204,11 +204,11 @@ void Instruction::execute(int &inPC)
     else
         qDebug() << "Null function!";
 
-    qDebug() << "After excecuting " << this->name;
-    for (int i = 0; i < registers->size(); i++){
-        qDebug() << i << ": " << registers->at(i);
-    }
-    qDebug() << "------------------";
+//    qDebug() << "After excecuting " << this->name;
+//    for (int i = 0; i < registers->size(); i++){
+//        qDebug() << i << ": " << registers->at(i);
+//    }
+//    qDebug() << "------------------";
 
    if(x != 0)
        emit raiseException(x);

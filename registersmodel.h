@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QMap>
 #include <QPair>
+#include <QComboBox>
 
 class RegistersModel : public QAbstractTableModel
 {
@@ -12,6 +13,7 @@ class RegistersModel : public QAbstractTableModel
 public:
     explicit RegistersModel(QObject *parent);
     explicit RegistersModel(QVector<int> *r, QObject *parent);
+    explicit RegistersModel(QVector<int> *r, QObject *parent, QComboBox *nm, QComboBox *dsb);
     void setRegs(QVector<int> *r);
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
@@ -34,6 +36,7 @@ private:
     //QList<QPair<int, int*> > *tableData;
     QVector<int> *regs;
     void constructData();
+    QComboBox *nameMode, *displayBase;
 
 signals:
 

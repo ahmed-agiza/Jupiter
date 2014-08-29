@@ -13,10 +13,10 @@
 #include <QVector>
 #include <QMessageBox>
 #include <iostream>
-#include "registersmodel.h"
+
 #include "memory.h"
 #include "InstructionFuncs.h"
-#include "memorymodel.h"
+
 
 
 
@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     memory = new Memory(this);
 
     memoryLoading = NULL;
+    ui->tableMemory->setCurrentIndex(1);
 
     for (int i = 0; i < 32; i++){
         mainProcessorRegisters.append(0);
@@ -38,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mainProcessorRegisters[28] = 0x10008000;
     mainProcessorRegisters[29] = 0x7FFFFFFC;
 
-    RegistersModel *regModel = new RegistersModel(&mainProcessorRegisters, this);
+    regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
     ui->tableMainRegisters->setModel(regModel);
 
     assem = NULL;
@@ -63,10 +64,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    MemoryModel *textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
-    MemoryModel *dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
-    MemoryModel *stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
-    MemoryModel *heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
+    textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
+    dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
+    stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
+    heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
 
     ui->textTable->setModel(textModel);
     ui->dataTable->setModel(dataModel);
@@ -91,17 +92,39 @@ MainWindow::~MainWindow(){
     //delete memory;
     if(assemblerInitialized)
         delete assem;
+    if (engine)
+        delete engine;
     delete ui;
 }
 
 void MainWindow::on_actionSimulate_triggered(){
+    qDebug() << "Simulating..";
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
-    engine->show();
+    if(ui->actionEnable_Graphics_Engine->isChecked()){
+        engine->show();
+    }
+
     if (assemblerInitialized){
         assem->simulate();
         mainProcessorRegisters = *assem->registers;
+
+
+        regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
+        ui->tableMainRegisters->setModel(regModel);
+
+        textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
+        dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
+        stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
+        heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
+
+        ui->textTable->setModel(textModel);
+        ui->dataTable->setModel(dataModel);
+        ui->stackTable->setModel(stackModel);
+        ui->heapTable->setModel(heapModel);
+         qDebug() << "Simulated.";
     }
+
 }
 
 void MainWindow::on_actionNew_triggered(){
@@ -145,6 +168,7 @@ void MainWindow::printS(){
 }
 
 void MainWindow::on_actionAssemble_triggered(){
+    qDebug() << "Assembling..";
     if (ui->mdiAreaCode->currentSubWindow())
     {
         QWidget *W  = ui->mdiAreaCode->currentSubWindow()->findChild <QWidget *> ("NW");
@@ -153,8 +177,15 @@ void MainWindow::on_actionAssemble_triggered(){
             if (E){
                 qDebug() << E->toPlainText();
                 QStringList instrs = E->toPlainText().split("\n");
-                if(assemblerInitialized)
+                if(assemblerInitialized){
                     delete assem;
+                    if (memory){
+                        Memory *tempMemory = memory;
+                        memory = new Memory(this);
+                        delete tempMemory;
+                    }
+
+                }
                 assem = new Assembler(&instrs, memory, &mainProcessorRegisters);
                 assemblerInitialized = true;
             }else
@@ -164,6 +195,7 @@ void MainWindow::on_actionAssemble_triggered(){
 
     }else
         QMessageBox::critical(this, "Error", "Error 3");
+    qDebug() << "Assembled.";
 }
 
 void MainWindow::on_actionClose_triggered(){

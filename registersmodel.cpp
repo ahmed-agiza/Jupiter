@@ -2,6 +2,12 @@
 
 #include <QDebug>
 
+const QString B10("Decimal");
+const QString B16("Hexadecimal");
+const QString B02("Binary");
+const QString NUM("Numbers");
+const QString STR("Names");
+
 RegistersModel::RegistersModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
@@ -16,6 +22,14 @@ RegistersModel::RegistersModel(QVector<int> *r, QObject *parent=0) : QAbstractTa
    //tableData = new QList<QPair<int, int*> >;
   // constructData();
 
+}
+
+RegistersModel::RegistersModel(QVector<int> *r, QObject *parent=0, QComboBox *nm = 0, QComboBox *dsb = 0) : QAbstractTableModel(parent)
+{
+   regs = r;
+   constructMap();
+   nameMode = nm;
+   displayBase = dsb;
 }
 
 void RegistersModel::constructMap()
@@ -100,10 +114,23 @@ QVariant RegistersModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole){
-        if (index.column() == 0)
-            return registersMap[index.row()];
-        else if (index.column() == 1)
-            return regs->at(index.row());
+        if (index.column() == 0){
+            if (nameMode->currentText() == NUM){
+                return "$" + QString::number(index.row());
+            }else{
+                return registersMap[index.row()];
+            }
+
+        }else if (index.column() == 1){
+            int value = regs->at(index.row());
+            if (displayBase->currentText() == B16){
+                return "0x" + QString::number(value, 16);
+            }else if (displayBase->currentText() == B02){
+                return "0b" + QString::number(value, 2);
+            }else{
+                return value;
+            }
+        }
         else
          return QVariant();
     }

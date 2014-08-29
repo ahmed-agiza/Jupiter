@@ -196,6 +196,7 @@ int sw(fParam2)
 {
     UNUSE_I
     Q_UNUSED(PC);
+
     mem->storeWord(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
@@ -204,7 +205,7 @@ int lw(fParam2)
 {
     UNUSE_I
     Q_UNUSED(PC);
-    Rtr = mem->loadWord(Rsr - data0Addr + imm) ;
+    Rtr = mem->loadWord(Rsr + imm) ;
     incPC;
     return 0;
 }

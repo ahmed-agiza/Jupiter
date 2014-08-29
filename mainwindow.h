@@ -10,6 +10,9 @@
 #include "tilesetviewer.h"
 #include "paletteviewer.h"
 #include "tileloader.h"
+#include "registersmodel.h"
+#include "memorymodel.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -55,6 +58,8 @@ private:
     TileEngine *engine;
     QVector<int> mainProcessorRegisters;
     Assembler *assem;
+    RegistersModel *regModel;
+    MemoryModel *textModel, *dataModel, *stackModel, *heapModel;
     bool assemblerInitialized;
     //Menus
 };
