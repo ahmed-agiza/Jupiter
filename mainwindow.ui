@@ -181,10 +181,10 @@
     <addaction name="separator"/>
     <addaction name="actionEnable_Graphics_Engine"/>
     <addaction name="actionReload_Tiles_Memory"/>
-    <addaction name="actionTile_loader"/>
+    <addaction name="actionSprite_Editor"/>
     <addaction name="actionTileset_viewer"/>
     <addaction name="actionPalette_Viewer"/>
-    <addaction name="actionSprite_Editor"/>
+    <addaction name="actionTile_loader"/>
     <addaction name="separator"/>
     <addaction name="actionConfigure"/>
    </widget>

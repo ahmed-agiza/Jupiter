@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionPalette_Viewer->setEnabled(false);
     ui->actionReload_Tiles_Memory->setEnabled(false);
     ui->actionTile_loader->setEnabled(false);
+    ui->actionSprite_Editor->setEnabled(false);
 
     /*Memory *testMemory = new Memory(this);
     int location = testMemory->dataSegmentBaseAddress;
@@ -219,8 +220,8 @@ void MainWindow::on_actionPalette_Viewer_triggered(){
 }
 
 void MainWindow::on_actionTile_loader_triggered(){
-    tileLoader = new TileLoader(this, memory);
-    tileLoader->show();
+    //tileLoader = new TileLoader(this, memory);
+    //tileLoader->show();
 }
 
 void MainWindow::on_actionEnable_Graphics_Engine_triggered()
@@ -236,7 +237,7 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered()
         ui->actionBitmap_Display->setEnabled(true);
         ui->actionPalette_Viewer->setEnabled(true);
         ui->actionReload_Tiles_Memory->setEnabled(true);
-        ui->actionTile_loader->setEnabled(true);
+        //ui->actionTile_loader->setEnabled(true);
         ui->actionSprite_Editor->setEnabled(true);
     }else{
         ui->actionTileset_viewer->setEnabled(false);
