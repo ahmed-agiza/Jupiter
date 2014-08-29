@@ -146,7 +146,7 @@ void SpriteViewer::on_positionYlineEdit_editingFinished()
     memory->spriteRam[ui->spriteIndex->value()].setPositionY(ui->positionYlineEdit->text().toInt());
 }
 
-void SpriteViewer::on_tile0RotateRight_PushButton_clicked()
+void SpriteViewer::on_tile0RotateLeft_PushButton_clicked()
 {
     GameSprite& gameSprite = memory->spriteRam[ui->spriteIndex->value()];
     switch(gameSprite.getTile0Rotation()){
@@ -175,7 +175,7 @@ void SpriteViewer::on_tile0RotateRight_PushButton_clicked()
     emit renderScreen();
 }
 
-void SpriteViewer::on_tile0RotateLeft_PushButton_clicked()
+void SpriteViewer::on_tile0RotateRight_PushButton_clicked()
 {
     GameSprite& gameSprite = memory->spriteRam[ui->spriteIndex->value()];
     switch(gameSprite.getTile0Rotation()){
