@@ -6,6 +6,7 @@ InputManager::InputManager(QWidget *parent) :
     ui(new Ui::InputManager)
 {
     ui->setupUi(this);
+    this->setWindowTitle("Input Manager");
 }
 
 InputManager::~InputManager()
