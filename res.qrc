@@ -37,5 +37,9 @@
         <file>icons/toolbar/run.png</file>
         <file>icons/toolbar/save.png</file>
         <file>icons/toolbar/undo.png</file>
+        <file>icons/toolbar/ghost 2.png</file>
+        <file>icons/toolbar/ghost2.png</file>
+        <file>icons/toolbar/pacman.png</file>
+        <file>icons/toolbar/pacman2.png</file>
     </qresource>
 </RCC>

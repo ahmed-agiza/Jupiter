@@ -51,6 +51,9 @@ public:
     ~MainWindow();
 
 private slots:
+    void projectExplorerMenuRequested(QPoint loc);
+
+
     void on_actionNew_triggered();
 
     void on_actionAssemble_triggered();
@@ -92,6 +95,7 @@ private slots:
     void on_actionViewCodeEditor_triggered();
 
     void on_actionViewMemory_triggered();
+
 
 private:
     Ui::MainWindow *ui;

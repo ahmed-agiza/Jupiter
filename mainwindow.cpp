@@ -91,6 +91,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->heapTable->setModel(heapModel);
 
     ui->actionOpen_Project->trigger();
+
+    ui->treeFiles->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
 }
 
 
@@ -224,6 +227,22 @@ MainWindow::~MainWindow(){
     delete ui;
 }
 
+void MainWindow::projectExplorerMenuRequested(QPoint loc){
+    // QModelIndex index = ui->treeFiles->indexAt(loc);
+    QTreeWidgetItem *itm = ui->treeFiles->itemAt(loc);
+    QMenu *menu=new QMenu(this);
+    if (itm && (itm->parent()->text(0) == "Data" || itm->parent()->text(0) == "Text")){
+        qDebug() << itm->text(0);
+    }else{
+        menu->addAction(ui->actionNew);
+        menu->addAction(ui->actionOpen);
+        menu->addAction(ui->actionClose);
+    }
+
+
+    menu->popup(ui->treeFiles->viewport()->mapToGlobal(loc));
+}
+
 void MainWindow::on_actionSimulate_triggered(){
     // qDebug() << "Simulating..";
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
@@ -317,12 +336,14 @@ void MainWindow::on_actionTile_loader_triggered(){
 void MainWindow::on_actionEnable_Graphics_Engine_triggered()
 {
     if(ui->actionEnable_Graphics_Engine->isChecked()){
-        if(memoryLoading == NULL || !memoryLoading->isInit()){
+        /*if(memoryLoading == NULL || !memoryLoading->isInit()){
             if (memoryLoading == NULL)
                 memoryLoading = new MemoryLoading(0, this->memory);
             memoryLoading->setModal(true);
             memoryLoading->show();
-        }
+        }*/
+        ui->actionEnable_Graphics_Engine->setText("Disable Graphics Engine");
+        ui->actionEnable_Graphics_Engine->setToolTip("Disable Graphics Engine");
         ui->actionTileset_viewer->setEnabled(true);
         ui->actionBitmap_Display->setEnabled(true);
         ui->actionPalette_Viewer->setEnabled(true);
@@ -330,6 +351,8 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered()
         //ui->actionTile_loader->setEnabled(true);
         ui->actionSprite_Editor->setEnabled(true);
     }else{
+        ui->actionEnable_Graphics_Engine->setText("Enable Graphics Engine");
+        ui->actionEnable_Graphics_Engine->setToolTip("Enable Graphics Engine");
         ui->actionTileset_viewer->setEnabled(false);
         ui->actionBitmap_Display->setEnabled(false);
         ui->actionPalette_Viewer->setEnabled(false);

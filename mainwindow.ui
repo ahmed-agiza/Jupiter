@@ -1081,6 +1081,11 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/toolbar/icons/toolbar/pacman.png</normaloff>
+     <normalon>:/icons/toolbar/icons/toolbar/pacman2.png</normalon>:/icons/toolbar/icons/toolbar/pacman.png</iconset>
+   </property>
    <property name="text">
     <string>Enable Graphics Engine</string>
    </property>
@@ -1157,6 +1162,9 @@
    </property>
    <property name="text">
     <string>Assemble</string>
+   </property>
+   <property name="toolTip">
+    <string>Assembly</string>
    </property>
    <property name="shortcut">
     <string>Alt+A</string>
