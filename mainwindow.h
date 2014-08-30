@@ -77,6 +77,10 @@ private slots:
 
     void on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int column);
 
+    void on_treeFiles_itemExpanded(QTreeWidgetItem *item);
+
+    void on_treeFiles_itemCollapsed(QTreeWidgetItem *item);
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;

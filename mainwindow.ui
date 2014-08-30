@@ -856,8 +856,8 @@
    <addaction name="actionClose"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
-   <addaction name="actionCut"/>
    <addaction name="actionCopy"/>
+   <addaction name="actionCut"/>
    <addaction name="actionPaste"/>
    <addaction name="actionAssemble"/>
    <addaction name="actionSimulate"/>
@@ -881,6 +881,11 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset>
+     <normalon>icons/toolbar/save.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -905,6 +910,10 @@
    </property>
   </action>
   <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/toolbar/icons/toolbar/undo.png</normaloff>:/icons/toolbar/icons/toolbar/undo.png</iconset>
+   </property>
    <property name="text">
     <string>Undo</string>
    </property>
@@ -913,6 +922,11 @@
    </property>
   </action>
   <action name="actionRedo">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/redo.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Redo</string>
    </property>
@@ -921,6 +935,11 @@
    </property>
   </action>
   <action name="actionCut">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/cut.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Cut</string>
    </property>
@@ -929,6 +948,10 @@
    </property>
   </action>
   <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/toolbar/icons/toolbar/copy.png</normaloff>:/icons/toolbar/icons/toolbar/copy.png</iconset>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -937,6 +960,11 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/paste.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Paste</string>
    </property>
@@ -969,6 +997,10 @@
    </property>
   </action>
   <action name="actionAssemble">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/toolbar/icons/toolbar/assemble2.png</normaloff>:/icons/toolbar/icons/toolbar/assemble2.png</iconset>
+   </property>
    <property name="text">
     <string>Assemble</string>
    </property>
@@ -977,6 +1009,10 @@
    </property>
   </action>
   <action name="actionSimulate">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/toolbar/icons/toolbar/run.png</normaloff>:/icons/toolbar/icons/toolbar/run.png</iconset>
+   </property>
    <property name="text">
     <string>Simulate</string>
    </property>
@@ -1058,6 +1094,10 @@
    </property>
   </action>
   <action name="actionAssemble_and_Simulate">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/toolbar/icons/toolbar/assemble.png</normaloff>:/icons/toolbar/icons/toolbar/assemble.png</iconset>
+   </property>
    <property name="text">
     <string>Assemble and Simulate</string>
    </property>
@@ -1092,6 +1132,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>

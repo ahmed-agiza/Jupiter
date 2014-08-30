@@ -15,4 +15,27 @@
         <file>consolai.ttf</file>
         <file>consolaz.ttf</file>
     </qresource>
+    <qresource prefix="/icons/explorer">
+        <file>icons/explorer/binaryIcon.png</file>
+        <file>icons/explorer/dataFileIcon.png</file>
+        <file>icons/explorer/folderIconClosed.png</file>
+        <file>icons/explorer/folderIconOpened.png</file>
+        <file>icons/explorer/pictureIcon.png</file>
+        <file>icons/explorer/textFileIcon.png</file>
+        <file>icons/explorer/textsegmentFileIcon.png</file>
+    </qresource>
+    <qresource prefix="/icons/toolbar">
+        <file>icons/toolbar/assemble.png</file>
+        <file>icons/toolbar/assemble2.png</file>
+        <file>icons/toolbar/assemble3.png</file>
+        <file>icons/toolbar/assemble4.png</file>
+        <file>icons/toolbar/calculator.png</file>
+        <file>icons/toolbar/copy.png</file>
+        <file>icons/toolbar/cut.png</file>
+        <file>icons/toolbar/paste.png</file>
+        <file>icons/toolbar/redo.png</file>
+        <file>icons/toolbar/run.png</file>
+        <file>icons/toolbar/save.png</file>
+        <file>icons/toolbar/undo.png</file>
+    </qresource>
 </RCC>

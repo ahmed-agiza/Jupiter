@@ -446,6 +446,7 @@ void MainWindow::loadProjectTree()
     foreach(const QString &textFile, MainWindow::projectTextFiles){
         QTreeWidgetItem *textFileItem = new QTreeWidgetItem(textSegmentParent);
         textFileItem->setText(0, textFile);
+        textFileItem->setIcon(0, QIcon(":/icons/explorer/icons/explorer/textsegmentFileIcon.png"));
         if (textFile == MainWindow::projectMainFile){
             QFont currentItemFont = textFileItem->font(0);
             currentItemFont.setItalic(true);
@@ -459,11 +460,14 @@ void MainWindow::loadProjectTree()
     projectItem->addChild(dataSegmentParent);
     QTreeWidgetItem *dataFileItem = new QTreeWidgetItem(dataSegmentParent);
     dataFileItem->setText(0, MainWindow::projectDataFile);
+    dataFileItem->setIcon(0, QIcon(":/icons/explorer/icons/explorer/dataFileIcon.png"));
     dataSegmentParent->addChild(dataFileItem);
 
     projectItem->setExpanded(true);
     textSegmentParent->setExpanded(true);
     dataSegmentParent->setExpanded(true);
+    //textSegmentParent->setIcon(0, QIcon(":/icons/explorer/icons/explorer/folderIconOpened.png"));
+    //dataSegmentParent->setIcon(0, QIcon(":/icons/explorer/icons/explorer/folderIconOpened.png"));
 }
 
 bool MainWindow::validateProjectFiles(bool forceAll = true)
@@ -522,4 +526,17 @@ void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int colum
         QMessageBox::critical(this, "Error", QString("Failed to open the file ") + itemText + QString("\n ") + file.errorString());
 
     }
+}
+
+void MainWindow::on_treeFiles_itemExpanded(QTreeWidgetItem *item)
+{
+    if (item->text(0) == "Text" || item->text(0) == "Data")
+        item->setIcon(0, QIcon(":/icons/explorer/icons/explorer/folderIconOpened.png"));
+
+}
+
+void MainWindow::on_treeFiles_itemCollapsed(QTreeWidgetItem *item)
+{
+    if (item->text(0) == "Text" || item->text(0) == "Data")
+        item->setIcon(0, QIcon(":/icons/explorer/icons/explorer/folderIconClosed.png"));
 }
