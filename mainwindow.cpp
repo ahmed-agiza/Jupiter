@@ -231,7 +231,7 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
     // QModelIndex index = ui->treeFiles->indexAt(loc);
     QTreeWidgetItem *itm = ui->treeFiles->itemAt(loc);
     QMenu *menu=new QMenu(this);
-    if (itm && (itm->parent()->text(0) == "Data" || itm->parent()->text(0) == "Text")){
+    if (itm && itm->parent() && (itm->parent()->text(0) == "Data" || itm->parent()->text(0) == "Text")){
         qDebug() << itm->text(0);
     }else{
         menu->addAction(ui->actionNew);
