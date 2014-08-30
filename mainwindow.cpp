@@ -532,7 +532,7 @@ void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int colum
             foreach(QMdiSubWindow *window, ui->mdiAreaCode->subWindowList()){
                 if(((CodeEditorWindow*) window)->getFilePath() == fileName){
                     ui->mdiAreaCode->setActiveSubWindow(window);
-                    //                qDebug() << ((CodeEditorWindow*) window)->getFilePath();
+                    //qDebug() << ((CodeEditorWindow*) window)->getFilePath();
                     return;
                 }
             }

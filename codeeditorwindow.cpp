@@ -39,6 +39,7 @@ bool CodeEditorWindow::openFile(QString fileName)
         while (!stream.atEnd()){
             fileData.append(stream.readLine() + "\n");
         }
+        file.close();
         editor->setText(fileData);
         return true;
 
