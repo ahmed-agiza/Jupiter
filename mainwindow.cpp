@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     installEventFilter(this);
 
     ui->actionTileset_viewer->setEnabled(false);
-    ui->actionBitmap_Display->setEnabled(false);
+    //ui->actionBitmap_Display->setEnabled(false);
     ui->actionPalette_Viewer->setEnabled(false);
     ui->actionReload_Tiles_Memory->setEnabled(false);
     ui->actionTile_loader->setEnabled(false);
@@ -236,7 +236,6 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
     }else{
         menu->addAction(ui->actionNew);
         menu->addAction(ui->actionOpen);
-        menu->addAction(ui->actionClose);
     }
 
 
@@ -345,7 +344,7 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered()
         ui->actionEnable_Graphics_Engine->setText("Disable Graphics Engine");
         ui->actionEnable_Graphics_Engine->setToolTip("Disable Graphics Engine");
         ui->actionTileset_viewer->setEnabled(true);
-        ui->actionBitmap_Display->setEnabled(true);
+        //ui->actionBitmap_Display->setEnabled(true);
         ui->actionPalette_Viewer->setEnabled(true);
         ui->actionReload_Tiles_Memory->setEnabled(true);
         //ui->actionTile_loader->setEnabled(true);
@@ -354,7 +353,7 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered()
         ui->actionEnable_Graphics_Engine->setText("Enable Graphics Engine");
         ui->actionEnable_Graphics_Engine->setToolTip("Enable Graphics Engine");
         ui->actionTileset_viewer->setEnabled(false);
-        ui->actionBitmap_Display->setEnabled(false);
+        //ui->actionBitmap_Display->setEnabled(false);
         ui->actionPalette_Viewer->setEnabled(false);
         ui->actionReload_Tiles_Memory->setEnabled(false);
         ui->actionTile_loader->setEnabled(false);

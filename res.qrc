@@ -41,5 +41,19 @@
         <file>icons/toolbar/ghost2.png</file>
         <file>icons/toolbar/pacman.png</file>
         <file>icons/toolbar/pacman2.png</file>
+        <file>icons/toolbar/addfile.png</file>
+        <file>icons/toolbar/newfile.png</file>
+        <file>icons/toolbar/close.png</file>
+        <file>icons/toolbar/configure.png</file>
+        <file>icons/toolbar/input.png</file>
+        <file>icons/toolbar/palette.png</file>
+        <file>icons/toolbar/sprite.png</file>
+        <file>icons/toolbar/tile.png</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>icons/mirageicon1.png</file>
+        <file>icons/mirageicon2.png</file>
+        <file>icons/mirageicon3.png</file>
+        <file>icons/appicon.ico</file>
     </qresource>
 </RCC>

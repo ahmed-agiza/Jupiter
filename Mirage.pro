@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     spriteviewer.cpp \
     spriterenderwindow.cpp \
     inputmanager.cpp \
-    codeeditorwindow.cpp
+    codeeditorwindow.cpp \
+    fileloader.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -66,7 +67,8 @@ HEADERS  += mainwindow.h \
     spriteviewer.h \
     spriterenderwindow.h \
     inputmanager.h \
-    codeeditorwindow.h
+    codeeditorwindow.h \
+    fileloader.h
 
 FORMS    += \
     mainwindow.ui \
@@ -93,3 +95,8 @@ CONFIG += c++11
 
 QMAKE_CFLAGS += -Wno-unused
 QMAKE_CFLAGS += -Wno-unused-parameter
+
+#win32:RC_ICONS += :/icons/icons/appicon.ico
+win32:RC_ICONS += appicon.ico
+
+#:/icons/icons/appicon.ico
