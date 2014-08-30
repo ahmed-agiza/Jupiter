@@ -4,6 +4,10 @@
     </qresource>
     <qresource prefix="/testProject">
         <file>testProject.mpro</file>
+        <file>file1.mtxt</file>
+        <file>file2.mtxt</file>
+        <file>file3.mdat</file>
+        <file>file4.mtxt</file>
     </qresource>
     <qresource prefix="/font">
         <file>consola.ttf</file>

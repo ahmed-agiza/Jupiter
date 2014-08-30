@@ -2,8 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "syntaxhl.h"
+#include <QTreeView>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 #include <QCompleter>
+#include "syntaxhl.h"
 #include "assembler.h"
 #include "loadmemorythread.h"
 #include "memoryloading.h"
@@ -27,6 +30,20 @@ public:
     explicit MainWindow(QWidget *parent = 0);
 
     bool eventFilter(QObject *, QEvent *);
+
+    static QString getProjectPath();
+    static QString getProjectTitle();
+    static QString getProjectMainFile();
+    static QStringList getProjectTextFiles();
+    static QString getProjectDataFile();
+    static QString getProjectConf(QString key);
+    static bool isLittleEndian();
+    static bool isGFXEnabled();
+    static int getTileMapWidth();
+    static int getTileMapHeight();
+
+
+
     ~MainWindow();
 
 private slots:
@@ -58,6 +75,8 @@ private slots:
 
     void on_actionInput_triggered();
 
+    void on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int column);
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
@@ -73,15 +92,23 @@ private:
     RegistersModel *regModel;
     MemoryModel *textModel, *dataModel, *stackModel, *heapModel;
     bool assemblerInitialized;
-    QString projectPath;
-    QString projectTitle;
-    QString projectMainFile;
-    QStringList projectTextFiles;
-    QString projectDataFile;
-    QMap<QString, QString> projectConf;
     QFont editorFont;
 
+    QTreeWidget *treeWidget;
+
+    //Projecet Configuration
+    QString currentProjectString;
+    static QString projectPath;
+    static QString projectTitle;
+    static QString projectMainFile;
+    static QStringList projectTextFiles;
+    static QString projectDataFile;
+    static QMap<QString, QString> projectConf;
+
+
     void parseProjectXML(QFile &);
+    void loadProjectTree();
+    bool validateProjectFiles(bool forceAll);
     //Menus
 };
 

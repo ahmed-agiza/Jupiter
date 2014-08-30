@@ -19,9 +19,19 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomText>
+#include <QFileSystemModel>
+
+
 
 #include "memory.h"
 #include "InstructionFuncs.h"
+
+QString MainWindow::projectPath;
+QString MainWindow::projectTitle;
+QString MainWindow::projectMainFile;
+QStringList MainWindow::projectTextFiles;
+QString MainWindow::projectDataFile;
+QMap<QString, QString> MainWindow::projectConf;
 
 
 
@@ -33,6 +43,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setCentralWidget(ui->dockCode);
     installEventFilter(this);
+
+    ui->actionTileset_viewer->setEnabled(false);
+    ui->actionBitmap_Display->setEnabled(false);
+    ui->actionPalette_Viewer->setEnabled(false);
+    ui->actionReload_Tiles_Memory->setEnabled(false);
+    ui->actionTile_loader->setEnabled(false);
+    ui->actionSprite_Editor->setEnabled(false);
+
+    QFontDatabase fontsDB;
+    fontsDB.addApplicationFont(":/font/consolas.ttf");
+    if(fontsDB.families().contains("Consolas")){
+        editorFont = fontsDB.font("Consolas", "Normal", 12);
+    }
+
+    treeWidget = ui->treeFiles;
 
     memory = new Memory(this);
 
@@ -52,32 +77,6 @@ MainWindow::MainWindow(QWidget *parent) :
     assemblerInitialized = false;
     this->setMouseTracking(true);
 
-    ui->actionTileset_viewer->setEnabled(false);
-    ui->actionBitmap_Display->setEnabled(false);
-    ui->actionPalette_Viewer->setEnabled(false);
-    ui->actionReload_Tiles_Memory->setEnabled(false);
-    ui->actionTile_loader->setEnabled(false);
-    ui->actionSprite_Editor->setEnabled(false);
-
-    QFontDatabase fontsDB;
-    fontsDB.addApplicationFont(":/font/consolas.ttf");
-    if(fontsDB.families().contains("Consolas")){
-        editorFont = fontsDB.font("Consolas", "Normal", 12);
-    }
-
-
-
-   // editorFont = fontsDB.font("consola")
-    /*Memory *testMemory = new Memory(this);
-    int location = testMemory->dataSegmentBaseAddress;
-    testMemory->storeWord(location, 15614);
-    testMemory->storeWord(location + 4, 1179010630);
-    testMemory->storeByte(location + 5, '5');
-    testMemory->storeByte(location + 6, '6');
-    testMemory->storeByte(location + 7, '7');
-    testMemory->storeByte(location + 8, '8');*/
-
-
 
 
     textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
@@ -89,10 +88,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->dataTable->setModel(dataModel);
     ui->stackTable->setModel(stackModel);
     ui->heapTable->setModel(heapModel);
-    /*for(int i = location; i < location + 32; i+=4){
-        qDebug() << "i: " << i << ":  " << (int) testMemory->loadWordU(i) << "\n";
-    }*/
 
+    ui->actionOpen_Project->trigger();
 }
 
 
@@ -100,6 +97,71 @@ bool MainWindow::eventFilter(QObject *, QEvent *e){
     if (e->type() == QEvent::Show)
         on_actionNew_triggered();
     return false;
+}
+
+QString MainWindow::getProjectPath(){
+    return MainWindow::projectPath;
+}
+
+QString MainWindow::getProjectTitle(){
+    return MainWindow::projectTitle;
+}
+
+QString MainWindow::getProjectMainFile(){
+    return MainWindow::projectMainFile;
+}
+
+QStringList MainWindow::getProjectTextFiles(){
+    return MainWindow::projectTextFiles;
+}
+
+QString MainWindow::getProjectDataFile(){
+    return MainWindow::projectDataFile;
+}
+
+QString MainWindow::getProjectConf(QString key){
+    if (MainWindow::projectConf.contains(key))
+        return MainWindow::projectConf[key];
+    else
+        return "";
+}
+
+bool MainWindow::isLittleEndian(){
+    if (MainWindow::projectConf.contains("Endianness"))
+        if (MainWindow::projectConf["Endianness"].toLower() == "big")
+            return false;
+    return true;
+}
+
+bool MainWindow::isGFXEnabled(){
+    if (MainWindow::projectConf.contains("EnableGFX"))
+        if (MainWindow::projectConf["EnableGFX"].toLower() == "true")
+            return true;
+    return false;
+}
+
+int MainWindow::getTileMapWidth(){
+    if (MainWindow::projectConf.contains("TileMapWidth")){
+        if (MainWindow::projectConf["TileMapWidth"].trimmed() == "3")
+            return 3;
+        else if (MainWindow::projectConf["TileMapWidth"].trimmed() == "2")
+            return 2;
+        else if (MainWindow::projectConf["TileMapWidth"].trimmed() == "2")
+            return 1;
+    }
+    return 4;
+}
+
+int MainWindow::getTileMapHeight(){
+    if (MainWindow::projectConf.contains("TileMapHeight")){
+        if (MainWindow::projectConf["TileMapHeight"].trimmed() == "3")
+            return 3;
+        else if (MainWindow::projectConf["TileMapHeight"].trimmed() == "2")
+            return 2;
+        else if (MainWindow::projectConf["TileMapHeight"].trimmed() == "2")
+            return 1;
+    }
+    return 4;
 }
 
 
@@ -289,42 +351,39 @@ void MainWindow::on_actionSprite_Editor_triggered()
 
 void MainWindow::on_actionOpen_Project_triggered()
 {
-    projectPath = ":/testProject/testProject.mpro";
+    MainWindow::projectPath = ":/testProject/testProject.mpro";
     QFile file(projectPath);
-    QString data;
+    QString line;
+    QTextStream stream(&file);
     if (file.open(QIODevice::ReadOnly)){
+        currentProjectString = "";
+        while (!stream.atEnd()){
+            line = stream.readLine();
+            currentProjectString.append(line + '\n');
+        }
+        //qDebug() << currentProjectString;
         file.close();
         parseProjectXML(file);
+        validateProjectFiles(true);
+        loadProjectTree();
     }else{
-        QMessageBox::information(0, "error", file.errorString());
+        QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + file.errorString());
         qDebug() << "Failed to open!";
     }
-    qDebug() << data;
 
 }
 
+
+
 void MainWindow::parseProjectXML(QFile &data){
-    /*if (data.open(QIODevice::ReadOnly)){
-        QXmlStreamReader xml(&data);
-        while(!xml.atEnd()){
-            if(xml.isStartElement())
-            {
-                // Read the tag name.
-                QString tagName(xml.name().toString());
-                // Check in settings map, whether there's already an entry. If not, insert.
-                QString tagValue(xml.readElementText());
-                qDebug() << tagName << ":  " << tagValue;
-                projectMap[tagName] = tagValue;
-            }
-            xml.readNext();
-        }
-    }*/
+
     if(!data.open( QIODevice::ReadOnly | QIODevice::Text ) ){
-        qDebug( "Failed to open!" );
+        QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + data.errorString());
+        qDebug() << "Failed to open!";
     }else{
         QDomDocument domDocument;
         if(!domDocument.setContent(&data)){
-            qDebug( "Cannot set content" );
+            qDebug() << "Cannot set content";
             return;
         }
 
@@ -335,34 +394,34 @@ void MainWindow::parseProjectXML(QFile &data){
         while(!child.isNull()) {
             QDomElement e = child.toElement();
             if (e.tagName().trimmed() == "ProjectTitle"){
-                projectTitle = e.toElement().text().trimmed();
-                qDebug() << "Title: " << projectTitle;
+                MainWindow::projectTitle = e.toElement().text().trimmed();
+                //qDebug() << "Title: " << MainWindow::projectTitle;
             }else if (e.tagName().trimmed() == "TextSegment"){
                 QDomNodeList textL = e.childNodes();
-                projectTextFiles.clear();;
+                MainWindow::projectTextFiles.clear();;
                 for (int i = 0; i < textL.size(); i++){
                     QString tempTag = textL.at(i).toElement().tagName().trimmed();
                     QString tempTagValue = textL.at(i).toElement().text().trimmed();
 
                     if (tempTag == "MainFile"){
-                        qDebug() << "Main: " << tempTagValue;
-                        projectMainFile = tempTagValue;
-                        projectTextFiles.append(tempTagValue);
+                       // qDebug() << "Main: " << tempTagValue;
+                        MainWindow::projectMainFile = tempTagValue;
+                        MainWindow::projectTextFiles.append(tempTagValue);
                     }else if (tempTag == "File"){
-                        projectTextFiles.append(tempTagValue);
+                        MainWindow::projectTextFiles.append(tempTagValue);
                     }
-                    if (i < projectTextFiles.size())
-                        qDebug() << "Text" << i << ": " << projectTextFiles.at(i);
+                    if (i < MainWindow::projectTextFiles.size())
+                        ;//qDebug() << "Text" << i << ": " << MainWindow::projectTextFiles.at(i);
                 }
             }else if (e.tagName().trimmed() == "DataSegment"){
-                projectDataFile = e.firstChild().toElement().text().trimmed();
-                qDebug() << "Data: " << projectDataFile;
+                MainWindow::projectDataFile = e.firstChild().toElement().text().trimmed();
+               // qDebug() << "Data: " << MainWindow::projectDataFile;
             }else if (e.tagName().trimmed() == "Configure"){
                 QDomNodeList confL = e.childNodes();
-                projectConf.clear();
+                MainWindow::projectConf.clear();
                 for (int i = 0; i < confL.size(); i++){
-                    projectConf[confL.at(i).toElement().tagName().trimmed()] = confL.at(i).toElement().text().trimmed();
-                    qDebug() << confL.at(i).toElement().tagName().trimmed() << ": " << projectConf[confL.at(i).toElement().tagName().trimmed()];
+                    MainWindow::projectConf[confL.at(i).toElement().tagName().trimmed()] = confL.at(i).toElement().text().trimmed();
+                    //qDebug() << confL.at(i).toElement().tagName().trimmed() << ": " << MainWindow::projectConf[confL.at(i).toElement().tagName().trimmed()];
                 }
             }
             child = child.nextSibling();
@@ -370,20 +429,97 @@ void MainWindow::parseProjectXML(QFile &data){
         }
 
     }
-    /* QString projectPath;
-    QString projectTitle;
-    QString mainFile;
-    QStringList projectTextFiles;
-    QString projectDataFile;
-    QMap<QString, QString> projectConf;*/
+}
+
+void MainWindow::loadProjectTree()
+{
+    QTreeWidgetItem *projectItem = new QTreeWidgetItem(treeWidget);
+    QFont currentProjectFont = projectItem->font(0);
+    currentProjectFont.setBold(true);
+    projectItem->setText(0, MainWindow::projectTitle);
+    projectItem->setFont(0, currentProjectFont);
+    treeWidget->addTopLevelItem(projectItem);
+
+    QTreeWidgetItem *textSegmentParent = new QTreeWidgetItem(projectItem);
+    textSegmentParent->setText(0, "Text");
+    projectItem->addChild(textSegmentParent);
+    foreach(const QString &textFile, MainWindow::projectTextFiles){
+        QTreeWidgetItem *textFileItem = new QTreeWidgetItem(textSegmentParent);
+        textFileItem->setText(0, textFile);
+        if (textFile == MainWindow::projectMainFile){
+            QFont currentItemFont = textFileItem->font(0);
+            currentItemFont.setItalic(true);
+            textFileItem->setFont(0, currentItemFont);
+        }
+        textSegmentParent->addChild(textFileItem);
+    }
+
+    QTreeWidgetItem *dataSegmentParent = new QTreeWidgetItem(projectItem);
+    dataSegmentParent->setText(0, "Data");
+    projectItem->addChild(dataSegmentParent);
+    QTreeWidgetItem *dataFileItem = new QTreeWidgetItem(dataSegmentParent);
+    dataFileItem->setText(0, MainWindow::projectDataFile);
+    dataSegmentParent->addChild(dataFileItem);
+
+    projectItem->setExpanded(true);
+    textSegmentParent->setExpanded(true);
+    dataSegmentParent->setExpanded(true);
+}
+
+bool MainWindow::validateProjectFiles(bool forceAll = true)
+{
+    foreach(const QString &textFile, MainWindow::projectTextFiles){
+        QFile testFile(textFile);
+        if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+            QMessageBox::critical(this, "Error", QString("Failed to load the file ") + textFile + QString("\n ") + testFile.errorString());
+            if(!forceAll)
+                return false;
+        }else{
+            //qDebug() << "Opened " << textFile;
+            testFile.close();
+        }
+    }
+    QFile testFile(MainWindow::projectDataFile);
+    if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+        QMessageBox::critical(this, "Error", QString("Failed to load the file ") + projectDataFile + QString("\n ") + testFile.errorString());
+        if(!forceAll)
+            return false;
+    }else{
+        //qDebug() << "Opened " << projectDataFile;
+        testFile.close();
+    }
 
 
-
-
+    return true;
 }
 
 void MainWindow::on_actionInput_triggered()
 {
     inputManager = new InputManager(this);
     inputManager->show();
+}
+
+void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+    QString itemText = item->text(0);
+    QFile file(itemText);
+    QString fileData;
+    QTextStream stream (&file);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        ui->actionNew->trigger();
+        ui->mdiAreaCode->currentSubWindow()->setWindowTitle(item->text(0));
+        while (!stream.atEnd()){
+            fileData.append(stream.readLine() + "\n");
+        }
+        QWidget *W  = ui->mdiAreaCode->currentSubWindow()->findChild <QWidget *> ("NW");
+        if (W){
+            CodeEditor  *E = W->findChild  <CodeEditor*> ("CodeE");
+            if (E)
+                E->setText(fileData);
+        }
+
+    }else{
+        QMessageBox::critical(this, "Error", QString("Failed to open the file ") + itemText + QString("\n ") + file.errorString());
+
+    }
 }

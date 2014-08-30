@@ -1,7 +1,7 @@
-<MIPSProject>
+<MirageProject>
 
 <ProjectTitle>
-	Some title
+        Test Project Title
 </ProjectTitle>
 
 <TextSegment> 
@@ -16,6 +16,9 @@
 
 <Configure>
 	<EnableGFX>true</EnableGFX>
+        <Endianness>little</Endianness>
+        <TileMapWidth>4</TileMapWidth>
+        <TileMapHeight>4</TileMapHeight>
 </Configure>
 
-</MIPSProject>
+</MirageProject>
