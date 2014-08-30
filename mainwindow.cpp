@@ -554,3 +554,32 @@ void MainWindow::on_treeFiles_itemCollapsed(QTreeWidgetItem *item)
     if (item->text(0) == "Text" || item->text(0) == "Data")
         item->setIcon(0, QIcon(":/icons/explorer/icons/explorer/folderIconClosed.png"));
 }
+
+void MainWindow::on_actionViewProjectManager_triggered(){
+    if(ui->actionViewProjectManager->isChecked())
+        ui->dockProject->setVisible(true);
+    else
+        ui->dockProject->setVisible(false);
+
+}
+
+void MainWindow::on_actionViewAssemble_triggered(){
+    if(ui->actionViewAssemble->isChecked())
+        ui->dockAsm->setVisible(true);
+    else
+        ui->dockAsm->setVisible(false);
+}
+
+void MainWindow::on_actionViewCodeEditor_triggered(){
+    if(ui->actionViewCodeEditor->isChecked())
+        ui->dockCode->setVisible(true);
+    else
+        ui->dockCode->setVisible(false);
+}
+
+void MainWindow::on_actionViewMemory_triggered(){
+    if(ui->actionViewMemory->isChecked())
+        ui->dockMemory->setVisible(true);
+    else
+        ui->dockMemory->setVisible(false);
+}

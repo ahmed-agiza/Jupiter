@@ -85,6 +85,14 @@ private slots:
 
     void on_treeFiles_itemCollapsed(QTreeWidgetItem *item);
 
+    void on_actionViewProjectManager_triggered();
+
+    void on_actionViewAssemble_triggered();
+
+    void on_actionViewCodeEditor_triggered();
+
+    void on_actionViewMemory_triggered();
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;

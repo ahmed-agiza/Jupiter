@@ -150,6 +150,10 @@
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="actionViewProjectManager"/>
+    <addaction name="actionViewAssemble"/>
+    <addaction name="actionViewCodeEditor"/>
+    <addaction name="actionViewMemory"/>
    </widget>
    <widget class="QMenu" name="menuProject">
     <property name="title">
@@ -1128,6 +1132,62 @@
   <action name="actionInput">
    <property name="text">
     <string>Input</string>
+   </property>
+  </action>
+  <action name="actionViewProjectManager">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Project Manager</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
+  </action>
+  <action name="actionViewAssemble">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Assemble</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+A</string>
+   </property>
+  </action>
+  <action name="actionViewCodeEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Code Editor</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
+   </property>
+  </action>
+  <action name="actionViewMemory">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Memory</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+M</string>
    </property>
   </action>
  </widget>
