@@ -1,6 +1,6 @@
 #include "codeeditorwindow.h"
 #include <QTextStream>
-
+#include <QFile>
 
 CodeEditorWindow::CodeEditorWindow(QWidget *parent):QMdiSubWindow(parent){
     init();
