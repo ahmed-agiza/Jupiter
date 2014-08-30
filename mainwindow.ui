@@ -882,9 +882,8 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
-     <normalon>icons/toolbar/save.png</normalon>
-    </iconset>
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/toolbar/icons/toolbar/save.png</normaloff>:/icons/toolbar/icons/toolbar/save.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>

@@ -20,6 +20,7 @@
 #include <QDomElement>
 #include <QDomText>
 #include <QFileSystemModel>
+#include "codeeditorwindow.h"
 
 
 
@@ -97,6 +98,54 @@ bool MainWindow::eventFilter(QObject *, QEvent *e){
     if (e->type() == QEvent::Show)
         on_actionNew_triggered();
     return false;
+}
+
+void MainWindow::addEditorWindow()
+{
+    /*QMdiSubWindow *newWindow = new QMdiSubWindow(ui->mdiAreaCode);
+    newWindow->setObjectName("newW");
+    newWindow->setWindowTitle("Untitled");
+
+
+    QWidget *newWidgets = new QWidget(newWindow);
+    newWidgets->setObjectName("NW");
+    QHBoxLayout *HL = new QHBoxLayout(newWidgets);
+    CodeEditor *newCode = new CodeEditor(newWidgets);
+    QTextEdit *linesCount = new QTextEdit(newWidgets);
+
+    newCode->setObjectName("CodeE");
+    newCode->setFont(editorFont);
+
+    linesCount->setEnabled(false);
+    linesCount->setMinimumSize(10, 10);
+    linesCount->setMaximumSize(40, linesCount->maximumSize().height());
+    linesCount->setText("0");
+    newCode->setCounter(linesCount);
+
+    HL->setObjectName("HL");
+    HL->addWidget(linesCount);
+    HL->addWidget(newCode);
+
+    newWidgets->setLayout(HL);
+
+    newWindow->setWidget(newWidgets);
+
+    newWindow->setAttribute(Qt::WA_DeleteOnClose, 1);*/
+    CodeEditorWindow *editorWindow = new CodeEditorWindow(ui->mdiAreaCode, editorFont);
+    ui->mdiAreaCode->addSubWindow(editorWindow);
+    //newWidgets->showMaximized();
+}
+
+void MainWindow::addEditorWindow(QString file)
+{
+    CodeEditorWindow *editorWindow = new CodeEditorWindow(ui->mdiAreaCode, editorFont);
+    if(editorWindow->openFile(file)){
+        ui->mdiAreaCode->addSubWindow(editorWindow);
+    }else{
+        delete editorWindow;
+        QMessageBox::critical(this, "Error", "Failed to open the file " + file);
+    }
+
 }
 
 QString MainWindow::getProjectPath(){
@@ -207,38 +256,7 @@ void MainWindow::on_actionSimulate_triggered(){
 
 void MainWindow::on_actionNew_triggered(){
 
-    QMdiSubWindow *newWindow = new QMdiSubWindow(ui->mdiAreaCode);
-    newWindow->setObjectName("newW");
-    newWindow->setWindowTitle("Untitled");
-
-
-    QWidget *newWidgets = new QWidget(newWindow);
-    newWidgets->setObjectName("NW");
-    QHBoxLayout *HL = new QHBoxLayout(newWidgets);
-    CodeEditor *newCode = new CodeEditor(newWidgets);
-    QTextEdit *linesCount = new QTextEdit(newWidgets);
-
-    newCode->setObjectName("CodeE");
-    newCode->setFont(editorFont);
-
-    linesCount->setEnabled(false);
-    linesCount->setMinimumSize(10, 10);
-    linesCount->setMaximumSize(40, linesCount->maximumSize().height());
-    linesCount->setText("0");
-    newCode->setCounter(linesCount);
-
-    HL->setObjectName("HL");
-    HL->addWidget(linesCount);
-    HL->addWidget(newCode);
-
-    newWidgets->setLayout(HL);
-
-    newWindow->setWidget(newWidgets);
-
-    newWindow->setAttribute(Qt::WA_DeleteOnClose, 1);
-    ui->mdiAreaCode->addSubWindow(newWindow);
-    newWidgets->showMaximized();
-
+    addEditorWindow();
 
 }
 
@@ -404,7 +422,7 @@ void MainWindow::parseProjectXML(QFile &data){
                     QString tempTagValue = textL.at(i).toElement().text().trimmed();
 
                     if (tempTag == "MainFile"){
-                       // qDebug() << "Main: " << tempTagValue;
+                        // qDebug() << "Main: " << tempTagValue;
                         MainWindow::projectMainFile = tempTagValue;
                         MainWindow::projectTextFiles.append(tempTagValue);
                     }else if (tempTag == "File"){
@@ -415,7 +433,7 @@ void MainWindow::parseProjectXML(QFile &data){
                 }
             }else if (e.tagName().trimmed() == "DataSegment"){
                 MainWindow::projectDataFile = e.firstChild().toElement().text().trimmed();
-               // qDebug() << "Data: " << MainWindow::projectDataFile;
+                // qDebug() << "Data: " << MainWindow::projectDataFile;
             }else if (e.tagName().trimmed() == "Configure"){
                 QDomNodeList confL = e.childNodes();
                 MainWindow::projectConf.clear();
@@ -505,27 +523,23 @@ void MainWindow::on_actionInput_triggered()
 
 void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
-    QString itemText = item->text(0);
-    QFile file(itemText);
-    QString fileData;
-    QTextStream stream (&file);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        ui->actionNew->trigger();
-        ui->mdiAreaCode->currentSubWindow()->setWindowTitle(item->text(0));
-        while (!stream.atEnd()){
-            fileData.append(stream.readLine() + "\n");
-        }
-        QWidget *W  = ui->mdiAreaCode->currentSubWindow()->findChild <QWidget *> ("NW");
-        if (W){
-            CodeEditor  *E = W->findChild  <CodeEditor*> ("CodeE");
-            if (E)
-                E->setText(fileData);
-        }
+    Q_UNUSED(column);
+    if(item->parent()){
+        QString parentItemText = item->parent()->text(0).trimmed();
+        if (parentItemText == "Text" || parentItemText == "Data"){
+            QString fileName = item->text(0);
 
-    }else{
-        QMessageBox::critical(this, "Error", QString("Failed to open the file ") + itemText + QString("\n ") + file.errorString());
-
+            foreach(QMdiSubWindow *window, ui->mdiAreaCode->subWindowList()){
+                if(((CodeEditorWindow*) window)->getFilePath() == fileName){
+                    ui->mdiAreaCode->setActiveSubWindow(window);
+                    //                qDebug() << ((CodeEditorWindow*) window)->getFilePath();
+                    return;
+                }
+            }
+            addEditorWindow(fileName);
+        }
     }
+
 }
 
 void MainWindow::on_treeFiles_itemExpanded(QTreeWidgetItem *item)

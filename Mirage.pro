@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     tileloader.cpp \
     spriteviewer.cpp \
     spriterenderwindow.cpp \
-    inputmanager.cpp
+    inputmanager.cpp \
+    codeeditorwindow.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -64,7 +65,8 @@ HEADERS  += mainwindow.h \
     tileloader.h \
     spriteviewer.h \
     spriterenderwindow.h \
-    inputmanager.h
+    inputmanager.h \
+    codeeditorwindow.h
 
 FORMS    += \
     mainwindow.ui \

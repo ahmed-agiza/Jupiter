@@ -31,6 +31,10 @@ public:
 
     bool eventFilter(QObject *, QEvent *);
 
+    void addEditorWindow();
+    void addEditorWindow(QString file);
+
+
     static QString getProjectPath();
     static QString getProjectTitle();
     static QString getProjectMainFile();
