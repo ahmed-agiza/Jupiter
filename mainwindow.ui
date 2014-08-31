@@ -914,6 +914,11 @@
    </property>
   </action>
   <action name="actionSaveAs">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/saveas.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Save As</string>
    </property>
@@ -924,7 +929,7 @@
   <action name="actionClose">
    <property name="icon">
     <iconset>
-     <normalon>:/icons/toolbar/icons/toolbar/close.png</normalon>
+     <normalon>:/icons/toolbar/icons/toolbar/close2.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -1046,6 +1051,11 @@
    </property>
   </action>
   <action name="actionReferences">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/references.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>References</string>
    </property>
@@ -1054,6 +1064,11 @@
    </property>
   </action>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/about2.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>About</string>
    </property>
@@ -1092,7 +1107,7 @@
   <action name="actionTileset_viewer">
    <property name="icon">
     <iconset>
-     <normalon>:/icons/toolbar/icons/toolbar/tile.png</normalon>
+     <normalon>:/icons/toolbar/icons/toolbar/tile2.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -1102,7 +1117,7 @@
   <action name="actionPalette_Viewer">
    <property name="icon">
     <iconset>
-     <normalon>:/icons/toolbar/icons/toolbar/palette.png</normalon>
+     <normalon>:/icons/toolbar/icons/toolbar/palette2.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -1179,7 +1194,7 @@
   <action name="actionSprite_Editor">
    <property name="icon">
     <iconset>
-     <normalon>:/icons/toolbar/icons/toolbar/sprite.png</normalon>
+     <normalon>:/icons/toolbar/icons/toolbar/sprite2.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -1189,7 +1204,7 @@
   <action name="actionInput">
    <property name="icon">
     <iconset>
-     <normalon>:/icons/toolbar/icons/toolbar/input.png</normalon>
+     <normalon>:/icons/toolbar/icons/toolbar/input2.png</normalon>
     </iconset>
    </property>
    <property name="text">

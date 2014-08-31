@@ -51,11 +51,40 @@
         <file>icons/toolbar/tile.png</file>
         <file>icons/toolbar/newproject.png</file>
         <file>icons/toolbar/openproject.png</file>
+        <file>icons/toolbar/about.png</file>
+        <file>icons/toolbar/about2.png</file>
+        <file>icons/toolbar/close2.png</file>
+        <file>icons/toolbar/input2.png</file>
+        <file>icons/toolbar/palette2.png</file>
+        <file>icons/toolbar/references.png</file>
+        <file>icons/toolbar/saveas.png</file>
+        <file>icons/toolbar/sprite2.png</file>
+        <file>icons/toolbar/tile2.png</file>
     </qresource>
     <qresource prefix="/icons">
         <file>icons/mirageicon1.png</file>
         <file>icons/mirageicon2.png</file>
         <file>icons/mirageicon3.png</file>
         <file>icons/appicon.ico</file>
+    </qresource>
+    <qresource prefix="/joypad">
+        <file>icons/joypad/ab.png</file>
+        <file>icons/joypad/ab2.png</file>
+        <file>icons/joypad/ab2_pressed.png</file>
+        <file>icons/joypad/down.png</file>
+        <file>icons/joypad/down_pressed.png</file>
+        <file>icons/joypad/l.png</file>
+        <file>icons/joypad/l_pressed.png</file>
+        <file>icons/joypad/left.png</file>
+        <file>icons/joypad/left_pressed.png</file>
+        <file>icons/joypad/r.png</file>
+        <file>icons/joypad/r_pressed.png</file>
+        <file>icons/joypad/right.png</file>
+        <file>icons/joypad/right_pressed.png</file>
+        <file>icons/joypad/startselect.png</file>
+        <file>icons/joypad/startselectbutton.png</file>
+        <file>icons/joypad/startselectbutton_pressed.png</file>
+        <file>icons/joypad/up.png</file>
+        <file>icons/joypad/up_pressed.png</file>
     </qresource>
 </RCC>
