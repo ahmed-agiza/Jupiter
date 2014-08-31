@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     spriterenderwindow.cpp \
     inputmanager.cpp \
     codeeditorwindow.cpp \
-    fileloader.cpp
+    fileloader.cpp \
+    explorertreeitem.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -68,7 +69,8 @@ HEADERS  += mainwindow.h \
     spriterenderwindow.h \
     inputmanager.h \
     codeeditorwindow.h \
-    fileloader.h
+    fileloader.h \
+    explorertreeitem.h
 
 FORMS    += \
     mainwindow.ui \
@@ -77,7 +79,8 @@ FORMS    += \
     paletteviewer.ui \
     tileloader.ui \
     spriteviewer.ui \
-    inputmanager.ui
+    inputmanager.ui \
+    fileloader.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \

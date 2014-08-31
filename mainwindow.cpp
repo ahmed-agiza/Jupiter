@@ -20,7 +20,10 @@
 #include <QDomElement>
 #include <QDomText>
 #include <QFileSystemModel>
+#include <QSignalMapper>
 #include "codeeditorwindow.h"
+#include "fileloader.h"
+#include "explorertreeitem.h"
 
 
 
@@ -28,6 +31,7 @@
 #include "InstructionFuncs.h"
 
 QString MainWindow::projectPath;
+QString MainWindow::projectFileName;
 QString MainWindow::projectTitle;
 QString MainWindow::projectMainFile;
 QStringList MainWindow::projectTextFiles;
@@ -41,9 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow){
 
 
+
     ui->setupUi(this);
     setCentralWidget(ui->dockCode);
     installEventFilter(this);
+
+
 
     ui->actionTileset_viewer->setEnabled(false);
     //ui->actionBitmap_Display->setEnabled(false);
@@ -99,7 +106,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 bool MainWindow::eventFilter(QObject *, QEvent *e){
     if (e->type() == QEvent::Show)
-        on_actionNew_triggered();
+        addEditorWindow();
+        //on_actionNew_triggered();
     return false;
 }
 
@@ -151,8 +159,58 @@ void MainWindow::addEditorWindow(QString file)
 
 }
 
-QString MainWindow::getProjectPath(){
+void MainWindow::createDataFile(QString file)
+{
+
+}
+
+void MainWindow::creatTextFile(QString file)
+{
+
+}
+
+void MainWindow::addDataFile(QString file)
+{
+
+}
+
+void MainWindow::addTextFile(QString file)
+{
+
+}
+
+void MainWindow::addResourceFile(QString file)
+{
+
+}
+
+void MainWindow::removeDataFile(QString file)
+{
+
+}
+
+void MainWindow::removeTextFile(QString file)
+{
+
+}
+
+void MainWindow::removeResourceFile(QString file)
+{
+
+}
+
+QString MainWindow::getProjectPath()
+{
     return MainWindow::projectPath;
+}
+
+void MainWindow::setProjectPath(QString path)
+{
+    MainWindow::projectPath = path;
+}
+
+QString MainWindow::getProjectFileName(){
+    return MainWindow::projectFileName;
 }
 
 QString MainWindow::getProjectTitle(){
@@ -232,7 +290,17 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
     QTreeWidgetItem *itm = ui->treeFiles->itemAt(loc);
     QMenu *menu=new QMenu(this);
     if (itm && itm->parent() && (itm->parent()->text(0) == "Data" || itm->parent()->text(0) == "Text")){
-        qDebug() << itm->text(0);
+        //qDebug() << itm->text(0);
+        QAction *openAction = new QAction(this);
+        QSignalMapper *mapper = new QSignalMapper(this);
+        mapper->setMapping(openAction, (QObject *) itm);
+        QObject::connect(openAction, SIGNAL(triggered()), mapper, SLOT(map()));
+        QObject::connect(mapper, SIGNAL(mapped(QObject*)), this, SLOT(openTreeItem(QObject*)));
+        openAction->setText("Open");
+        QAction *removeAction = new QAction(this);
+        removeAction->setText("Remove");
+        menu->addAction(openAction);
+        menu->addAction(removeAction);
     }else{
         menu->addAction(ui->actionNew);
         menu->addAction(ui->actionOpen);
@@ -274,6 +342,8 @@ void MainWindow::on_actionSimulate_triggered(){
 
 void MainWindow::on_actionNew_triggered(){
 
+    FileLoader *loader = new FileLoader(this, CreateFile);
+    loader->show();
     addEditorWindow();
 
 }
@@ -391,8 +461,10 @@ void MainWindow::on_actionSprite_Editor_triggered()
 
 void MainWindow::on_actionOpen_Project_triggered()
 {
-    MainWindow::projectPath = ":/testProject/testProject.mpro";
-    QFile file(projectPath);
+    //MainWindow::projectPath = ":/testProject/";
+    MainWindow::projectPath = QDir::currentPath() + "/";//"C:/Users/Ahmed/Documents/GitHub/build-Mirage-Desktop_Qt_5_3_MinGW_32bit-Debug/";
+    MainWindow::projectFileName = "testProject.mpro";
+    QFile file(projectPath + projectFileName);
     QString line;
     QTextStream stream(&file);
     if (file.open(QIODevice::ReadOnly)){
@@ -473,14 +545,14 @@ void MainWindow::parseProjectXML(QFile &data){
 
 void MainWindow::loadProjectTree()
 {
-    QTreeWidgetItem *projectItem = new QTreeWidgetItem(treeWidget);
+    ExplorerTreeItem *projectItem = new ExplorerTreeItem(treeWidget);
     QFont currentProjectFont = projectItem->font(0);
     currentProjectFont.setBold(true);
     projectItem->setText(0, MainWindow::projectTitle);
     projectItem->setFont(0, currentProjectFont);
     treeWidget->addTopLevelItem(projectItem);
 
-    QTreeWidgetItem *textSegmentParent = new QTreeWidgetItem(projectItem);
+    ExplorerTreeItem *textSegmentParent = new ExplorerTreeItem(projectItem);
     textSegmentParent->setText(0, "Text");
     projectItem->addChild(textSegmentParent);
     foreach(const QString &textFile, MainWindow::projectTextFiles){
@@ -495,10 +567,10 @@ void MainWindow::loadProjectTree()
         textSegmentParent->addChild(textFileItem);
     }
 
-    QTreeWidgetItem *dataSegmentParent = new QTreeWidgetItem(projectItem);
+    ExplorerTreeItem *dataSegmentParent = new ExplorerTreeItem(projectItem);
     dataSegmentParent->setText(0, "Data");
     projectItem->addChild(dataSegmentParent);
-    QTreeWidgetItem *dataFileItem = new QTreeWidgetItem(dataSegmentParent);
+    ExplorerTreeItem *dataFileItem = new ExplorerTreeItem(dataSegmentParent);
     dataFileItem->setText(0, MainWindow::projectDataFile);
     dataFileItem->setIcon(0, QIcon(":/icons/explorer/icons/explorer/dataFileIcon.png"));
     dataSegmentParent->addChild(dataFileItem);
@@ -604,4 +676,15 @@ void MainWindow::on_actionViewMemory_triggered(){
         ui->dockMemory->setVisible(true);
     else
         ui->dockMemory->setVisible(false);
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    FileLoader *loader = new FileLoader(this, AddFile);
+    loader->show();
+}
+
+void MainWindow::openTreeItem(QObject *itm){
+   // qDebug() << "Triggered" << ((QTreeWidgetItem *)itm)->text(0);
+    this->on_treeFiles_itemDoubleClicked((QTreeWidgetItem *)itm, 0);
 }

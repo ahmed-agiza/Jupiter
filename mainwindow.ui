@@ -853,19 +853,26 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNew_Project"/>
+   <addaction name="actionOpen_Project"/>
+   <addaction name="separator"/>
    <addaction name="actionNew"/>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="actionClose"/>
+   <addaction name="separator"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="actionCopy"/>
    <addaction name="actionCut"/>
    <addaction name="actionPaste"/>
+   <addaction name="separator"/>
    <addaction name="actionAssemble"/>
    <addaction name="actionSimulate"/>
    <addaction name="actionAssemble_and_Simulate"/>
+   <addaction name="separator"/>
    <addaction name="actionBase_Converter"/>
+   <addaction name="separator"/>
    <addaction name="actionEnable_Graphics_Engine"/>
   </widget>
   <action name="actionNew">
@@ -915,6 +922,11 @@
    </property>
   </action>
   <action name="actionClose">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/close.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Close</string>
    </property>
@@ -1057,6 +1069,11 @@
    </property>
   </action>
   <action name="actionConfigure">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/configure.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Configure</string>
    </property>
@@ -1073,11 +1090,21 @@
    </property>
   </action>
   <action name="actionTileset_viewer">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/tile.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Tileset Viewer</string>
    </property>
   </action>
   <action name="actionPalette_Viewer">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/palette.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Palette Viewer</string>
    </property>
@@ -1124,6 +1151,11 @@
    </property>
   </action>
   <action name="actionNew_Project">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/newproject.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>New Project</string>
    </property>
@@ -1132,6 +1164,11 @@
    </property>
   </action>
   <action name="actionOpen_Project">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/openproject.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Open Project</string>
    </property>
@@ -1140,11 +1177,21 @@
    </property>
   </action>
   <action name="actionSprite_Editor">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/sprite.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Sprite Editor</string>
    </property>
   </action>
   <action name="actionInput">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/toolbar/icons/toolbar/input.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Input</string>
    </property>

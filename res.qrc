@@ -49,6 +49,8 @@
         <file>icons/toolbar/palette.png</file>
         <file>icons/toolbar/sprite.png</file>
         <file>icons/toolbar/tile.png</file>
+        <file>icons/toolbar/newproject.png</file>
+        <file>icons/toolbar/openproject.png</file>
     </qresource>
     <qresource prefix="/icons">
         <file>icons/mirageicon1.png</file>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FileLoader</class>
+ <widget class="QDialog" name="FileLoader">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>300</width>
+    <height>51</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QToolButton" name="btnText">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>101</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Text Segment File</string>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/explorer/icons/explorer/textsegmentFileIcon.png</normaloff>:/icons/explorer/icons/explorer/textsegmentFileIcon.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>64</width>
+     <height>64</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+  </widget>
+  <widget class="QToolButton" name="btnData">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>0</y>
+     <width>101</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Data Segment File</string>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/explorer/icons/explorer/dataFileIcon.png</normaloff>:/icons/explorer/icons/explorer/dataFileIcon.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>64</width>
+     <height>64</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+  </widget>
+  <widget class="QToolButton" name="btnRes">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>0</y>
+     <width>101</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Resource File</string>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/explorer/icons/explorer/binaryIcon.png</normaloff>:/icons/explorer/icons/explorer/binaryIcon.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>64</width>
+     <height>64</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

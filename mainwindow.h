@@ -34,8 +34,22 @@ public:
     void addEditorWindow();
     void addEditorWindow(QString file);
 
+    void createDataFile(QString file);
+    void creatTextFile(QString file);
+
+    void addDataFile(QString file);
+    void addTextFile(QString file);
+    void addResourceFile(QString file);
+
+    void removeDataFile(QString file);
+    void removeTextFile(QString file);
+    void removeResourceFile(QString file);
+
+
 
     static QString getProjectPath();
+    static void setProjectPath(QString path);
+    static QString getProjectFileName();
     static QString getProjectTitle();
     static QString getProjectMainFile();
     static QStringList getProjectTextFiles();
@@ -97,6 +111,10 @@ private slots:
     void on_actionViewMemory_triggered();
 
 
+    void on_actionOpen_triggered();
+
+    void openTreeItem(QObject *itm);
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
@@ -119,6 +137,7 @@ private:
     //Projecet Configuration
     QString currentProjectString;
     static QString projectPath;
+    static QString projectFileName;
     static QString projectTitle;
     static QString projectMainFile;
     static QStringList projectTextFiles;
