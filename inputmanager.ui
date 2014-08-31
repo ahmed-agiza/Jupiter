@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>596</width>
-    <height>431</height>
+    <width>678</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,13 +20,13 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>30</y>
-     <width>541</width>
+     <y>45</y>
+     <width>611</width>
      <height>371</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-image: url(C:/joypad.png);
+    <string notr="true">background-image: url(C:/stuff/controller.png);
 background-repeat: no-repeat;
 </string>
    </property>
@@ -35,6 +35,285 @@ background-repeat: no-repeat;
    </property>
    <property name="frameShadow">
     <enum>QFrame::Raised</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="B">
+   <property name="geometry">
+    <rect>
+     <x>408</x>
+     <y>176</y>
+     <width>61</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/ab2.png);
+	background-repeat: no-repeat;
+
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/ab2_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="A">
+   <property name="geometry">
+    <rect>
+     <x>472</x>
+     <y>138</y>
+     <width>61</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/ab2.png);
+	background-repeat: no-repeat;
+	border-color:#1E665D;
+	border-width: 1px;
+
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/ab2_pressed.png);
+	background-repeat: no-repeat;
+	border-color: #1E665D;
+	border-width: 1px;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="select">
+   <property name="geometry">
+    <rect>
+     <x>277</x>
+     <y>296</y>
+     <width>41</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/startselectbutton.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/startselectbutton_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="start">
+   <property name="geometry">
+    <rect>
+     <x>332</x>
+     <y>296</y>
+     <width>41</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/startselectbutton.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/startselectbutton_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="up">
+   <property name="geometry">
+    <rect>
+     <x>135</x>
+     <y>124</y>
+     <width>41</width>
+     <height>53</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/up.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/up_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="down">
+   <property name="geometry">
+    <rect>
+     <x>135</x>
+     <y>219</y>
+     <width>41</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/down.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/down_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="right">
+   <property name="geometry">
+    <rect>
+     <x>178</x>
+     <y>178</y>
+     <width>61</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/right.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/right_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="left">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>178</y>
+     <width>56</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/left.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/left_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="l">
+   <property name="geometry">
+    <rect>
+     <x>121</x>
+     <y>30</y>
+     <width>103</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/l.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/l_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="r">
+   <property name="geometry">
+    <rect>
+     <x>422</x>
+     <y>30</y>
+     <width>103</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	background-image: url(C:/stuff/buttons/r.png);
+	background-repeat: no-repeat;
+}
+
+QPushButton:checked{
+		background-image: url(C:/stuff/buttons/r_pressed.png);
+	background-repeat: no-repeat;
+}</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>
