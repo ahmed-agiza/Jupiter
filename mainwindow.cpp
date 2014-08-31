@@ -611,7 +611,7 @@ bool MainWindow::validateProjectFiles(bool forceAll = true)
 
 void MainWindow::on_actionInput_triggered()
 {
-    inputManager = new InputManager(this);
+    inputManager = new InputManager(this, memory);
     inputManager->show();
 }
 

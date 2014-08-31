@@ -5,11 +5,12 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QDebug>
-
-InputManager::InputManager(QWidget *parent) :
+#include <SFML/Graphics.hpp>
+InputManager::InputManager(QWidget *parent, Memory *memory) :
     QDialog(parent),
     ui(new Ui::InputManager)
 {
+    this->mem = memory;
     ui->setupUi(this);
     this->setWindowTitle("Input Manager");
     QPixmap pixmap;
@@ -96,9 +97,76 @@ void InputManager::handleKeyPress(int key, Qt::KeyboardModifiers modifiers)
     }else
         qDebug() << "Key(" << key << ") key was pressed";
 
+    switch(key){
+    case Qt::Key_Up:
+        ui->up->setChecked(true);
+        break;
+    case Qt::Key_Down:
+        ui->down->setChecked(true);
+        break;
+    case Qt::Key_Left:
+        ui->left->setChecked(true);
+        break;
+    case Qt::Key_Right:
+        ui->right->setChecked(true);
+        break;
+    case Qt::Key_Z:
+        ui->A->setChecked(true);
+        break;
+    case Qt::Key_X:
+        ui->B->setChecked(true);
+        break;
+    case Qt::Key_A:
+        ui->l->setChecked(true);
+        break;
+    case Qt::Key_D:
+        ui->r->setChecked(true);
+        break;
+    case Qt::Key_Return:
+        ui->start->setChecked(true);
+        break;
+    case Qt::Key_Backspace:
+        ui->select->setChecked(true);
+        break;
+    }
+
 }
 
 void InputManager::handleKeyRelease(int key, Qt::KeyboardModifiers modifiers)
 {
     qDebug() << "Key(" << key << ") key was released";
+
+    switch(key){
+    case Qt::Key_Up:
+        ui->up->setChecked(false);
+        break;
+    case Qt::Key_Down:
+        ui->down->setChecked(false);
+        break;
+    case Qt::Key_Left:
+        ui->left->setChecked(false);
+        break;
+    case Qt::Key_Right:
+        ui->right->setChecked(false);
+        break;
+    case Qt::Key_Z:
+        ui->A->setChecked(false);
+        break;
+    case Qt::Key_X:
+        ui->B->setChecked(false);
+        break;
+    case Qt::Key_A:
+        ui->l->setChecked(false);
+        break;
+    case Qt::Key_D:
+        ui->r->setChecked(false);
+        break;
+    case Qt::Key_Return:
+        ui->start->setChecked(false);
+        break;
+    case Qt::Key_Backspace:
+        ui->select->setChecked(false);
+        break;
+    }
+
 }
