@@ -56,7 +56,7 @@ FileLoader::FileLoader(MainWindow *parent, FileDialogType type) :
     //this->setFixedWidth(btnRes->width() + btnText->width() + btnData->width());
     //this->setFixedHeight(btnText->height() + btnText->iconSize().width() + 20);*/
 
-    if(dialogType == CreateFile){
+    if(dialogType == CREATE_FILE){
         this->setWindowTitle("Creat New File");
         ui->btnRes->setEnabled(false);
     }else

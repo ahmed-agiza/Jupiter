@@ -342,7 +342,7 @@ void MainWindow::on_actionSimulate_triggered(){
 
 void MainWindow::on_actionNew_triggered(){
 
-    FileLoader *loader = new FileLoader(this, CreateFile);
+    FileLoader *loader = new FileLoader(this, CREATE_FILE);
     loader->show();
     addEditorWindow();
 
@@ -680,7 +680,7 @@ void MainWindow::on_actionViewMemory_triggered(){
 
 void MainWindow::on_actionOpen_triggered()
 {
-    FileLoader *loader = new FileLoader(this, AddFile);
+    FileLoader *loader = new FileLoader(this, ADD_FILE);
     loader->show();
 }
 
