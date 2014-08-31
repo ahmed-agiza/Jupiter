@@ -22,11 +22,11 @@
      <x>30</x>
      <y>45</y>
      <width>611</width>
-     <height>371</height>
+     <height>311</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-image: url(C:/stuff/controller.png);
+    <string notr="true">background-image: url(:/joypad/icons/joypad/controller.png);
 background-repeat: no-repeat;
 </string>
    </property>
@@ -48,13 +48,13 @@ background-repeat: no-repeat;
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/ab2.png);
+	background-image: url(:/joypad/icons/joypad/ab2.png);
 	background-repeat: no-repeat;
 
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/ab2_pressed.png);
+		background-image: url(:/joypad/icons/joypad/ab2_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -76,7 +76,7 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/ab2.png);
+	background-image: url(:/joypad/icons/joypad/ab2.png);
 	background-repeat: no-repeat;
 	border-color:#1E665D;
 	border-width: 1px;
@@ -84,7 +84,7 @@ QPushButton:checked{
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/ab2_pressed.png);
+		background-image: url(:/joypad/icons/joypad/ab2_pressed.png);
 	background-repeat: no-repeat;
 	border-color: #1E665D;
 	border-width: 1px;
@@ -111,12 +111,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/startselectbutton.png);
+	background-image: url(:/joypad/icons/joypad/startselectbutton.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/startselectbutton_pressed.png);
+		background-image: url(:/joypad/icons/joypad/startselectbutton_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -138,12 +138,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/startselectbutton.png);
+	background-image: url(:/joypad/icons/joypad/startselectbutton.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/startselectbutton_pressed.png);
+		background-image: url(:/joypad/icons/joypad/startselectbutton_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -165,12 +165,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/up.png);
+	background-image: url(:/joypad/icons/joypad/up.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/up_pressed.png);
+		background-image: url(:/joypad/icons/joypad/up_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -192,12 +192,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/down.png);
+	background-image: url(:/joypad/icons/joypad/down.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/down_pressed.png);
+		background-image: url(:/joypad/icons/joypad/down_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -219,12 +219,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/right.png);
+	background-image: url(:/joypad/icons/joypad/right.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/right_pressed.png);
+		background-image: url(:/joypad/icons/joypad/right_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -246,12 +246,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/left.png);
+	background-image: url(:/joypad/icons/joypad/left.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/left_pressed.png);
+		background-image: url(:/joypad/icons/joypad/left_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -273,12 +273,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/l.png);
+	background-image: url(:/joypad/icons/joypad/l.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/l_pressed.png);
+		background-image: url(:/joypad/icons/joypad/l_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>
@@ -300,12 +300,12 @@ QPushButton:checked{
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton{
-	background-image: url(C:/stuff/buttons/r.png);
+	background-image: url(:/joypad/icons/joypad/r.png);
 	background-repeat: no-repeat;
 }
 
 QPushButton:checked{
-		background-image: url(C:/stuff/buttons/r_pressed.png);
+		background-image: url(:/joypad/icons/joypad/r_pressed.png);
 	background-repeat: no-repeat;
 }</string>
    </property>

@@ -86,5 +86,6 @@
         <file>icons/joypad/startselectbutton_pressed.png</file>
         <file>icons/joypad/up.png</file>
         <file>icons/joypad/up_pressed.png</file>
+        <file>icons/joypad/controller.png</file>
     </qresource>
 </RCC>
