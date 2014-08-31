@@ -1,6 +1,7 @@
 #include "tilesetviewer.h"
 #include "ui_tilesetviewer.h"
 #include <QGridLayout>
+#include <fstream>
 
 TileSetViewer::TileSetViewer(QWidget *parent, Memory * memory) :
     QDialog(parent),
@@ -86,7 +87,7 @@ void TileSetViewer::on_lineEdit_editingFinished()
 
 void TileSetViewer::on_browsePushButton_clicked()
 {
-    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("PNG files (*.png)"));
+    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("Mirage Tile Image (*.mtile);; PNG File(*.png)"));
     ui->lineEdit->setText(filePath);
 }
 
@@ -145,8 +146,44 @@ void TileSetViewer::on_loadPushButton_clicked()
                 memory->storeByte((tileBaseAddress | (tileIndex << 8) | (i<<4) | j), imageMatrix[i][j]);
             }
         }
-    }
-    else{
+    }else if(filePath.endsWith(".mtile")){
+        std::ifstream inputFile(filePath.toStdString().c_str(), std::ios::binary);
+        int tileIndex = ui->horizontalSlider->value();
+        int tileBaseAddress = ((ui->pushButton->text() == "Background")? memory->backgroundTileSetBaseAddress:memory->spritesTileSetBaseAddress);
+        for(int i=0; i<16; i++){
+            for(int j=0; j<16; j++){
+                char colorR, colorG, colorB, colorA;
+                inputFile.get(colorR);
+                inputFile.get(colorG);
+                inputFile.get(colorB);
+                inputFile.get(colorA);
+                Uint32 color = colorToInt(sf::Color(colorR,colorG,colorB,colorA));
+                if(paletteSet.contains(color)){
+                    imageMatrix[i][j] = paletteSet[color];
+                }else{
+                    if(palettePointer<256){
+                        while(palettePointer<256 && memory->palette[palettePointer].getColor() != sf::Color(0,0,0,0)){
+                            palettePointer++;
+                        }
+                        if(palettePointer == 256){
+                            qDebug() << "Error! Color palette is full";
+                        }else{
+                            memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
+                            paletteSet[color] = palettePointer;
+                            imageMatrix[i][j] = palettePointer;
+                        }
+                    }else{
+                        qDebug() << "Error! Color palette is full";
+                    }
+                }
+            }
+        }
+        for(int i=0; i<16; i++){
+            for(int j=0; j<16; j++){
+                memory->storeByte((tileBaseAddress | (tileIndex << 8) | (i<<4) | j), imageMatrix[i][j]);
+            }
+        }
+    }else{
         QMessageBox::information(this, tr("Tile Loader"),
                                  tr("Failed to open tile"),
                                  QMessageBox::Ok);
@@ -158,11 +195,33 @@ void TileSetViewer::on_savePushButton_clicked()
     QString tileNumber = QString::number(ui->horizontalSlider->value());
     if(tileNumber.size() == 1) tileNumber = QString("00") + tileNumber;
     else if(tileNumber.size() == 2) tileNumber = QString("0") + tileNumber;
-    QString fileName = "tile" + tileNumber + ".png";
-    fileName = QFileDialog::getSaveFileName(this, tr("Save File"),fileName,tr("PNG (*.png)"));
+    QString fileName = "tile" + tileNumber;
+    fileName = QFileDialog::getSaveFileName(this, tr("Save File"),fileName,tr("Mirage Tile Image (*.mtile);; PNG File(*.png)"));
+    if(fileName.endsWith(".png")){
+        if(tileRenderWindow->getTileSetToRender() == 0){
+            memory->backgroundTileSet[tileRenderWindow->getTileIndex()].getImage().saveToFile(fileName.toStdString());
+        }else{
+            memory->spritesTileSet[tileRenderWindow->getTileIndex()].getImage().saveToFile(fileName.toStdString());
+        }
+    }else if(fileName.endsWith(".mtile")){
+        sf::Image image;
     if(tileRenderWindow->getTileSetToRender() == 0){
-        memory->backgroundTileSet[tileRenderWindow->getTileIndex()].getImage().saveToFile(fileName.toStdString());
+        image = memory->backgroundTileSet[tileRenderWindow->getTileIndex()].getImage();
     }else{
-        memory->spritesTileSet[tileRenderWindow->getTileIndex()].getImage().saveToFile(fileName.toStdString());
+        image = memory->backgroundTileSet[tileRenderWindow->getTileIndex()].getImage();
+    }
+
+    std::ofstream outfile(fileName.toStdString(), std::ios::binary);
+        for (int i = 0; i < 16; i++){
+            for (int j = 0; j < 16; j++){
+                Color color = image.getPixel(j, i);
+                outfile.put(char(color.r));
+                outfile.put(char(color.g));
+                outfile.put(char(color.b));
+                outfile.put(char(color.a));
+            }
+        }
+
+        outfile.close();
     }
 }
