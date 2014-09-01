@@ -12,6 +12,24 @@ InputManager::InputManager(QWidget *parent, Memory *memory) :
 {
     this->mem = memory;
     ui->setupUi(this);
+
+    joystickNumber = 0;
+
+    buttons.resize(10);
+
+    buttons[ DOWN_KEY_INDEX] =  ui->down;
+    buttons[ LEFT_KEY_INDEX] =  ui->left;
+    buttons[ RIGHT_KEY_INDEX] =  ui->right;
+    buttons[ UP_KEY_INDEX] =  ui->up;
+    buttons[ A_KEY_INDEX] =  ui->A;
+    buttons[ B_KEY_INDEX] =  ui->B;
+    buttons[ R_KEY_INDEX] =  ui->r;
+    buttons[ L_KEY_INDEX] =  ui->l;
+    buttons[ START_KEY_INDEX] =  ui->start;
+    buttons[ SELECT_KEY_INDEX] =  ui->select;
+
+
+    connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
     this->setWindowTitle("Input Manager");
     QPixmap pixmap;
     pixmap.load(":/joypad/icons/joypad/up.png");
@@ -43,6 +61,18 @@ InputManager::InputManager(QWidget *parent, Memory *memory) :
         }
     }
 
+
+    for(int i=0; i<8; i++){
+        ui->tableWidget->setColumnWidth(i,30);
+    }
+
+    for(int i=0; i<2; i++){
+        for(int j=0; j<8; j++){
+            tablePointers[i][j] = new QTableWidgetItem("0");
+            tablePointers[i][j]->setTextAlignment(Qt::AlignCenter);
+            ui->tableWidget->setItem(i,j,tablePointers[i][j]);
+        }
+    }
 }
 
 bool InputManager::eventFilter(QObject *o, QEvent *e){
@@ -86,19 +116,24 @@ void InputManager::keyReleaseEvent(QKeyEvent *e){
 InputManager::~InputManager()
 {
     delete ui;
+    for(int i=0; i<2; i++){
+        for(int j=0; j<8; j++){
+            delete tablePointers[i][j];
+        }
+    }
 }
 
 void InputManager::handleKeyPress(int key, Qt::KeyboardModifiers modifiers)
 {
-    if(key == Qt::Key_Up && (modifiers & Qt::ControlModifier)){
-
-        qDebug() << "Up and Ctrl combination was pressed";
-
-    }else
-        qDebug() << "Key(" << key << ") key was pressed";
-
+    if(keyman.contains(key)){
+        emit buttonPressed(keyman.getJoystickKeyCode(key), 0, true);
+        refreshTable();
+        //buttons[keyman.getJoystickKeyCode(key)]->setChecked(true);
+    }
+/*
     switch(key){
     case Qt::Key_Up:
+        emit buttonPressed(UP_KEY_INDEX,0, true);
         ui->up->setChecked(true);
         break;
     case Qt::Key_Down:
@@ -129,14 +164,35 @@ void InputManager::handleKeyPress(int key, Qt::KeyboardModifiers modifiers)
         ui->select->setChecked(true);
         break;
     }
+*/
 
+}
+
+void InputManager::refreshTable()
+{
+    unsigned int address = mem->inputMemoryBaseAddress + (joystickNumber<<1);
+    Uint8 returnedbuttons0 = mem->loadByte(address);
+    Uint8 returnedbuttons1 = mem->loadByte(address+1);
+
+    for(int i=0; i<8; i++){
+        //ui->tableWidget->setItem(0,7-i, &items[((returnedbuttons0>>i)&1)]);
+        //ui->tableWidget->setItem(1,7-i, &items[((returnedbuttons1>>i)&1)]);
+        tablePointers[0][7-i]->setText(QString::number(((returnedbuttons0>>i)&1)));
+        tablePointers[1][7-i]->setText(QString::number(((returnedbuttons1>>i)&1)));
+        buttons[i]->setChecked((returnedbuttons0>>i)&1);
+    }
+    buttons[8]->setChecked((returnedbuttons1)&1);
+    buttons[9]->setChecked((returnedbuttons1>>1)&1);
 }
 
 void InputManager::handleKeyRelease(int key, Qt::KeyboardModifiers modifiers)
 {
-    qDebug() << "Key(" << key << ") key was released";
-
-    switch(key){
+    if(keyman.contains(key)){
+        emit buttonPressed(keyman.getJoystickKeyCode(key), 0, false);
+        refreshTable();
+        //buttons[keyman.getJoystickKeyCode(key)]->setChecked(false);
+    }
+    /*switch(key){
     case Qt::Key_Up:
         ui->up->setChecked(false);
         break;
@@ -168,5 +224,16 @@ void InputManager::handleKeyRelease(int key, Qt::KeyboardModifiers modifiers)
         ui->select->setChecked(false);
         break;
     }
+*/
+}
 
+void InputManager::on_pushButton_pressed()
+{
+    if(ui->pushButton->text() == "Joypad 1"){
+        ui->pushButton->setText("Joypad 2");
+        joystickNumber = 1;
+    }else{
+        ui->pushButton->setText("Joypad 1");
+        joystickNumber = 0;
+    }
 }

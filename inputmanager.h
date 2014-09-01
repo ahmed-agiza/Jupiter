@@ -2,7 +2,11 @@
 #define INPUTMANAGER_H
 
 #include <QDialog>
+#include <QPushButton>
+#include <QVector>
+#include <QTableWidgetItem>
 #include "memory.h"
+#include "keyboardmanager.h"
 
 namespace Ui {
 class InputManager;
@@ -18,12 +22,20 @@ public:
     //void keyPressEvent(QKeyEvent *e);
     //void keyReleaseEvent(QKeyEvent *e);
     ~InputManager();
-
+    void refreshTable();
+private slots:
+    void on_pushButton_pressed();
+signals:
+    void buttonPressed(int,int,bool);
 private:
+    QVector< QPushButton* > buttons;
     Ui::InputManager *ui;
     void handleKeyPress(int key, Qt::KeyboardModifiers modifiers);
     void handleKeyRelease(int key, Qt::KeyboardModifiers modifiers);
     Memory *mem;
+    KeyboardManager keyman;\
+    QTableWidgetItem* tablePointers[2][8];
+    bool joystickNumber;
 };
 
 #endif // INPUTMANAGER_H

@@ -235,7 +235,7 @@ char Memory::loadByte(unsigned int addr) const
     else if(segment == PALETTE)
         return palette[(addr - paletteBaseAddress)>>2].loadByte(addr&0x3);
     else if(segment == INPUT_BUTTON){
-        return (((addr % 2) ^ !isLittleEndian())?  (inputMemory[(addr - inputMemoryBaseAddress)/2]>>8)&0xff : inputMemory[(addr - inputMemoryBaseAddress)/2]&0xff);
+        return ((addr % 2)?  (inputMemory[(addr - inputMemoryBaseAddress)/2]>>8)&0xff : inputMemory[(addr - inputMemoryBaseAddress)/2]&0xff);
     }else return 0;
 }
 

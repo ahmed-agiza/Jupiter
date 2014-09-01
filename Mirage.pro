@@ -41,8 +41,13 @@ SOURCES += main.cpp\
     codeeditorwindow.cpp \
     fileloader.cpp \
     explorertreeitem.cpp \
+<<<<<<< HEAD
     startupdialog.cpp \
     projectcreator.cpp
+=======
+    keyboardmanager.cpp \
+    startupdialog.cpp
+>>>>>>> origin/master
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -73,8 +78,13 @@ HEADERS  += mainwindow.h \
     codeeditorwindow.h \
     fileloader.h \
     explorertreeitem.h \
+<<<<<<< HEAD
     startupdialog.h \
     projectcreator.h
+=======
+    keyboardmanager.h \
+    startupdialog.h
+>>>>>>> origin/master
 
 FORMS    += \
     mainwindow.ui \
