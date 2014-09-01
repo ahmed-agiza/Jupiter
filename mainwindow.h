@@ -33,6 +33,9 @@ public:
     bool eventFilter(QObject *, QEvent *);
 
     void openProjectAction();
+    void createProjectAction();
+
+    void closeProject();
 
     void addEditorWindow();
     void addEditorWindow(QString file);
@@ -137,8 +140,13 @@ private slots:
     void refreshActions();
     void refreshEditActions();
 
+    void builProjectFile();
+    void reBuildProjectFile();
+
 
     void on_actionNew_Project_triggered();
+
+    void on_actionDefaultLayout_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -176,6 +184,8 @@ private:
     bool parseProjectXML(QFile &);
     void loadProjectTree();
     bool validateProjectFiles(bool forceAll);
+
+    void openProjectFile(QString tempProjectFileName);
 
 
     //Menus

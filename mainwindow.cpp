@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     setCentralWidget(ui->dockCode);
+
     installEventFilter(this);
 
 
@@ -157,19 +158,42 @@ MainWindow::MainWindow(QWidget *parent) :
 
 bool MainWindow::eventFilter(QObject *o, QEvent *e){
     if (e->type() == QEvent::Show){
-        //addEditorWindow();
-        //ui->actionOpen_Project->trigger();
+        ui->actionDefaultLayout->trigger();
         StartupDialog *sdialog = new StartupDialog(this);
         sdialog->show();
         sdialog->setModal(true);
+
     }
-    //on_actionNew_triggered();
+
     return QMainWindow::eventFilter(o, e);
 }
 
 void MainWindow::openProjectAction()
 {
     on_actionOpen_Project_triggered();
+}
+
+void MainWindow::createProjectAction()
+{
+    on_actionNew_Project_triggered();
+}
+
+void MainWindow::closeProject()
+{
+    ui->mdiAreaCode->closeAllSubWindows();
+    if (projectFile.isOpen()){
+        projectFile.close();
+    }
+    ui->treeFiles->clear();
+    currentProjectString = "";
+    MainWindow::projectPath = "";
+    MainWindow::projectFileName = "";
+    MainWindow::projectTitle = "";
+    MainWindow::projectMainFile = "";
+    MainWindow::projectTextFiles.clear();
+    MainWindow::projectDataFile = "";
+    MainWindow::projectConf.clear();
+    refreshActions();
 }
 
 void MainWindow::addEditorWindow()
@@ -513,20 +537,7 @@ void MainWindow::on_actionClose_triggered(){
     if (!projectFile.isOpen())
         return;
     if(QMessageBox::information(this, "Close Project", "Are you sure you want to close the active project?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes){
-        ui->mdiAreaCode->closeAllSubWindows();
-        if (projectFile.isOpen()){
-            projectFile.close();
-        }
-        ui->treeFiles->clear();
-        currentProjectString = "";
-        MainWindow::projectPath = "";
-        MainWindow::projectFileName = "";
-        MainWindow::projectTitle = "";
-        MainWindow::projectMainFile = "";
-        MainWindow::projectTextFiles.clear();
-        MainWindow::projectDataFile = "";
-        MainWindow::projectConf.clear();
-        refreshActions();
+        closeProject();
     }
 }
 
@@ -604,53 +615,19 @@ void MainWindow::on_actionSprite_Editor_triggered()
 
 void MainWindow::on_actionOpen_Project_triggered()
 {
+    if (projectFile.isOpen())
+        if(QMessageBox::information(this, "Close Project", "Are you sure you want to close the active project?", QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
+            return;
+
+
+
     QString tempProjectFileName = QFileDialog::getOpenFileName(this, "Open Project", QDir::currentPath() /* + "/projects/"*/, "Mirage Project File(*.mpro)");
     if (tempProjectFileName.trimmed() == "")
         return;
-    QString tempProjectPath = QFileInfo(tempProjectFileName).absolutePath() + "/";
-    tempProjectFileName = QFileInfo(tempProjectFileName).fileName();
-    QFile tempProjectFile(tempProjectPath + tempProjectFileName);
-    QString tempCurrentProjectString = "";
-    QString line;
-    QTextStream stream(&tempProjectFile);
 
-    if (tempProjectFile.open(QIODevice::ReadOnly | QIODevice::ReadOnly)){
-        tempCurrentProjectString = "";
-        while (!stream.atEnd()){
-            line = stream.readLine();
-            tempCurrentProjectString.append(line + '\n');
-        }
-        //qDebug() << currentProjectString;
-        tempProjectFile.close();
-        if (parseProjectXML(tempProjectFile)){
-            if(validateProjectFiles(false)){
-                QString tempCurrentProjectFileName = projectFile.fileName();
-                projectFile.setFileName(tempProjectFile.fileName());
-                if(projectFile.open(QIODevice::ReadWrite | QIODevice::Text)){
-                    MainWindow::projectFileName = tempProjectFileName;
-                    MainWindow::projectPath = tempProjectPath;
-                    currentProjectString = tempCurrentProjectString;
-                    loadProjectTree();
-                    ui->mdiAreaCode->closeAllSubWindows();
-                    QTreeWidgetItemIterator it(ui->treeFiles);
-                    while (*it) {
-                        if ((*it)->text(0).trimmed() == MainWindow::getProjectMainFile()){
-                            on_treeFiles_itemDoubleClicked((*it), 0);
-                            break;
-                        }
-                        ++it;
-                    }
-                }else{
-                    projectFile.setFileName(tempCurrentProjectFileName);
-                }
-            }
-
-        }
-    }else{
-        QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + tempProjectFile.errorString());
-        qDebug() << "Failed to open!";
-    }
-    refreshActions();
+    if (projectFile.isOpen())
+        closeProject();
+    openProjectFile(tempProjectFileName);
 }
 
 
@@ -741,6 +718,7 @@ void MainWindow::loadProjectTree()
     textSegmentParent->setText(0, "Text");
     projectItem->addChild(textSegmentParent);
     foreach(const QString &textFile, MainWindow::projectTextFiles){
+        if (textFile.trimmed() == "") continue;
         QTreeWidgetItem *textFileItem = new QTreeWidgetItem(textSegmentParent);
         textFileItem->setText(0, textFile);
         textFileItem->setIcon(0, QIcon(":/icons/explorer/icons/explorer/textsegmentFileIcon.png"));
@@ -755,10 +733,12 @@ void MainWindow::loadProjectTree()
     ExplorerTreeItem *dataSegmentParent = new ExplorerTreeItem(projectItem);
     dataSegmentParent->setText(0, "Data");
     projectItem->addChild(dataSegmentParent);
-    ExplorerTreeItem *dataFileItem = new ExplorerTreeItem(dataSegmentParent);
-    dataFileItem->setText(0, MainWindow::projectDataFile);
-    dataFileItem->setIcon(0, QIcon(":/icons/explorer/icons/explorer/dataFileIcon.png"));
-    dataSegmentParent->addChild(dataFileItem);
+    if (MainWindow::projectDataFile.trimmed() != ""){
+        ExplorerTreeItem *dataFileItem = new ExplorerTreeItem(dataSegmentParent);
+        dataFileItem->setText(0, MainWindow::projectDataFile);
+        dataFileItem->setIcon(0, QIcon(":/icons/explorer/icons/explorer/dataFileIcon.png"));
+        dataSegmentParent->addChild(dataFileItem);
+    }
 
     projectItem->setExpanded(true);
     textSegmentParent->setExpanded(true);
@@ -769,29 +749,81 @@ void MainWindow::loadProjectTree()
 
 bool MainWindow::validateProjectFiles(bool forceAll = true)
 {
+
+    if (MainWindow::projectTextFiles.size() > 0)
     foreach(const QString &textFile, MainWindow::projectTextFiles){
+        if (textFile.trimmed() == "") continue;
         QFile testFile(textFile);
         if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
             QMessageBox::critical(this, "Error", QString("Failed to load the file ") + textFile + QString("\n ") + testFile.errorString());
             if(!forceAll)
                 return false;
         }else{
-            //qDebug() << "Opened " << textFile;
             testFile.close();
         }
     }
-    QFile testFile(MainWindow::projectDataFile);
-    if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
-        QMessageBox::critical(this, "Error", QString("Failed to load the file ") + projectDataFile + QString("\n ") + testFile.errorString());
-        if(!forceAll)
-            return false;
-    }else{
-        //qDebug() << "Opened " << projectDataFile;
-        testFile.close();
+    if (MainWindow::projectDataFile.trimmed() != ""){
+        QFile testFile(MainWindow::projectDataFile);
+        if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+            QMessageBox::critical(this, "Error", QString("Failed to load the file ") + projectDataFile + QString("\n ") + testFile.errorString());
+            if(!forceAll)
+                return false;
+        }else{
+            testFile.close();
+        }
     }
 
 
     return true;
+}
+
+void MainWindow::openProjectFile(QString tempProjectFileName)
+{
+
+    QString tempProjectPath = QFileInfo(tempProjectFileName).absolutePath() + "/";
+    tempProjectFileName = QFileInfo(tempProjectFileName).fileName();
+    QFile tempProjectFile(tempProjectPath + tempProjectFileName);
+    QString tempCurrentProjectString = "";
+    QString line;
+    QTextStream stream(&tempProjectFile);
+
+    if (tempProjectFile.open(QIODevice::ReadOnly | QIODevice::ReadOnly)){
+        tempCurrentProjectString = "";
+        while (!stream.atEnd()){
+            line = stream.readLine();
+            tempCurrentProjectString.append(line + '\n');
+        }
+
+        tempProjectFile.close();
+        if (parseProjectXML(tempProjectFile)){
+            if(validateProjectFiles(false)){
+                QString tempCurrentProjectFileName = projectFile.fileName();
+                projectFile.setFileName(tempProjectFile.fileName());
+                if(projectFile.open(QIODevice::ReadWrite | QIODevice::Text)){
+                    MainWindow::projectFileName = tempProjectFileName;
+                    MainWindow::projectPath = tempProjectPath;
+                    currentProjectString = tempCurrentProjectString;
+                    loadProjectTree();
+                    ui->mdiAreaCode->closeAllSubWindows();
+                    QTreeWidgetItemIterator it(ui->treeFiles);
+                    while (*it) {
+                        if ((*it)->text(0).trimmed() == MainWindow::getProjectMainFile()){
+                            on_treeFiles_itemDoubleClicked((*it), 0);
+                            break;
+                        }
+                        ++it;
+                    }
+                }else{
+                    projectFile.setFileName(tempCurrentProjectFileName);
+                }
+            }
+
+        }
+    }else{
+        QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + tempProjectFile.errorString());
+        qDebug() << "Failed to open!";
+    }
+    refreshActions();
 }
 
 void MainWindow::on_actionInput_triggered()
@@ -959,6 +991,14 @@ void MainWindow::refreshEditActions(){
 
 }
 
+void MainWindow::builProjectFile(){
+
+}
+
+void MainWindow::reBuildProjectFile(){
+
+}
+
 void MainWindow::setMainProjectFile(QString file)
 {
     MainWindow::projectMainFile = file;
@@ -966,5 +1006,54 @@ void MainWindow::setMainProjectFile(QString file)
 
 void MainWindow::on_actionNew_Project_triggered()
 {
-    refreshActions();
+    QString projectName = QFileDialog::getSaveFileName(this, "New Project", QDir::currentPath() /*+ "/projects/"*/, "Mirage Project File(*.mpro)");
+    QFile tempProject(projectName);
+    if (tempProject.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)){
+        QTextStream writer(&tempProject);
+        writer << "<MIPSProject>" << endl;
+        writer << "<ProjectTitle>" << endl;
+        writer << QFileInfo(projectName).baseName() << endl;
+        writer << "</ProjectTitle>" << endl;
+        writer << "<TextSegment>" << endl;
+        writer << "</TextSegment>" << endl;
+        writer << "<DataSegment>" << endl;
+        writer << "</DataSegment>" << endl;
+        writer << "<Configure>" << endl;
+        writer << "</Configure>" << endl;
+        writer << "</MIPSProject>";
+        tempProject.close();
+        openProjectFile(projectName);
+    }else
+        QMessageBox::critical(this, "Error", "Could not create the project " + projectName);
+}
+
+void MainWindow::on_actionDefaultLayout_triggered()
+{
+    ui->dockAsm->setVisible(true);
+    ui->dockCode->setVisible(true);
+    ui->dockMemory->setVisible(true);
+    ui->dockProject->setVisible(true);
+
+    this->removeDockWidget(ui->dockAsm);
+    this->removeDockWidget(ui->dockCode);
+    this->removeDockWidget(ui->dockMemory);
+    this->removeDockWidget(ui->dockProject);
+
+    this->addDockWidget(Qt::LeftDockWidgetArea, ui->dockCode);
+    this->setCentralWidget(ui->dockCode);
+
+    this->addDockWidget(Qt::LeftDockWidgetArea, ui->dockProject);
+    this->addDockWidget(Qt::RightDockWidgetArea, ui->dockMemory);
+    this->addDockWidget(Qt::LeftDockWidgetArea, ui->dockAsm);
+
+    ui->dockAsm->setFloating(false);
+    ui->dockCode->setFloating(false);
+    ui->dockMemory->setFloating(false);
+    ui->dockProject->setFloating(false);
+
+    ui->dockAsm->setVisible(true);
+    ui->dockCode->setVisible(true);
+    ui->dockMemory->setVisible(true);
+    ui->dockProject->setVisible(true);
+
 }

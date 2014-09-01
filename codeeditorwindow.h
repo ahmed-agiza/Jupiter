@@ -6,8 +6,10 @@
 #include <QTextEdit>
 #include <QList>
 #include "codeeditor.h"
+#include <QObject>
 
 class CodeEditorWindow : public QMdiSubWindow{
+    Q_OBJECT
 public:
     CodeEditorWindow(QWidget *parent);
     CodeEditorWindow(QWidget *parent, QFont editorFont);
@@ -23,18 +25,24 @@ public:
     void findAndReplace();
 
     CodeEditor *codeEditor();
+    bool isEdited();
 
     void cut();
     void copy();
     void paste();
     void undo();
     void redo();
+private slots:
+    void editedSlot();
+
 private:
     CodeEditor *editor;
     QWidget *widgetsContainer;
     QHBoxLayout *editorLayout;
     QTextEdit *linesCounter;
     QString filePath;
+    QString title;
+    bool edited;
 
     void init();
 };

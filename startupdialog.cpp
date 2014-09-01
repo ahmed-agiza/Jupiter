@@ -29,6 +29,7 @@ StartupDialog::~StartupDialog()
 void StartupDialog::on_btnNewProject_clicked()
 {
     hide();
+    p->createProjectAction();
 }
 
 

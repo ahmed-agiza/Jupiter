@@ -1,6 +1,7 @@
 #include "codeeditorwindow.h"
 #include <QTextStream>
 #include <QFile>
+#include <QDebug>
 
 CodeEditorWindow::CodeEditorWindow(QWidget *parent):QMdiSubWindow(parent){
     init();
@@ -9,6 +10,7 @@ CodeEditorWindow::CodeEditorWindow(QWidget *parent):QMdiSubWindow(parent){
 CodeEditorWindow::CodeEditorWindow(QWidget *parent, QFont editorFont):QMdiSubWindow(parent){
     init();
     editor->setFont(editorFont);
+
 }
 
 
@@ -34,13 +36,14 @@ bool CodeEditorWindow::openFile(QString fileName)
     QString fileData;
     QTextStream stream (&file);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        setWindowTitle(fileName);
+        title = fileName;
         setFilePath(fileName);
         while (!stream.atEnd()){
             fileData.append(stream.readLine() + "\n");
         }
         file.close();
         editor->setText(fileData);
+        setWindowTitle(fileName);
         return true;
 
     }else
@@ -77,6 +80,11 @@ CodeEditor *CodeEditorWindow::codeEditor()
     return editor;
 }
 
+bool CodeEditorWindow::isEdited()
+{
+    return edited;
+}
+
 void CodeEditorWindow::cut()
 {
     editor->cut();
@@ -102,10 +110,19 @@ void CodeEditorWindow::redo()
     editor->redo();
 }
 
+void CodeEditorWindow::editedSlot()
+{
+    edited = true;
+    setWindowTitle(title + "*");
+}
+
+
 void CodeEditorWindow::init()
 {
-    this->setObjectName("newW");
-    this->setWindowTitle("Untitled");
+    setObjectName("newW");
+    setWindowTitle("Untitled");
+    title = "Untitled";
+    edited = false;
     filePath = "NULL";
 
     widgetsContainer = new QWidget(this);
@@ -129,8 +146,9 @@ void CodeEditorWindow::init()
 
     widgetsContainer->setLayout(editorLayout);
 
-    this->setWidget(widgetsContainer);
+    setWidget(widgetsContainer);
 
-    this->setAttribute(Qt::WA_DeleteOnClose, 1);
+    setAttribute(Qt::WA_DeleteOnClose, 1);
     widgetsContainer->showMaximized();
+    connect(editor, SIGNAL(textChanged()), this, SLOT(editedSlot()));
 }
