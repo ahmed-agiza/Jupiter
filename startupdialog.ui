@@ -47,6 +47,9 @@
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextBesideIcon</enum>
    </property>
+   <property name="autoRaise">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QToolButton" name="btnOpenProject">
    <property name="geometry">
@@ -66,6 +69,12 @@
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <property name="autoRaise">
+    <bool>true</bool>
+   </property>
+   <property name="arrowType">
+    <enum>Qt::NoArrow</enum>
    </property>
   </widget>
  </widget>
