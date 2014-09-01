@@ -44,6 +44,9 @@
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
+   <property name="autoRaise">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QToolButton" name="btnData">
    <property name="geometry">
@@ -70,6 +73,9 @@
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
+   <property name="autoRaise">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QToolButton" name="btnRes">
    <property name="geometry">
@@ -95,6 +101,9 @@
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <property name="autoRaise">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

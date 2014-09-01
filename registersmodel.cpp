@@ -8,9 +8,10 @@ const QString B02("Binary");
 const QString NUM("Numbers");
 const QString STR("Names");
 
+QString getPaddedBinary(int number, int padding);
+
 RegistersModel::RegistersModel(QObject *parent) :
-    QAbstractTableModel(parent)
-{
+    QAbstractTableModel(parent){
     constructMap();
 }
 
@@ -126,7 +127,7 @@ QVariant RegistersModel::data(const QModelIndex &index, int role) const
             if (displayBase->currentText() == B16){
                 return "0x" + QString::number(value, 16);
             }else if (displayBase->currentText() == B02){
-                return "0b" + QString::number(value, 2);
+                return "0b" + getPaddedBinary(value, 32);
             }else{
                 return value;
             }
@@ -231,5 +232,38 @@ QList<QPair<QString, int> > RegistersModel::getAllData()
     }
 
     return tableData;
+}
+
+QString getPaddedBinary(int number, int padding){
+    QString binary = QString::number(number, 2);
+    if (padding == 4){
+        if (binary.size() < 4)
+            while(binary.size() < 4)
+                binary.prepend("0");
+    }else if (padding == 8){
+        if (binary.size() < 8)
+            while(binary.size() < 8)
+                binary.prepend("0");
+    }else if (padding == 16){
+        if (binary.size() < 16)
+            while(binary.size() < 16)
+                binary.prepend("0");
+    }else if (padding == 24){
+        if (binary.size() < 24)
+            while(binary.size() < 24)
+                binary.prepend("0");
+    }else if (padding == 32){
+        if (binary.size() < 32)
+            while(binary.size() < 32)
+                binary.prepend("0");
+    }else
+        return binary;
+
+
+    if(binary.size() > 4)
+        for(int i = 4; i < binary.size(); i += 5)
+            binary.insert(i, ' ');
+
+    return binary;
 }
 

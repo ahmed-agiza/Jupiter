@@ -60,7 +60,7 @@ FileLoader::FileLoader(MainWindow *parent, FileDialogType type) :
         this->setWindowTitle("Creat New File");
         ui->btnRes->setEnabled(false);
     }else
-        this->setWindowTitle("Add Existing File");
+        setWindowTitle("Add Existing File");
 
 
 
@@ -68,7 +68,7 @@ FileLoader::FileLoader(MainWindow *parent, FileDialogType type) :
     QPoint centerPoint = screenGeo.center();
     centerPoint.setX(centerPoint.x() - this->width()/2);
     centerPoint.setY(centerPoint.y() - this->height()/2);
-    this->move(centerPoint);
+    move(centerPoint);
 
 }
 

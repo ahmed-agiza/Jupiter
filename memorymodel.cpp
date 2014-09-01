@@ -9,6 +9,8 @@ const QString B16("Hexadecimal");
 const QString B02("Binary");
 const QString BAS("Ascii");
 
+QString getPaddedBinary(int number, int padding);
+
 
 
 MemoryModel::MemoryModel(QObject *parent) :
@@ -110,7 +112,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
             else if (addressBase->currentText() == B16)
                 return "0x" + QString::number(adr, 16).toUpper();
             else if (addressBase->currentText() == B02)
-                return "0b" + QString::number(adr, 2);
+                return "0b" + getPaddedBinary(adr, 32);
         }
         else if (index.column() == 1){
             int value;
@@ -154,7 +156,10 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                     return "0x" + untrimmed.mid(untrimmed.size() - 8).toUpper();
                 }
             }else if (memoryBase->currentText() == B02){
-                return "0b" + QString::number(value, 2);
+                if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD)
+                    return "0b" + getPaddedBinary(value, 32);
+                else
+                    return "0b" + getPaddedBinary(value, 8);
             }else if (memoryBase->currentText() == BAS){
                 if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
                     QByteArray strByte(4, ' ');
@@ -208,12 +213,23 @@ Qt::ItemFlags MemoryModel::flags(const QModelIndex &index) const
     return QAbstractTableModel::flags(index);// | Qt::ItemIsEditable;
 }
 
-void MemoryModel::setModifiers(QComboBox *ab, QComboBox *mm, QComboBox *mb)
-{
+void MemoryModel::setModifiers(QComboBox *ab, QComboBox *mm, QComboBox *mb){
     addressBase = ab;
     memoryMode = mm;
     memoryBase = mb;
 }
+
+/*QString getPaddedBinary(int number, int padding){
+    QString binary = QString::number(number, 2);
+    QString trimmed = binary.mid(binary.length() - padding);
+    while(trimmed.size() %4 != 0)
+        trimmed.prepend("0");
+    if(trimmed.size() > 4)
+        for(int i = 4; i < trimmed.size(); i += 5)
+            trimmed.insert(i, ' ');
+
+    return trimmed;
+}*/
 /*bool RegistersModel::setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole)
 {
 

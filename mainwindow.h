@@ -17,6 +17,7 @@
 #include "memorymodel.h"
 #include "spriteviewer.h"
 #include "inputmanager.h"
+#include <QFile>
 
 namespace Ui {
 class MainWindow;
@@ -30,6 +31,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
 
     bool eventFilter(QObject *, QEvent *);
+
+    void openProjectAction();
+    void createProjectAction();
+
+    void closeProject();
 
     void addEditorWindow();
     void addEditorWindow(QString file);
@@ -60,13 +66,20 @@ public:
     static int getTileMapWidth();
     static int getTileMapHeight();
 
+    void resizeColumns();
+
 
 
     ~MainWindow();
 
 private slots:
-    void projectExplorerMenuRequested(QPoint loc);
+    void resizeDataColumns();
+    void resizeTextColumns();
+    void resizeHeapColumns();
+    void resizeStackColumns();
+    void resizeRegsColumns();
 
+    void projectExplorerMenuRequested(QPoint loc);
 
     void on_actionNew_triggered();
 
@@ -115,6 +128,26 @@ private slots:
 
     void openTreeItem(QObject *itm);
 
+    void activeWindowCopy();
+    void activeWindowCut();
+    void activeWindowPaste();
+    void activeWindowUndo();
+    void activeWindowRedo();
+    void activeWindowSelectAll();
+    void activeWindowQuickFind();
+    void activeWindowFindAndReplace();
+
+    void refreshActions();
+    void refreshEditActions();
+
+    void builProjectFile();
+    void reBuildProjectFile();
+
+
+    void on_actionNew_Project_triggered();
+
+    void on_actionDefaultLayout_triggered();
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
@@ -144,10 +177,17 @@ private:
     static QString projectDataFile;
     static QMap<QString, QString> projectConf;
 
+    QFile projectFile;
+    void setMainProjectFile(QString);
 
-    void parseProjectXML(QFile &);
+
+    bool parseProjectXML(QFile &);
     void loadProjectTree();
     bool validateProjectFiles(bool forceAll);
+
+    void openProjectFile(QString tempProjectFileName);
+
+
     //Menus
 };
 
