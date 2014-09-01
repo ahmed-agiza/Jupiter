@@ -38,7 +38,7 @@ public:
     void closeProject();
 
     void addEditorWindow();
-    void addEditorWindow(QString file);
+    void addEditorWindow(QString file, QString title);
 
     void createDataFile(QString file);
     void creatTextFile(QString file);
@@ -52,7 +52,7 @@ public:
     void removeResourceFile(QString file);
 
 
-
+    QString loadFileText(QString fileName);
     static QString getProjectPath();
     static void setProjectPath(QString path);
     static QString getProjectFileName();
@@ -67,6 +67,12 @@ public:
     static int getTileMapHeight();
 
     void resizeColumns();
+
+    bool hasOpenProject();
+
+    void openProjectFile(QString tempProjectFileName);
+
+    void applyProjectSettings();
 
 
 
@@ -98,8 +104,6 @@ private slots:
     void on_actionSprite_Editor_triggered();
 
     void printS();
-
-    void on_actionEnable_Graphics_Engine_triggered();
 
     void on_actionReload_Tiles_Memory_triggered();
 
@@ -139,14 +143,16 @@ private slots:
 
     void refreshActions();
     void refreshEditActions();
+    void refreshGraphicsAction();
 
-    void builProjectFile();
     void reBuildProjectFile();
 
 
     void on_actionNew_Project_triggered();
 
     void on_actionDefaultLayout_triggered();
+
+
 
 private:
     Ui::MainWindow *ui;
@@ -184,8 +190,9 @@ private:
     bool parseProjectXML(QFile &);
     void loadProjectTree();
     bool validateProjectFiles(bool forceAll);
+    bool validateTempProjectFiles(bool forceAll);
 
-    void openProjectFile(QString tempProjectFileName);
+
 
 
     //Menus

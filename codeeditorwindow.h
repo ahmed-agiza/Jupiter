@@ -17,12 +17,14 @@ public:
     QString getFilePath();
     bool operator==(CodeEditorWindow &window);
     void setFilePath(QString path);
-    bool openFile(QString fileName);
+    bool openFile(QString fileName, QString fileTitle);
     void saveFile();
     void saveFileAs();
     void selectAll();
     void quickFind();
     void findAndReplace();
+
+    void setOpened();
 
     CodeEditor *codeEditor();
     bool isEdited();

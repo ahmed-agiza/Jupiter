@@ -243,3 +243,10 @@ void CodeEditor::setCounter(QTextEdit *lc)
 {
     lCounter = lc;
 }
+
+void CodeEditor::setOpened(){
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+    setTextCursor(cursor);
+    codeCompleter->popup()->hide();
+}

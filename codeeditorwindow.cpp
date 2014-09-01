@@ -30,33 +30,33 @@ void CodeEditorWindow::setFilePath(QString path){
     filePath = path;
 }
 
-bool CodeEditorWindow::openFile(QString fileName)
-{
+bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
     QFile file(fileName);
     QString fileData;
     QTextStream stream (&file);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        title = fileName;
+        if (fileTitle.trimmed() == "")
+            title = fileName;
+        else
+            title = fileTitle;
         setFilePath(fileName);
         while (!stream.atEnd()){
             fileData.append(stream.readLine() + "\n");
         }
         file.close();
         editor->setText(fileData);
-        setWindowTitle(fileName);
+        setWindowTitle(title);
         return true;
 
     }else
         return false;
 }
 
-void CodeEditorWindow::saveFile()
-{
+void CodeEditorWindow::saveFile(){
 
 }
 
-void CodeEditorWindow::saveFileAs()
-{
+void CodeEditorWindow::saveFileAs(){
 
 }
 
@@ -65,18 +65,19 @@ void CodeEditorWindow::selectAll()
     editor->selectAll();
 }
 
-void CodeEditorWindow::quickFind()
-{
+void CodeEditorWindow::quickFind(){
 
 }
 
-void CodeEditorWindow::findAndReplace()
-{
+void CodeEditorWindow::findAndReplace(){
 
 }
 
-CodeEditor *CodeEditorWindow::codeEditor()
-{
+void CodeEditorWindow::setOpened(){
+    editor->setOpened();
+}
+
+CodeEditor *CodeEditorWindow::codeEditor(){
     return editor;
 }
 
@@ -85,40 +86,33 @@ bool CodeEditorWindow::isEdited()
     return edited;
 }
 
-void CodeEditorWindow::cut()
-{
+void CodeEditorWindow::cut(){
     editor->cut();
 }
 
-void CodeEditorWindow::copy()
-{
+void CodeEditorWindow::copy(){
     editor->copy();
 }
 
-void CodeEditorWindow::paste()
-{
+void CodeEditorWindow::paste(){
     editor->paste();
 }
 
-void CodeEditorWindow::undo()
-{
+void CodeEditorWindow::undo(){
     editor->undo();
 }
 
-void CodeEditorWindow::redo()
-{
+void CodeEditorWindow::redo(){
     editor->redo();
 }
 
-void CodeEditorWindow::editedSlot()
-{
+void CodeEditorWindow::editedSlot(){
     edited = true;
     setWindowTitle(title + "*");
 }
 
 
-void CodeEditorWindow::init()
-{
+void CodeEditorWindow::init(){
     setObjectName("newW");
     setWindowTitle("Untitled");
     title = "Untitled";

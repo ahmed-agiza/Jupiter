@@ -11,6 +11,7 @@ class CodeEditor : public QTextEdit
 public:
     explicit CodeEditor(QWidget *parent = 0);
     void setCounter(QTextEdit *lc);
+    void setOpened();
 
 private:
     SyntaxHL *SHL;

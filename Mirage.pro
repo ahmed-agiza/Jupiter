@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     codeeditorwindow.cpp \
     fileloader.cpp \
     explorertreeitem.cpp \
-    startupdialog.cpp
+    startupdialog.cpp \
+    projectcreator.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -72,7 +73,8 @@ HEADERS  += mainwindow.h \
     codeeditorwindow.h \
     fileloader.h \
     explorertreeitem.h \
-    startupdialog.h
+    startupdialog.h \
+    projectcreator.h
 
 FORMS    += \
     mainwindow.ui \
@@ -83,7 +85,8 @@ FORMS    += \
     spriteviewer.ui \
     inputmanager.ui \
     fileloader.ui \
-    startupdialog.ui
+    startupdialog.ui \
+    projectcreator.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \
