@@ -90,7 +90,7 @@ void ProjectCreator::buildProject(QString projectName){
 }
 
 void ProjectCreator::on_btnBrowse_clicked(){
-    QString dir = QFileDialog::getExistingDirectory(this, "Select Project Path", QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks | QFileDialog::DontUseCustomDirectoryIcons);
+    QString dir = QFileDialog::getExistingDirectory(this, "Select Project Path", QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (dir.trimmed() != "")
         ui->txtPath->setText(dir);
 }
