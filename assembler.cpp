@@ -20,7 +20,7 @@ QString dataSegmentDirectives = "\\.(align|asciiz?|byte|double|float|half|space|
 // Matches invalid directives
 QString invalidDirectivesRegex = "\\.(?!align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
 // Matches strings
-QString cstringsRegex = "\".*?[^\\\\]\"";
+QString cstringsRegex = "\".*[^\\\\]\"";
 // Matches strings
 QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 
@@ -275,8 +275,8 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
 
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
 
-    //parseDataSegment(stringList);
-    parseTextSegment(stringList);
+    parseDataSegment(stringList);
+    //parseTextSegment(stringList);
 
 }
 
@@ -320,7 +320,9 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         errorList.append(Error(".align directive must be followed by a number between 0 and 4", lineNumber));
                     }
                 }else if(directiveName == "ascii" || directiveName == "asciiz"){
-                    if(QRegExp(cstringsRegex).indexIn(parameters) == 0){
+                    QRegExp cStrReg(cstringsRegex);
+                    cStrReg.setMinimal(1);
+                    if(cStrReg.indexIn(parameters) == 0){
                         std::string actualString = parameters.mid(1,parameters.length()-2).toStdString();
                         int i;
                         for(i=address; i<actualString.size() + address; i++){
