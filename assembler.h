@@ -11,20 +11,12 @@
 #include <QSet>
 #include <QTextEdit>
 #include "memory.h"
+#include "keyboardmanager.h"
 //#include "InstructionFuncs.h"
 #include "tileengine.h"
 #include "trie.h"
 
-#define DOWN_KEY_INDEX 0
-#define LEFT_KEY_INDEX 1
-#define RIGHT_KEY_INDEX 2
-#define UP_KEY_INDEX 3
-#define A_KEY_INDEX 4
-#define B_KEY_INDEX 5
-#define R_KEY_INDEX 6
-#define L_KEY_INDEX 7
-#define START_KEY_INDEX 8
-#define SELECT_KEY_INDEX 9
+
 class Error
 {
 public:

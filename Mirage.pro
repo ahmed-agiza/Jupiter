@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     inputmanager.cpp \
     codeeditorwindow.cpp \
     fileloader.cpp \
-    explorertreeitem.cpp
+    explorertreeitem.cpp \
+    keyboardmanager.cpp
 
 HEADERS  += mainwindow.h \
     syntaxhl.h \
@@ -70,7 +71,8 @@ HEADERS  += mainwindow.h \
     inputmanager.h \
     codeeditorwindow.h \
     fileloader.h \
-    explorertreeitem.h
+    explorertreeitem.h \
+    keyboardmanager.h
 
 FORMS    += \
     mainwindow.ui \
