@@ -69,19 +69,29 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
     QSyntaxHighlighter(parent)
 {
    //Syntax formats:
-   instructionFormat.setForeground(QColor(Qt::red).lighter(120));
+   instructionFormat.setForeground(QColor(Qt::blue).lighter(150));
    instructionFormat.setFontWeight(QFont::Bold);
    registerFormat.setForeground(Qt::yellow);
    registerFormat.setFontWeight(QFont::Bold);
-   commentFormat.setForeground(Qt::darkGreen);
+   commentFormat.setForeground(Qt::green);
    stringFormat.setForeground(Qt::green);
    labelFormat.setForeground(Qt::darkBlue);
    macroFormat.setForeground(Qt::magenta);
+   pseudoFormat.setForeground(QColor(Qt::blue).lighter(150));
+   pseudoFormat.setFontItalic(true);
+   immFormat.setForeground(QColor(Qt::red));
+   immFormat.setFontWeight(QFont::Bold);
 
    //Instructions Syntax
 
    syntax tempSyn;
-   QStringList instructionsList;
+
+
+
+
+   tempSyn.pattern = QRegExp("0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+"); tempSyn.format = immFormat;
+   syntaxes.append(tempSyn);
+
    instructionsList << "add" << "addu" << "sub" << "subu" << "and" << "or" << "xor"
               << "srlv" << "sllv" << "srav" << "slt" << "sltu" << "addi" <<"addiu"
               << "andi" << "ori" << "nori" << "xori" << "srl" << "sll" << "sra"
@@ -92,26 +102,51 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
               << "j" << "jal" << "syscal" << "nop";
 
 
-   //      sb
-   //      lb
-   //      lbu
-   //      sh
-   //      lh
-   //      lhu
-   //      sw
-   //      lw
-   //      lwl
-   //      lwr
-   //      swl
-   //      swr
-   //      ll
-   //      sc
-
-
-
    foreach(QString pattern, instructionsList)
    {
        tempSyn.pattern = QRegExp(QString("\\b" + pattern + "\\b"), Qt::CaseInsensitive); tempSyn.format = instructionFormat;
+       syntaxes.append(tempSyn);
+   }
+
+   pseudoList << "blt" <<  "bgt"
+                       <<  "ble"
+                       <<  "bge"
+                       <<  "bltu"
+                       <<  "bgtu"
+                       <<  "bleu"
+                       <<  "bgeu"
+                       <<  "blti"
+                       <<  "bgti"
+                       <<  "blei"
+                       <<  "bgei"
+                       <<  "bltiu"
+                       <<  "bgtiu"
+                       <<  "bleiu"
+                       <<  "bgeiu"
+                       <<  "beqz"
+                       <<  "bnez"
+                       <<  "bltz"
+                       <<  "bgtz"
+                       <<  "blez"
+                       <<  "bgez"
+                       <<  "li"
+                       <<  "ror"
+                       <<  "rol"
+                       <<  "not"
+                       <<  "neg"
+                       <<  "move"
+                       <<  "abs"
+                       <<  "mul"
+                       <<  "div"
+                       <<  "rem"
+                       <<  "clear"
+                       <<  "subi";
+
+
+
+   foreach(QString pattern, pseudoList)
+   {
+       tempSyn.pattern = QRegExp(QString("\\b" + pattern + "\\b"), Qt::CaseInsensitive); tempSyn.format = pseudoFormat;
        syntaxes.append(tempSyn);
    }
 
@@ -133,6 +168,9 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    }
 
    //Comment's syntax.
+   tempSyn.pattern = QRegExp("#.*"); tempSyn.format = commentFormat;
+   syntaxes.append(tempSyn);
+
 
 }
 

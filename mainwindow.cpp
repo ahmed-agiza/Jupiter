@@ -77,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QFontDatabase fontsDB;
     fontsDB.addApplicationFont(":/font/consolas.ttf");
     if(fontsDB.families().contains("Consolas")){
-        editorFont = fontsDB.font("Consolas", "Normal", 12);
+        editorFont = fontsDB.font("Consolas", "Normal", 10);
     }
 
     treeWidget = ui->treeFiles;
@@ -658,6 +658,7 @@ bool MainWindow::parseProjectXML(QFile &data){
 
         QDomDocument domDocument;
         if(!domDocument.setContent(&data)){
+            QMessageBox::critical(this, "Error", "Invalid project file");
             qDebug() << "Cannot set content";
             return false;
         }
@@ -898,7 +899,6 @@ void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int colum
             foreach(QMdiSubWindow *window, ui->mdiAreaCode->subWindowList()){
                 if((dynamic_cast<CodeEditorWindow*> (window))->getFilePath() == fileName){
                     ui->mdiAreaCode->setActiveSubWindow(window);
-                    (dynamic_cast<CodeEditorWindow*> (window))->setOpened();
                     return;
                 }
             }
@@ -1029,7 +1029,6 @@ void MainWindow::refreshActions(){
     ui->actionEnable_Graphics_Engine->setEnabled(value);
     ui->actionInput->setEnabled(value);
     ui->actionInsert_Breakpoint->setEnabled(value);
-    ui->actionSave->setEnabled(value);
     ui->actionSaveAs->setEnabled(value);
     ui->actionSimulate->setEnabled(value);
     ui->actionNew->setEnabled(value);
@@ -1046,7 +1045,7 @@ void MainWindow::refreshEditActions(){
     ui->actionFindandReplace->setEnabled(activeWindow);
     ui->actionQuickFind->setEnabled(activeWindow);
     ui->actionSelect_All->setEnabled(activeWindow);
-
+    ui->actionSave->setEnabled(activeWindow);
 }
 
 void MainWindow::refreshGraphicsAction(){
@@ -1111,5 +1110,12 @@ void MainWindow::on_actionDefaultLayout_triggered()
     ui->dockCode->setVisible(true);
     ui->dockMemory->setVisible(true);
     ui->dockProject->setVisible(true);
+
+}
+
+void MainWindow::on_actionSave_triggered(){
+    CodeEditorWindow *activeWin = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
+    if (activeWin)
+        activeWin->saveFile();
 
 }

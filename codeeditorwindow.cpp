@@ -2,14 +2,21 @@
 #include <QTextStream>
 #include <QFile>
 #include <QDebug>
+#include <QMessageBox>
+#include <QFileDialog>
 
 CodeEditorWindow::CodeEditorWindow(QWidget *parent):QMdiSubWindow(parent){
     init();
 }
 
-CodeEditorWindow::CodeEditorWindow(QWidget *parent, QFont editorFont):QMdiSubWindow(parent){
+CodeEditorWindow::CodeEditorWindow(QWidget *parent, QFont editorFont, MirageFileType nType):QMdiSubWindow(parent){
     init();
     editor->setFont(editorFont);
+    linesCounter->setFont(editorFont);
+    QPalette palette = linesCounter->palette();
+    palette.setColor(QPalette::Disabled, QPalette::Text, QColor(Qt::white).darker(50));
+    linesCounter->setPalette(palette);
+    fileType = nType;
 
 }
 
@@ -39,6 +46,7 @@ bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
             title = fileName;
         else
             title = fileTitle;
+        filePath = fileName;
         setFilePath(fileName);
         while (!stream.atEnd()){
             fileData.append(stream.readLine() + "\n");
@@ -52,13 +60,31 @@ bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
         return false;
 }
 
-void CodeEditorWindow::saveFile(){
+bool CodeEditorWindow::saveFile(){
+    if (filePath.trimmed() != "" && filePath.trimmed() != "NULL"){
+        QFile file(filePath);
+        if (file.open(QIODevice::ReadOnly)){
+            file.close();
+            if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+                QTextStream writer(&file);
+                QStringList lines = editor->toPlainText().split("\n");
+                for(int i = 0; i < lines.size(); i++)
+                    writer << lines.at(i) << endl;
+                file.close();
+                setWindowTitle(title);
+                edited = false;
+                return true;
+            }else{
+                QMessageBox::critical(this, "Error", "Cannot open the file for saving");
+                return false;
+            }
+        }
+    }else
+        return false;
 
 }
 
-void CodeEditorWindow::saveFileAs(){
 
-}
 
 void CodeEditorWindow::selectAll()
 {
@@ -71,6 +97,14 @@ void CodeEditorWindow::quickFind(){
 
 void CodeEditorWindow::findAndReplace(){
 
+}
+
+void CodeEditorWindow::setFileType(MirageFileType nType){
+    fileType = nType;
+}
+
+MirageFileType CodeEditorWindow::getFileType(){
+    return fileType;
 }
 
 void CodeEditorWindow::setOpened(){
@@ -124,6 +158,7 @@ void CodeEditorWindow::init(){
     editorLayout = new QHBoxLayout(widgetsContainer);
     editor = new CodeEditor(widgetsContainer);
     linesCounter = new QTextEdit(widgetsContainer);
+
 
     editor->setObjectName("CodeE");
     //newCode->setFont(editorFont);

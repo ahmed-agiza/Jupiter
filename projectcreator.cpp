@@ -58,6 +58,12 @@ void ProjectCreator::buildProject(QString projectName){
         }
         writer << "</DataSegment>" << endl;
         writer << "<Configure>" << endl;
+        writer << "<Endianness>" << endl;
+        if (ui->radBEndian->isChecked())
+            writer << "big" << endl;
+        else
+            writer << "little" << endl;
+        writer << "</Endianness>" << endl;
         if(ui->chkEnableGFX->isChecked()){
             writer << "<EnableGFX>" << endl;
             writer << "true" << endl;
@@ -105,6 +111,10 @@ void ProjectCreator::on_btnCreate_clicked(){
     QRegExp fileValidator("^[A-Za-z0-9_\\@\\$.\\s]*$");
     if (fileValidator.indexIn(projectTitle) == -1){
         QMessageBox::critical(this, "Invalid Project Title", "The project title contains invalid characters");
+        return;
+    }
+    if (ui->radBEndian->isChecked() == false && ui->radLEndian->isChecked() == false){
+        QMessageBox::critical(this, "Error", "Select the endiannesss");
         return;
     }
 

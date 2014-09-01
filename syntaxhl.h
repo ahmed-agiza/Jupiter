@@ -16,8 +16,7 @@ protected:
     void highlightBlock (const QString &text);
 
 private:
-    struct syntax
-    {
+    struct syntax{
              QRegExp pattern;
              QTextCharFormat format;
     };
@@ -26,13 +25,16 @@ private:
 
 
     QTextCharFormat instructionFormat;
+    QTextCharFormat pseudoFormat;
     QTextCharFormat registerFormat;
     QTextCharFormat commentFormat;
     QTextCharFormat stringFormat;
     QTextCharFormat labelFormat;
     QTextCharFormat macroFormat;
+    QTextCharFormat immFormat;
 
     QStringList instructionsList;
+    QStringList pseudoList;
     QStringList registersList;
     QStringList macrosList;
 
