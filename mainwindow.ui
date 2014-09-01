@@ -180,6 +180,7 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
+    <addaction name="actionInput"/>
     <addaction name="actionBase_Converter"/>
     <addaction name="separator"/>
     <addaction name="actionEnable_Graphics_Engine"/>
@@ -190,7 +191,6 @@
     <addaction name="actionTile_loader"/>
     <addaction name="separator"/>
     <addaction name="actionConfigure"/>
-    <addaction name="actionInput"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -261,7 +261,7 @@
      <item>
       <widget class="QTabWidget" name="tableMemory">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -482,7 +482,14 @@
           </layout>
          </item>
          <item>
-          <widget class="QTableView" name="dataTable"/>
+          <widget class="QTableView" name="dataTable">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -871,6 +878,7 @@
    <addaction name="actionSimulate"/>
    <addaction name="actionAssemble_and_Simulate"/>
    <addaction name="separator"/>
+   <addaction name="actionInput"/>
    <addaction name="actionBase_Converter"/>
    <addaction name="separator"/>
    <addaction name="actionEnable_Graphics_Engine"/>
@@ -1208,7 +1216,7 @@
     </iconset>
    </property>
    <property name="text">
-    <string>Input</string>
+    <string>Input Manager</string>
    </property>
   </action>
   <action name="actionViewProjectManager">

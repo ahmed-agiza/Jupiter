@@ -32,6 +32,8 @@ public:
 
     bool eventFilter(QObject *, QEvent *);
 
+    void openProjectAction();
+
     void addEditorWindow();
     void addEditorWindow(QString file);
 
@@ -61,13 +63,20 @@ public:
     static int getTileMapWidth();
     static int getTileMapHeight();
 
+    void resizeColumns();
+
 
 
     ~MainWindow();
 
 private slots:
-    void projectExplorerMenuRequested(QPoint loc);
+    void resizeDataColumns();
+    void resizeTextColumns();
+    void resizeHeapColumns();
+    void resizeStackColumns();
+    void resizeRegsColumns();
 
+    void projectExplorerMenuRequested(QPoint loc);
 
     void on_actionNew_triggered();
 
@@ -121,10 +130,15 @@ private slots:
     void activeWindowPaste();
     void activeWindowUndo();
     void activeWindowRedo();
+    void activeWindowSelectAll();
+    void activeWindowQuickFind();
+    void activeWindowFindAndReplace();
 
     void refreshActions();
     void refreshEditActions();
 
+
+    void on_actionNew_Project_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -156,11 +170,14 @@ private:
     static QMap<QString, QString> projectConf;
 
     QFile projectFile;
+    void setMainProjectFile(QString);
 
 
     bool parseProjectXML(QFile &);
     void loadProjectTree();
     bool validateProjectFiles(bool forceAll);
+
+
     //Menus
 };
 

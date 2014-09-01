@@ -57,6 +57,21 @@ void CodeEditorWindow::saveFileAs()
 
 }
 
+void CodeEditorWindow::selectAll()
+{
+    editor->selectAll();
+}
+
+void CodeEditorWindow::quickFind()
+{
+
+}
+
+void CodeEditorWindow::findAndReplace()
+{
+
+}
+
 CodeEditor *CodeEditorWindow::codeEditor()
 {
     return editor;

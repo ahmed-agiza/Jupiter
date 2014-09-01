@@ -5,6 +5,7 @@
 #include <QTextEdit>
 #include <QVector>
 
+
 class SyntaxHL : public QSyntaxHighlighter
 {
     Q_OBJECT

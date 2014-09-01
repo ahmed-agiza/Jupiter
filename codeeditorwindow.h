@@ -18,6 +18,9 @@ public:
     bool openFile(QString fileName);
     void saveFile();
     void saveFileAs();
+    void selectAll();
+    void quickFind();
+    void findAndReplace();
 
     CodeEditor *codeEditor();
 

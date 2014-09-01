@@ -21,11 +21,13 @@
 #include "fileloader.h"
 #include "explorertreeitem.h"
 #include <QFileDialog>
+#include <QTreeWidgetItemIterator>
 
 
 
 #include "memory.h"
 #include "InstructionFuncs.h"
+#include "startupdialog.h"
 
 QString MainWindow::projectPath;
 QString MainWindow::projectFileName;
@@ -34,6 +36,17 @@ QString MainWindow::projectMainFile;
 QStringList MainWindow::projectTextFiles;
 QString MainWindow::projectDataFile;
 QMap<QString, QString> MainWindow::projectConf;
+
+int minDataTableWidth0 = 0;
+int minDataTableWidth1 = 0;
+int minTextTableWidth0 = 0;
+int minTextTableWidth1 = 0;
+int minHeapTableWidth0 = 0;
+int minHeapTableWidth1 = 0;
+int minStackTableWidth0 = 0;
+int minStackTableWidth1 = 0;
+int minRegsTableWidth0 = 0;
+int minRegsTableWidth1 = 0;
 
 
 
@@ -83,7 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setMouseTracking(true);
 
 
-
     textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
     dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
     stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
@@ -94,9 +106,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackTable->setModel(stackModel);
     ui->heapTable->setModel(heapModel);
 
-    ui->actionOpen_Project->trigger();
-
     ui->treeFiles->setContextMenuPolicy(Qt::CustomContextMenu);
+    refreshActions();
     refreshEditActions();
     QObject::connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
     QObject::connect(ui->mdiAreaCode,SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(refreshEditActions()));
@@ -105,15 +116,60 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(activeWindowPaste()));
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(activeWindowUndo()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(activeWindowRedo()));
+    QObject::connect(ui->actionSelect_All, SIGNAL(triggered()), this, SLOT(activeWindowSelectAll()));
+    QObject::connect(ui->actionQuickFind, SIGNAL(triggered()), this, SLOT(activeWindowQuickFind()));
+    QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
+
+
+    minDataTableWidth0 = ui->dataTable->columnWidth(0);
+    minDataTableWidth1 = ui->dataTable->columnWidth(1);
+    minTextTableWidth0 = ui->textTable->columnWidth(0);
+    minTextTableWidth1 = ui->textTable->columnWidth(1);
+    minHeapTableWidth0 = ui->heapTable->columnWidth(0);
+    minHeapTableWidth1 = ui->heapTable->columnWidth(1);
+    minStackTableWidth0 = ui->stackTable->columnWidth(0);
+    minStackTableWidth1 = ui->stackTable->columnWidth(1);
+    minRegsTableWidth0 = ui->tableMainRegisters->columnWidth(0);
+    minRegsTableWidth1 = ui->tableMainRegisters->columnWidth(1);
+
+    QObject::connect(ui->dataAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
+    QObject::connect(ui->dataMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
+    QObject::connect(ui->dataMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
+
+    QObject::connect(ui->textAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
+    QObject::connect(ui->textMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
+    QObject::connect(ui->textMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
+
+    QObject::connect(ui->heapAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
+    QObject::connect(ui->heapMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
+    QObject::connect(ui->heapMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
+
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
+
+    QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
+    QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
+
 
 }
 
 
-bool MainWindow::eventFilter(QObject *, QEvent *e){
-    if (e->type() == QEvent::Show)
-        addEditorWindow();
+bool MainWindow::eventFilter(QObject *o, QEvent *e){
+    if (e->type() == QEvent::Show){
+        //addEditorWindow();
+        //ui->actionOpen_Project->trigger();
+        StartupDialog *sdialog = new StartupDialog(this);
+        sdialog->show();
+        sdialog->setModal(true);
+    }
     //on_actionNew_triggered();
-    return false;
+    return QMainWindow::eventFilter(o, e);
+}
+
+void MainWindow::openProjectAction()
+{
+    on_actionOpen_Project_triggered();
 }
 
 void MainWindow::addEditorWindow()
@@ -279,15 +335,78 @@ int MainWindow::getTileMapHeight(){
     return 4;
 }
 
+void MainWindow::resizeColumns(){
+    resizeDataColumns();
+    resizeTextColumns();
+    resizeHeapColumns();
+    resizeStackColumns();
+    resizeRegsColumns();
+}
+
 
 
 MainWindow::~MainWindow(){
     //delete memory;
+    if (projectFile.isOpen())
+        projectFile.close();
     if(assemblerInitialized)
         delete assem;
     if (engine)
         delete engine;
     delete ui;
+}
+
+void MainWindow::resizeTextColumns(){
+    ui->textTable->resizeColumnsToContents();
+
+    if (ui->textTable->columnWidth(0) < minTextTableWidth0)
+        ui->textTable->setColumnWidth(0, minTextTableWidth0);
+
+    if (ui->textTable->columnWidth(1) < minTextTableWidth1)
+        ui->textTable->setColumnWidth(1, minTextTableWidth1);
+}
+
+void MainWindow::resizeHeapColumns(){
+    ui->heapTable->resizeColumnsToContents();
+
+    if (ui->heapTable->columnWidth(0) < minHeapTableWidth0)
+        ui->heapTable->setColumnWidth(0, minHeapTableWidth0);
+
+    if (ui->heapTable->columnWidth(1) < minHeapTableWidth1)
+        ui->heapTable->setColumnWidth(1, minHeapTableWidth1);
+}
+
+void MainWindow::resizeStackColumns(){
+    ui->stackTable->resizeColumnsToContents();
+
+    if (ui->stackTable->columnWidth(0) < minStackTableWidth0)
+        ui->stackTable->setColumnWidth(0, minStackTableWidth0);
+
+    if (ui->stackTable->columnWidth(1) < minStackTableWidth1)
+        ui->stackTable->setColumnWidth(1, minStackTableWidth1);
+}
+
+void MainWindow::resizeRegsColumns(){
+    ui->tableMainRegisters->resizeColumnsToContents();
+
+    if (ui->tableMainRegisters->columnWidth(0) < minRegsTableWidth0)
+        ui->tableMainRegisters->setColumnWidth(0, minRegsTableWidth0);
+
+    if (ui->tableMainRegisters->columnWidth(1) < minRegsTableWidth1)
+        ui->tableMainRegisters->setColumnWidth(1, minRegsTableWidth1);
+
+
+}
+
+void MainWindow::resizeDataColumns(){
+    ui->dataTable->resizeColumnsToContents();
+
+    if (ui->dataTable->columnWidth(0) < minDataTableWidth0)
+        ui->dataTable->setColumnWidth(0, minDataTableWidth0);
+
+    if (ui->dataTable->columnWidth(1) < minDataTableWidth1)
+        ui->dataTable->setColumnWidth(1, minDataTableWidth1);
+
 }
 
 void MainWindow::projectExplorerMenuRequested(QPoint loc){
@@ -340,6 +459,8 @@ void MainWindow::on_actionSimulate_triggered(){
         ui->dataTable->setModel(dataModel);
         ui->stackTable->setModel(stackModel);
         ui->heapTable->setModel(heapModel);
+
+        resizeColumns();
         // qDebug() << "Simulated.";
     }
 
@@ -389,7 +510,24 @@ void MainWindow::on_actionAssemble_triggered(){
 }
 
 void MainWindow::on_actionClose_triggered(){
-    ui->mdiAreaCode->closeAllSubWindows();
+    if (!projectFile.isOpen())
+        return;
+    if(QMessageBox::information(this, "Close Project", "Are you sure you want to close the active project?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes){
+        ui->mdiAreaCode->closeAllSubWindows();
+        if (projectFile.isOpen()){
+            projectFile.close();
+        }
+        ui->treeFiles->clear();
+        currentProjectString = "";
+        MainWindow::projectPath = "";
+        MainWindow::projectFileName = "";
+        MainWindow::projectTitle = "";
+        MainWindow::projectMainFile = "";
+        MainWindow::projectTextFiles.clear();
+        MainWindow::projectDataFile = "";
+        MainWindow::projectConf.clear();
+        refreshActions();
+    }
 }
 
 void MainWindow::on_actionTileset_viewer_triggered(){
@@ -486,11 +624,25 @@ void MainWindow::on_actionOpen_Project_triggered()
         tempProjectFile.close();
         if (parseProjectXML(tempProjectFile)){
             if(validateProjectFiles(false)){
-                MainWindow::projectFileName = tempProjectFileName;
+                QString tempCurrentProjectFileName = projectFile.fileName();
                 projectFile.setFileName(tempProjectFile.fileName());
-                MainWindow::projectPath = tempProjectPath;
-                currentProjectString = tempCurrentProjectString;
-                loadProjectTree();
+                if(projectFile.open(QIODevice::ReadWrite | QIODevice::Text)){
+                    MainWindow::projectFileName = tempProjectFileName;
+                    MainWindow::projectPath = tempProjectPath;
+                    currentProjectString = tempCurrentProjectString;
+                    loadProjectTree();
+                    ui->mdiAreaCode->closeAllSubWindows();
+                    QTreeWidgetItemIterator it(ui->treeFiles);
+                    while (*it) {
+                        if ((*it)->text(0).trimmed() == MainWindow::getProjectMainFile()){
+                            on_treeFiles_itemDoubleClicked((*it), 0);
+                            break;
+                        }
+                        ++it;
+                    }
+                }else{
+                    projectFile.setFileName(tempCurrentProjectFileName);
+                }
             }
 
         }
@@ -498,7 +650,7 @@ void MainWindow::on_actionOpen_Project_triggered()
         QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + tempProjectFile.errorString());
         qDebug() << "Failed to open!";
     }
-
+    refreshActions();
 }
 
 
@@ -556,7 +708,7 @@ bool MainWindow::parseProjectXML(QFile &data){
                 tempProjectConf.clear();
                 for (int i = 0; i < confL.size(); i++){
                     tempProjectConf[confL.at(i).toElement().tagName().trimmed()] = confL.at(i).toElement().text().trimmed();
-                     }
+                }
             }else{
                 QMessageBox::critical(this, "Error", "Unidentified element " + e.tagName().trimmed() + " in the project file");
                 return false;
@@ -755,23 +907,64 @@ void MainWindow::activeWindowRedo(){
     }
 }
 
-void MainWindow::refreshActions(){
+void MainWindow::activeWindowSelectAll()
+{
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->selectAll();
+    }
+}
 
+void MainWindow::activeWindowQuickFind()
+{
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->quickFind();
+    }
+}
+
+void MainWindow::activeWindowFindAndReplace()
+{
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->findAndReplace();
+    }
+}
+
+void MainWindow::refreshActions(){
+    bool value = projectFile.isOpen();
+    ui->actionAssemble->setEnabled(value);
+    ui->actionAssemble_and_Simulate->setEnabled(value);
+    ui->actionClose->setEnabled(value);
+    ui->actionEnable_Graphics_Engine->setEnabled(value);
+    ui->actionInput->setEnabled(value);
+    ui->actionInsert_Breakpoint->setEnabled(value);
+    ui->actionSave->setEnabled(value);
+    ui->actionSaveAs->setEnabled(value);
+    ui->actionSimulate->setEnabled(value);
+    ui->actionNew->setEnabled(value);
+    ui->actionOpen->setEnabled(value);
 }
 
 void MainWindow::refreshEditActions(){
     CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
-    if (activeWindow){
-        ui->actionCopy->setEnabled(true);
-        ui->actionCut->setEnabled(true);
-        ui->actionPaste->setEnabled(true);
-        ui->actionUndo->setEnabled(true);
-        ui->actionRedo->setEnabled(true);
-    }else{
-        ui->actionCopy->setEnabled(false);
-        ui->actionCut->setEnabled(false);
-        ui->actionPaste->setEnabled(false);
-        ui->actionUndo->setEnabled(false);
-        ui->actionRedo->setEnabled(false);
-    }
+    ui->actionCopy->setEnabled(activeWindow);
+    ui->actionCut->setEnabled(activeWindow);
+    ui->actionPaste->setEnabled(activeWindow);
+    ui->actionUndo->setEnabled(activeWindow);
+    ui->actionRedo->setEnabled(activeWindow);
+    ui->actionFindandReplace->setEnabled(activeWindow);
+    ui->actionQuickFind->setEnabled(activeWindow);
+    ui->actionSelect_All->setEnabled(activeWindow);
+
+}
+
+void MainWindow::setMainProjectFile(QString file)
+{
+    MainWindow::projectMainFile = file;
+}
+
+void MainWindow::on_actionNew_Project_triggered()
+{
+    refreshActions();
 }
