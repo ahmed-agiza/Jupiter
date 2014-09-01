@@ -57,6 +57,36 @@ void CodeEditorWindow::saveFileAs()
 
 }
 
+CodeEditor *CodeEditorWindow::codeEditor()
+{
+    return editor;
+}
+
+void CodeEditorWindow::cut()
+{
+    editor->cut();
+}
+
+void CodeEditorWindow::copy()
+{
+    editor->copy();
+}
+
+void CodeEditorWindow::paste()
+{
+    editor->paste();
+}
+
+void CodeEditorWindow::undo()
+{
+    editor->undo();
+}
+
+void CodeEditorWindow::redo()
+{
+    editor->redo();
+}
+
 void CodeEditorWindow::init()
 {
     this->setObjectName("newW");

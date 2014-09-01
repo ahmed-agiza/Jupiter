@@ -13,17 +13,14 @@
 #include "instruction.h"
 #include <QVector>
 #include <QMessageBox>
-#include <iostream>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomText>
-#include <QFileSystemModel>
 #include <QSignalMapper>
 #include "codeeditorwindow.h"
 #include "fileloader.h"
 #include "explorertreeitem.h"
+#include <QFileDialog>
 
 
 
@@ -100,14 +97,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionOpen_Project->trigger();
 
     ui->treeFiles->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
+    refreshEditActions();
+    QObject::connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
+    QObject::connect(ui->mdiAreaCode,SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(refreshEditActions()));
+    QObject::connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(activeWindowCopy()));
+    QObject::connect(ui->actionCut, SIGNAL(triggered()), this, SLOT(activeWindowCut()));
+    QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(activeWindowPaste()));
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(activeWindowUndo()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(activeWindowRedo()));
+
 }
 
 
 bool MainWindow::eventFilter(QObject *, QEvent *e){
     if (e->type() == QEvent::Show)
         addEditorWindow();
-        //on_actionNew_triggered();
+    //on_actionNew_triggered();
     return false;
 }
 
@@ -461,25 +466,36 @@ void MainWindow::on_actionSprite_Editor_triggered()
 
 void MainWindow::on_actionOpen_Project_triggered()
 {
-    //MainWindow::projectPath = ":/testProject/";
-    MainWindow::projectPath = QDir::currentPath() + "/";//"C:/Users/Ahmed/Documents/GitHub/build-Mirage-Desktop_Qt_5_3_MinGW_32bit-Debug/";
-    MainWindow::projectFileName = "testProject.mpro";
-    QFile file(projectPath + projectFileName);
+    QString tempProjectFileName = QFileDialog::getOpenFileName(this, "Open Project", QDir::currentPath() /* + "/projects/"*/, "Mirage Project File(*.mpro)");
+    if (tempProjectFileName.trimmed() == "")
+        return;
+    QString tempProjectPath = QFileInfo(tempProjectFileName).absolutePath() + "/";
+    tempProjectFileName = QFileInfo(tempProjectFileName).fileName();
+    QFile tempProjectFile(tempProjectPath + tempProjectFileName);
+    QString tempCurrentProjectString = "";
     QString line;
-    QTextStream stream(&file);
-    if (file.open(QIODevice::ReadOnly)){
-        currentProjectString = "";
+    QTextStream stream(&tempProjectFile);
+
+    if (tempProjectFile.open(QIODevice::ReadOnly | QIODevice::ReadOnly)){
+        tempCurrentProjectString = "";
         while (!stream.atEnd()){
             line = stream.readLine();
-            currentProjectString.append(line + '\n');
+            tempCurrentProjectString.append(line + '\n');
         }
         //qDebug() << currentProjectString;
-        file.close();
-        parseProjectXML(file);
-        validateProjectFiles(true);
-        loadProjectTree();
+        tempProjectFile.close();
+        if (parseProjectXML(tempProjectFile)){
+            if(validateProjectFiles(false)){
+                MainWindow::projectFileName = tempProjectFileName;
+                projectFile.setFileName(tempProjectFile.fileName());
+                MainWindow::projectPath = tempProjectPath;
+                currentProjectString = tempCurrentProjectString;
+                loadProjectTree();
+            }
+
+        }
     }else{
-        QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + file.errorString());
+        QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + tempProjectFile.errorString());
         qDebug() << "Failed to open!";
     }
 
@@ -487,60 +503,77 @@ void MainWindow::on_actionOpen_Project_triggered()
 
 
 
-void MainWindow::parseProjectXML(QFile &data){
+bool MainWindow::parseProjectXML(QFile &data){
 
     if(!data.open( QIODevice::ReadOnly | QIODevice::Text ) ){
         QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + data.errorString());
         qDebug() << "Failed to open!";
     }else{
+
         QDomDocument domDocument;
         if(!domDocument.setContent(&data)){
             qDebug() << "Cannot set content";
-            return;
+            return false;
         }
 
         data.close();
 
+        QString tempProjectTitle;
+        QString tempProjectMainFile;
+        QStringList tempProjectTextFiles;
+        QString tempProjectDataFile;
+        QMap<QString, QString> tempProjectConf;
+
         QDomElement domElement = domDocument.documentElement();
+        if (domElement.tagName().trimmed() != "MIPSProject"){
+            QMessageBox::critical(this, "Error", "Invalid project file");
+            return false;
+        }
         QDomNode child = domElement.firstChild();
         while(!child.isNull()) {
             QDomElement e = child.toElement();
             if (e.tagName().trimmed() == "ProjectTitle"){
-                MainWindow::projectTitle = e.toElement().text().trimmed();
-                //qDebug() << "Title: " << MainWindow::projectTitle;
+                tempProjectTitle = e.toElement().text().trimmed();
             }else if (e.tagName().trimmed() == "TextSegment"){
                 QDomNodeList textL = e.childNodes();
-                MainWindow::projectTextFiles.clear();;
+                tempProjectTextFiles.clear();
                 for (int i = 0; i < textL.size(); i++){
                     QString tempTag = textL.at(i).toElement().tagName().trimmed();
                     QString tempTagValue = textL.at(i).toElement().text().trimmed();
 
                     if (tempTag == "MainFile"){
                         // qDebug() << "Main: " << tempTagValue;
-                        MainWindow::projectMainFile = tempTagValue;
-                        MainWindow::projectTextFiles.append(tempTagValue);
+                        tempProjectMainFile = tempTagValue;
+                        tempProjectTextFiles.append(tempTagValue);
                     }else if (tempTag == "File"){
-                        MainWindow::projectTextFiles.append(tempTagValue);
+                        tempProjectTextFiles.append(tempTagValue);
                     }
-                    if (i < MainWindow::projectTextFiles.size())
-                        ;//qDebug() << "Text" << i << ": " << MainWindow::projectTextFiles.at(i);
                 }
             }else if (e.tagName().trimmed() == "DataSegment"){
-                MainWindow::projectDataFile = e.firstChild().toElement().text().trimmed();
-                // qDebug() << "Data: " << MainWindow::projectDataFile;
+                tempProjectDataFile = e.firstChild().toElement().text().trimmed();
             }else if (e.tagName().trimmed() == "Configure"){
                 QDomNodeList confL = e.childNodes();
-                MainWindow::projectConf.clear();
+                tempProjectConf.clear();
                 for (int i = 0; i < confL.size(); i++){
-                    MainWindow::projectConf[confL.at(i).toElement().tagName().trimmed()] = confL.at(i).toElement().text().trimmed();
-                    //qDebug() << confL.at(i).toElement().tagName().trimmed() << ": " << MainWindow::projectConf[confL.at(i).toElement().tagName().trimmed()];
-                }
+                    tempProjectConf[confL.at(i).toElement().tagName().trimmed()] = confL.at(i).toElement().text().trimmed();
+                     }
+            }else{
+                QMessageBox::critical(this, "Error", "Unidentified element " + e.tagName().trimmed() + " in the project file");
+                return false;
             }
             child = child.nextSibling();
 
         }
-
+        MainWindow::projectTitle =  tempProjectTitle;
+        MainWindow::projectMainFile =  tempProjectMainFile;
+        MainWindow::projectTextFiles = tempProjectTextFiles;
+        MainWindow::projectDataFile = tempProjectDataFile;
+        MainWindow::projectConf = tempProjectConf;
+        return true;
     }
+
+    return false;
+
 }
 
 void MainWindow::loadProjectTree()
@@ -636,15 +669,13 @@ void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int colum
 
 }
 
-void MainWindow::on_treeFiles_itemExpanded(QTreeWidgetItem *item)
-{
+void MainWindow::on_treeFiles_itemExpanded(QTreeWidgetItem *item){
     if (item->text(0) == "Text" || item->text(0) == "Data")
         item->setIcon(0, QIcon(":/icons/explorer/icons/explorer/folderIconOpened.png"));
 
 }
 
-void MainWindow::on_treeFiles_itemCollapsed(QTreeWidgetItem *item)
-{
+void MainWindow::on_treeFiles_itemCollapsed(QTreeWidgetItem *item){
     if (item->text(0) == "Text" || item->text(0) == "Data")
         item->setIcon(0, QIcon(":/icons/explorer/icons/explorer/folderIconClosed.png"));
 }
@@ -678,13 +709,69 @@ void MainWindow::on_actionViewMemory_triggered(){
         ui->dockMemory->setVisible(false);
 }
 
-void MainWindow::on_actionOpen_triggered()
-{
+void MainWindow::on_actionOpen_triggered(){
     FileLoader *loader = new FileLoader(this, ADD_FILE);
     loader->show();
 }
 
 void MainWindow::openTreeItem(QObject *itm){
-   // qDebug() << "Triggered" << ((QTreeWidgetItem *)itm)->text(0);
+    // qDebug() << "Triggered" << ((QTreeWidgetItem *)itm)->text(0);
     this->on_treeFiles_itemDoubleClicked((QTreeWidgetItem *)itm, 0);
+}
+
+void MainWindow::activeWindowCopy(){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->copy();
+    }
+}
+
+void MainWindow::activeWindowCut(){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->cut();
+    }else
+        qDebug() << "No active window";
+}
+
+void MainWindow::activeWindowPaste(){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->paste();
+    }
+}
+
+void MainWindow::activeWindowUndo(){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->undo();
+    }
+}
+
+void MainWindow::activeWindowRedo(){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->redo();
+    }
+}
+
+void MainWindow::refreshActions(){
+
+}
+
+void MainWindow::refreshEditActions(){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        ui->actionCopy->setEnabled(true);
+        ui->actionCut->setEnabled(true);
+        ui->actionPaste->setEnabled(true);
+        ui->actionUndo->setEnabled(true);
+        ui->actionRedo->setEnabled(true);
+    }else{
+        ui->actionCopy->setEnabled(false);
+        ui->actionCut->setEnabled(false);
+        ui->actionPaste->setEnabled(false);
+        ui->actionUndo->setEnabled(false);
+        ui->actionRedo->setEnabled(false);
+    }
 }

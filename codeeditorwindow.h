@@ -18,6 +18,14 @@ public:
     bool openFile(QString fileName);
     void saveFile();
     void saveFileAs();
+
+    CodeEditor *codeEditor();
+
+    void cut();
+    void copy();
+    void paste();
+    void undo();
+    void redo();
 private:
     CodeEditor *editor;
     QWidget *widgetsContainer;

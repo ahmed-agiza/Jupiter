@@ -17,6 +17,7 @@
 #include "memorymodel.h"
 #include "spriteviewer.h"
 #include "inputmanager.h"
+#include <QFile>
 
 namespace Ui {
 class MainWindow;
@@ -115,6 +116,16 @@ private slots:
 
     void openTreeItem(QObject *itm);
 
+    void activeWindowCopy();
+    void activeWindowCut();
+    void activeWindowPaste();
+    void activeWindowUndo();
+    void activeWindowRedo();
+
+    void refreshActions();
+    void refreshEditActions();
+
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
@@ -144,8 +155,10 @@ private:
     static QString projectDataFile;
     static QMap<QString, QString> projectConf;
 
+    QFile projectFile;
 
-    void parseProjectXML(QFile &);
+
+    bool parseProjectXML(QFile &);
     void loadProjectTree();
     bool validateProjectFiles(bool forceAll);
     //Menus
