@@ -20,7 +20,8 @@ QString dataSegmentDirectives = "\\.(align|asciiz?|byte|double|float|half|space|
 // Matches invalid directives
 QString invalidDirectivesRegex = "\\.(?!align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
 // Matches strings
-QString cstringsRegex = "\".*[^\\\\]\"";
+QString cstringsRegex = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\""; // "\".*[^\\\\]\"";
+QRegExp characterRegex ("^'(?:[^'\\\\\\n\\r]|\\\\')'$"); //
 // Matches strings
 QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 
@@ -303,7 +304,6 @@ void Assembler::parseDataSegment(QStringList* stringList)
             QString directiveName = directivesRegex.cap(2);
             QString labelName = directivesRegex.cap(1);
             QString parameters = directivesRegex.cap(3);
-
             if(validDirectives.contains(directiveName)){
                 if(directiveName == "align"){
                     int alignNumber = getNumber(parameters);
@@ -323,6 +323,11 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     QRegExp cStrReg(cstringsRegex);
                     cStrReg.setMinimal(1);
                     if(cStrReg.indexIn(parameters) == 0){
+                        parameters.replace("\\\"","\"");
+                        parameters.replace("\\t","\t");
+                        parameters.replace("\\n","\n");
+                        parameters.replace("\\r","\r");
+                        parameters.replace("\\b","\b");
                         std::string actualString = parameters.mid(1,parameters.length()-2).toStdString();
                         int i;
                         for(i=address; i<actualString.size() + address; i++){
@@ -390,9 +395,8 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     }else if(parameters.contains(',')){
                         QStringList variables = parameters.remove(' ').remove('\t').split(',', QString::SkipEmptyParts);
                         foreach (QString immediateNumber, variables) {
-                            QRegExp character("'([^\\n\\r']|(?:\\'))'");
-                            if(character.indexIn(immediateNumber) == 0)
-                                mem->storeByte(mem->dataSegmentBaseAddress + address, character.cap(1).toStdString()[character.cap(1).size()-1]);
+                            if(characterRegex.indexIn(immediateNumber) == 0)
+                                mem->storeByte(mem->dataSegmentBaseAddress + address, characterRegex.cap(1).toStdString()[characterRegex.cap(1).size()-1]);
                             else if(numberRegExp.indexIn(immediateNumber) == 0)
                                 mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
                             else
@@ -408,8 +412,8 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         }
                         mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(parameters));
                         address++;
-                    }else if(QRegExp("^'(.|\\')'$").indexIn(parameters) == 0){
-                        mem->storeByte(mem->dataSegmentBaseAddress + address, parameters.toStdString()[1]);
+                    }else if(characterRegex.indexIn(parameters) == 0){
+                        mem->storeByte(mem->dataSegmentBaseAddress + address, parameters.toStdString()[parameters.size()-2]);
                         address++;
                     }else{
                         errorList.append(Error("Syntax error", lineNumber));

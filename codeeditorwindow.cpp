@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QCloseEvent>
 
 CodeEditorWindow::CodeEditorWindow(QWidget *parent):QMdiSubWindow(parent){
     init();
