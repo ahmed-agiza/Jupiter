@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QInputDialog>
 FileLoader::FileLoader(MainWindow *parent, FileDialogType type) :
     QDialog(parent),
     ui(new Ui::FileLoader)
@@ -80,13 +81,83 @@ FileLoader::~FileLoader()
     delete ui;
 }
 
-void FileLoader::on_btnText_clicked()
-{
+void FileLoader::on_btnText_clicked(){
+    if (dialogType == CREATE_FILE){
+        QString fileName = QInputDialog::getText(this, "Text File Name", "Enter the name of the new text file");
+        fileName = fileName.trimmed();
+        if (fileName == "")
+            return;
+        else if (QRegExp("^[A-Za-z0-9_\\@\\$.\\s]*$").indexIn(fileName) == -1){
+            QMessageBox::critical(this, "Invalid File Name", "The entered file name contains invalid characters");
+            return;
+        }
+        if (!p->hasOpenProject()){
+            QMessageBox::critical(this, "Error", "Cannot detect an active project");
+            return;
+        }
 
+        QString projectPath = p->getProjectPath().trimmed();
+        if (projectPath == ""){
+            QMessageBox::critical(this, "Error", "Invalid project directory");
+            return;
+        }
+
+        QFile newTextFile(projectPath + fileName + ".mtxt");
+        if (newTextFile.open(QIODevice::ReadOnly)){
+            QMessageBox::critical(this, "Error", "A file with the same name already exists in the project directory");
+            return;
+        }else
+            newTextFile.close();
+
+        if (newTextFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+            newTextFile.close();
+            p->addTextFile(fileName + ".mtxt");
+            this->hide();
+        }else{
+            QMessageBox::critical(this, "Error", "Could not add the new text file");
+        }
+
+    }
 }
 
-void FileLoader::on_btnData_clicked()
-{
+void FileLoader::on_btnData_clicked(){
+    if (dialogType == CREATE_FILE){
+        QString fileName = QInputDialog::getText(this, "Data File Name", "Enter the name of the new text file");
+        fileName = fileName.trimmed();
+        if (fileName == "")
+            return;
+        else if (QRegExp("^[A-Za-z0-9_\\@\\$.\\s]*$").indexIn(fileName) == -1){
+            QMessageBox::critical(this, "Invalid File Name", "The entered file name contains invalid characters");
+            return;
+        }
+        if (!p->hasOpenProject()){
+            QMessageBox::critical(this, "Error", "Cannot detect an active project");
+            return;
+        }
+
+        QString projectPath = p->getProjectPath().trimmed();
+        if (projectPath == ""){
+            QMessageBox::critical(this, "Error", "Invalid project directory");
+            return;
+        }
+
+        QFile newTextFile(projectPath + fileName + ".mdat");
+        if (newTextFile.open(QIODevice::ReadOnly)){
+            QMessageBox::critical(this, "Error", "A file with the same name already exists in the project directory");
+            return;
+        }else
+            newTextFile.close();
+
+        if (newTextFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+            newTextFile.close();
+            p->addTextFile(fileName + ".mdat");
+            this->hide();
+        }else{
+            QMessageBox::critical(this, "Error", "Could not add the new data file");
+        }
+
+    }
+
 
 }
 

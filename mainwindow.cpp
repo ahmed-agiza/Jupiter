@@ -270,11 +270,23 @@ void MainWindow::creatTextFile(QString file){
 }
 
 void MainWindow::addDataFile(QString file){
-
+    MainWindow::projectDataFile = file;
+    reBuildProjectFile();
+    loadProjectTree();
 }
 
 void MainWindow::addTextFile(QString file){
-
+    MainWindow::projectTextFiles.append(file);
+    reBuildProjectFile();
+    loadProjectTree();
+    QTreeWidgetItemIterator it(treeWidget);
+    while (*it) {
+        if ((*it)->text(0).trimmed() == file){
+            on_treeFiles_itemDoubleClicked((*it), 0);
+            break;
+        }
+        ++it;
+    }
 }
 
 void MainWindow::addResourceFile(QString file){
@@ -542,9 +554,8 @@ void MainWindow::on_actionSimulate_triggered(){
 
 void MainWindow::on_actionNew_triggered(){
 
-    reBuildProjectFile();
-    //FileLoader *loader = new FileLoader(this, CREATE_FILE);
-    //loader->show();
+   FileLoader *loader = new FileLoader(this, CREATE_FILE);
+   loader->show();
     //addEditorWindow();
 
 }
@@ -738,6 +749,7 @@ bool MainWindow::parseProjectXML(QFile &data){
 
 void MainWindow::loadProjectTree()
 {
+    treeWidget->clear();
     ExplorerTreeItem *projectItem = new ExplorerTreeItem(treeWidget, PROJECT_TITLE);
     QFont currentProjectFont = projectItem->font(0);
     currentProjectFont.setBold(true);
@@ -1238,3 +1250,12 @@ void MainWindow::on_actionSave_triggered(){
 
 }
 
+
+void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
+    if(ui->actionEnable_Graphics_Engine->isChecked())
+        MainWindow::projectConf["EnableGFX"] = "true";
+    else
+        MainWindow::projectConf["EnableGFX"] = "false";
+
+    reBuildProjectFile();
+}

@@ -160,6 +160,8 @@ private slots:
     void on_actionSave_triggered();
 
 
+    void on_actionEnable_Graphics_Engine_triggered();
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
