@@ -31,6 +31,7 @@ public:
     QStringList getContentList();
 
     QString getTitle();
+    void setTitle(QString newTitle);
 
     void setFileType(MirageFileType nType);
     MirageFileType getFileType();

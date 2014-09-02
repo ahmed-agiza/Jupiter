@@ -77,6 +77,7 @@ public:
     void setDeleteFromDisk(bool value);
 
     bool closeFileWindow(QString fileName);
+    void renameFileWindow(QString fileName, QString newName);
 
 
 
@@ -166,6 +167,7 @@ private slots:
 public slots:
 
     void setMainProjectFile(QString);
+    void unsetMainProjectFile();
 
     void renameTextItem(QString);
     void renameMainTextItem(QString);

@@ -17,6 +17,7 @@
 #include <QSignalMapper>
 #include <QFileDialog>
 #include <QTreeWidgetItemIterator>
+#include <QInputDialog>
 
 #include "projectcreator.h"
 #include "codeeditor.h"
@@ -233,6 +234,14 @@ void MainWindow::addDataFile(QString file){
     MainWindow::projectDataFile = file;
     rebuildProjectFile();
     loadProjectTree();
+    QTreeWidgetItemIterator it(treeWidget);
+    while (*it) {
+        if ((*it)->text(0).trimmed() == file){
+            on_treeFiles_itemDoubleClicked((*it), 0);
+            break;
+        }
+        ++it;
+    }
 }
 
 void MainWindow::addTextFile(QString file){
@@ -556,6 +565,11 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
             QObject::connect(setMainMapper, SIGNAL(mapped(QString)), this, SLOT(setMainProjectFile(QString)));
             setMainAction->setText("Set as Main File");
             menu->addAction(setMainAction);
+        }else if (itm->getItemType() == TEXT_MAIN){
+            QAction *unsetMainAction = new QAction(this);
+            QObject::connect(unsetMainAction, SIGNAL(triggered()), this, SLOT(unsetMainProjectFile()));
+            unsetMainAction->setText("Unset Main File");
+            menu->addAction(unsetMainAction);
         }
 
         QAction *renameAction = new QAction(this);
@@ -1076,6 +1090,20 @@ bool MainWindow::closeFileWindow(QString fileName){
 
 }
 
+void MainWindow::renameFileWindow(QString fileName, QString newName){
+    QList<QMdiSubWindow *> windows = ui->mdiAreaCode->subWindowList();
+    foreach (QMdiSubWindow *currentWindow, windows){
+        CodeEditorWindow *editorWindow = dynamic_cast<CodeEditorWindow *>(currentWindow);
+        if (editorWindow){
+            if(editorWindow->getTitle().trimmed() == fileName.trimmed()){
+                editorWindow->setTitle(newName);
+                return;
+            }
+        }
+    }
+
+}
+
 void MainWindow::on_actionInput_triggered()
 {
     inputManager = new InputManager(this, memory);
@@ -1350,22 +1378,46 @@ void MainWindow::setMainProjectFile(QString file)
     loadProjectTree();
 }
 
-void MainWindow::renameDataItem(QString newName){
-    qDebug() << "Rename data " << newName;
+void MainWindow::unsetMainProjectFile(){
+    MainWindow::projectMainFile = "";
+    rebuildProjectFile();
+    loadProjectTree();
+}
+
+void MainWindow::renameDataItem(QString file){
+    //QRegExp("^[A-Za-z0-9_\\@\\$\\.\\s]*$")
+    QString newName = QInputDialog::getText(this, "Rename Data File", "Enter the new file name").trimmed();
+    if (newName.trimmed() == "")
+        return;
+    if (QRegExp("^[A-Za-z0-9_\\@\\$\\.\\s]*$").indexIn(newName) == -1){
+        QMessageBox::critical(this, "Invalid File Name", "The new file name contains invalid characters");
+        return;
+    }
+    QFile renamedFile(MainWindow::projectPath + file);
+    if (!renamedFile.rename(newName + ".mdat")){
+        QMessageBox::critical(this, "Error", "Failed to rename the file");
+        return;
+    }
+    renamedFile.close();
+    MainWindow::projectDataFile = newName + ".mdat";
+    rebuildProjectFile();
+    loadProjectTree();
+    renameFileWindow(file, newName + ".mdat");
+
 
 }
 
-void MainWindow::renameResItem(QString newName){
-    qDebug() << "Rename res " << newName;
-}
 
-void MainWindow::renameMainTextItem(QString newName){
-    qDebug() << "Rename main " << newName;
+void MainWindow::renameMainTextItem(QString file){
+
 }
 
 
-void MainWindow::renameTextItem(QString newName){
-    qDebug() << "Rename text " << newName;
+void MainWindow::renameTextItem(QString file){
+
+}
+
+void MainWindow::renameResItem(QString file){
 
 }
 

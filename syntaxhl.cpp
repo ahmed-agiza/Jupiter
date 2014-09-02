@@ -79,7 +79,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    macroFormat.setForeground(Qt::magenta);
    pseudoFormat.setForeground(QColor(Qt::blue).lighter(150));
    pseudoFormat.setFontItalic(true);
-   immFormat.setForeground(QColor(Qt::red));
+   immFormat.setForeground(QColor(Qt::white).darker(110));
    immFormat.setFontWeight(QFont::Bold);
 
    //Instructions Syntax

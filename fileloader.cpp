@@ -85,8 +85,53 @@ void FileLoader::on_btnText_clicked(){
             QMessageBox::critical(this, "Error", "Could not add the new text file");
         }
 
+    }else if (dialogType == ADD_FILE){
+
+        fileName = QFileDialog::getOpenFileName(this, "Add Text File", MainWindow::getProjectPath(), "Mirage Text File(*.mtxt)").trimmed();
+        QString strippedFileName = QFileInfo(fileName).fileName();
+        if (fileName == "")
+            return;
+        else if (QRegExp("^[A-Za-z0-9_\\@\\$\\.\\s]*$").indexIn(strippedFileName) == -1){
+            QMessageBox::critical(this, "Invalid File Name", "The specified file name contains invalid characters");
+            return;
+        }
+
+        if (!p->hasOpenProject()){
+            QMessageBox::critical(this, "Error", "Cannot detect an active project");
+            return;
+        }
+
+        QString projectPath = p->getProjectPath().trimmed();
+        if (projectPath == ""){
+            QMessageBox::critical(this, "Error", "Invalid project directory");
+            return;
+        }
+
+        QFile textFile(fileName);
+        if (!textFile.open(QIODevice::ReadOnly)){
+            QMessageBox::critical(this, "Error", "Cannot open the specified file");
+            return;
+        }else{
+            textFile.close();
+
+            if (QFileInfo(projectPath).absolutePath() != QFileInfo(fileName).absolutePath()){
+                if(QMessageBox::question(this, "Copy New File", "The added file must exist in the project directory, do you want to copy it?") != QMessageBox::Yes){
+                    hide();
+                    return;
+                }
+                if (!QFile::copy(fileName, MainWindow::getProjectPath() + strippedFileName)){
+                    QMessageBox::critical(this, "Error", "Failed to copy the file to the project directory");
+                    hide();
+                    return;
+                }
+            }
+
+            p->addTextFile(strippedFileName);
+            if (QMessageBox::question(this, "Set as Main File", "Do you want to set the added file as main file?") == QMessageBox::Yes)
+                p->setMainProjectFile(strippedFileName);
+        }
     }
-    this->hide();
+    hide();
 }
 
 void FileLoader::on_btnData_clicked(){
@@ -125,12 +170,55 @@ void FileLoader::on_btnData_clicked(){
             QMessageBox::critical(this, "Error", "Could not add the new data file");
         }
 
-    }
+    }else if (dialogType == ADD_FILE){
 
-    this->hide();
+        fileName = QFileDialog::getOpenFileName(this, "Add Data File", MainWindow::getProjectPath(), "Mirage Data File(*.mdat)").trimmed();
+        QString strippedFileName = QFileInfo(fileName).fileName();
+        if (fileName == "")
+            return;
+        else if (QRegExp("^[A-Za-z0-9_\\@\\$\\.\\s]*$").indexIn(strippedFileName) == -1){
+            QMessageBox::critical(this, "Invalid File Name", "The specified file name contains invalid characters");
+            return;
+        }
+
+        if (!p->hasOpenProject()){
+            QMessageBox::critical(this, "Error", "Cannot detect an active project");
+            return;
+        }
+
+        QString projectPath = p->getProjectPath().trimmed();
+        if (projectPath == ""){
+            QMessageBox::critical(this, "Error", "Invalid project directory");
+            return;
+        }
+
+        QFile dataFile(fileName);
+        if (!dataFile.open(QIODevice::ReadOnly)){
+            QMessageBox::critical(this, "Error", "Cannot open the specified file");
+            return;
+        }else{
+            dataFile.close();
+
+            if (QFileInfo(projectPath).absolutePath() != QFileInfo(fileName).absolutePath()){
+                if(QMessageBox::question(this, "Copy New File", "The added file must exist in the project directory, do you want to copy it?") != QMessageBox::Yes){
+                    hide();
+                    return;
+                }
+                if (!QFile::copy(fileName, MainWindow::getProjectPath() + strippedFileName)){
+                    QMessageBox::critical(this, "Error", "Failed to copy the file to the project directory");
+                    hide();
+                    return;
+                }
+            }
+
+            p->addDataFile(strippedFileName);
+        }
+    }
+    hide();
 }
 
 void FileLoader::on_btnRes_clicked()
 {
+    this->hide();
 
 }

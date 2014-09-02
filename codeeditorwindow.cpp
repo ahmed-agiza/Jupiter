@@ -145,7 +145,16 @@ QStringList CodeEditorWindow::getContentList(){
 }
 
 QString CodeEditorWindow::getTitle(){
-    return title;
+      return title;
+}
+
+void CodeEditorWindow::setTitle(QString newTitle){
+    title = newTitle;
+    if(edited){
+        setWindowTitle(title + "*");
+    }else
+        setWindowTitle(title);
+
 }
 
 void CodeEditorWindow::setFileType(MirageFileType nType){
