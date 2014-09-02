@@ -62,6 +62,9 @@ FileLoader::FileLoader(MainWindow *parent, FileDialogType type) :
     }else
         setWindowTitle("Add Existing File");
 
+    if(p->hasDataFile())
+        ui->btnData->setEnabled(false);
+
 
 
     QRect screenGeo = QApplication::desktop()->screenGeometry(0);

@@ -17,6 +17,7 @@ public:
     CodeEditorWindow(QWidget *parent, QFont editorFont, MirageFileType nType = TEXT_FILE);
     CodeEditorWindow(QWidget *parent, QFont editorFont, QList<CodeEditorWindow> *currentWins);
     QString getFilePath();
+    bool isModified();
     bool operator==(CodeEditorWindow &window);
     void setFilePath(QString path);
     bool openFile(QString fileName, QString fileTitle);
@@ -24,6 +25,8 @@ public:
     void selectAll();
     void quickFind();
     void findAndReplace();
+
+    QString getTitle();
 
     void setFileType(MirageFileType nType);
     MirageFileType getFileType();
@@ -50,6 +53,8 @@ private:
     QString title;
     MirageFileType fileType;
     bool edited;
+
+    //void closeEvent(QCloseEvent *closeEvent);
 
     void init();
 };

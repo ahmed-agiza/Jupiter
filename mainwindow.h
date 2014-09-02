@@ -5,7 +5,8 @@
 #include <QTreeView>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QCompleter>
+#include <QFile>
+
 #include "syntaxhl.h"
 #include "assembler.h"
 #include "loadmemorythread.h"
@@ -17,7 +18,7 @@
 #include "memorymodel.h"
 #include "spriteviewer.h"
 #include "inputmanager.h"
-#include <QFile>
+#include "codeeditorwindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,7 +39,7 @@ public:
     void closeProject();
 
     void addEditorWindow();
-    void addEditorWindow(QString file, QString title);
+    void addEditorWindow(QString file, QString title, MirageFileType type);
 
     void createDataFile(QString file);
     void creatTextFile(QString file);
@@ -73,6 +74,8 @@ public:
     void openProjectFile(QString tempProjectFileName);
 
     void applyProjectSettings();
+
+    bool hasDataFile();
 
 
 
@@ -156,6 +159,7 @@ private slots:
 
     void on_actionSave_triggered();
 
+
 private:
     Ui::MainWindow *ui;
     MemoryLoading* memoryLoading;
@@ -194,8 +198,9 @@ private:
     bool validateProjectFiles(bool forceAll);
     bool validateTempProjectFiles(bool forceAll);
 
+    bool closeAllWindows();
 
-
+    void closeEvent(QCloseEvent *);
 
     //Menus
 };

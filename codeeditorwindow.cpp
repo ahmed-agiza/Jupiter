@@ -25,6 +25,10 @@ QString CodeEditorWindow::getFilePath(){
     return filePath;
 }
 
+bool CodeEditorWindow::isModified(){
+    return edited;
+}
+
 bool CodeEditorWindow::operator== (CodeEditorWindow &window){
     if (filePath == "NULL" || filePath.trimmed() == "" || window.getFilePath() == "NULL" || window.getFilePath().trimmed() == "")
         return false;
@@ -54,6 +58,7 @@ bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
         file.close();
         editor->setText(fileData);
         setWindowTitle(title);
+        edited = false;
         return true;
 
     }else
@@ -63,27 +68,40 @@ bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
 bool CodeEditorWindow::saveFile(){
     if (filePath.trimmed() != "" && filePath.trimmed() != "NULL"){
         QFile file(filePath);
-        if (file.open(QIODevice::ReadOnly)){
-            file.close();
-            if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+
+        if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
                 QTextStream writer(&file);
                 QStringList lines = editor->toPlainText().split("\n");
-                for(int i = 0; i < lines.size(); i++)
-                    writer << lines.at(i) << endl;
+                for(int i = 0; i < lines.size(); i++){
+                    writer << lines.at(i);
+                    if (i != lines.size() - 1)
+                        writer << endl;
+                }
                 file.close();
                 setWindowTitle(title);
                 edited = false;
                 return true;
             }else{
                 QMessageBox::critical(this, "Error", "Cannot open the file for saving");
-                return false;
             }
-        }
-    }else
-        return false;
+    }
+    return false;
 
 }
 
+/*void CodeEditorWindow::closeEvent(QCloseEvent *closeEvent){
+    if (edited){
+        QMessageBox::StandardButton btn = QMessageBox::question(this, QString("Close"), QString("The changes to the file " + title.trimmed() + " have not be changed\nDo you want to save the file before closing?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+        if (btn == QMessageBox::Yes){
+            saveFile();
+            closeEvent->accept();
+        }else if (btn == QMessageBox::No){
+            closeEvent->accept();
+        }else
+            closeEvent->ignore();
+    }
+    closeEvent->accept();
+}*/
 
 
 void CodeEditorWindow::selectAll()
@@ -97,6 +115,10 @@ void CodeEditorWindow::quickFind(){
 
 void CodeEditorWindow::findAndReplace(){
 
+}
+
+QString CodeEditorWindow::getTitle(){
+    return title;
 }
 
 void CodeEditorWindow::setFileType(MirageFileType nType){

@@ -21,7 +21,6 @@
 #include "projectcreator.h"
 #include "codeeditor.h"
 #include "instruction.h"
-#include "codeeditorwindow.h"
 #include "fileloader.h"
 #include "explorertreeitem.h"
 #include "memory.h"
@@ -99,6 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
     assem = NULL;
     assemblerInitialized = false;
     this->setMouseTracking(true);
+    engine = NULL;
 
 
     textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
@@ -158,6 +158,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
 
 
+
 }
 
 
@@ -173,6 +174,14 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e){
     return QMainWindow::eventFilter(o, e);
 }
 
+void MainWindow::closeEvent(QCloseEvent *e){
+    if (closeAllWindows()){
+        e->accept();
+    }else{
+        e->ignore();
+    }
+}
+
 void MainWindow::openProjectAction()
 {
     on_actionOpen_Project_triggered();
@@ -185,19 +194,21 @@ void MainWindow::createProjectAction()
 
 void MainWindow::closeProject()
 {
-    ui->mdiAreaCode->closeAllSubWindows();
+    //ui->mdiAreaCode->closeAllSubWindows();
+    if (closeAllWindows()){
     if (projectFile.isOpen()){
         projectFile.close();
     }
-    ui->treeFiles->clear();
-    currentProjectString = "";
-    MainWindow::projectPath = "";
-    MainWindow::projectFileName = "";
-    MainWindow::projectTitle = "";
-    MainWindow::projectMainFile = "";
-    MainWindow::projectTextFiles.clear();
-    MainWindow::projectDataFile = "";
-    MainWindow::projectConf.clear();
+        ui->treeFiles->clear();
+        currentProjectString = "";
+        MainWindow::projectPath = "";
+        MainWindow::projectFileName = "";
+        MainWindow::projectTitle = "";
+        MainWindow::projectMainFile = "";
+        MainWindow::projectTextFiles.clear();
+        MainWindow::projectDataFile = "";
+        MainWindow::projectConf.clear();
+    }
     refreshActions();
 }
 
@@ -237,11 +248,12 @@ void MainWindow::addEditorWindow()
     //newWidgets->showMaximized();
 }
 
-void MainWindow::addEditorWindow(QString file, QString title)
+void MainWindow::addEditorWindow(QString file, QString title, MirageFileType type)
 {
-    CodeEditorWindow *editorWindow = new CodeEditorWindow(ui->mdiAreaCode, editorFont);
+    CodeEditorWindow *editorWindow = new CodeEditorWindow(ui->mdiAreaCode, editorFont, type);
     if(editorWindow->openFile(file, title)){
         ui->mdiAreaCode->addSubWindow(editorWindow);
+
     }else{
         delete editorWindow;
         QMessageBox::critical(this, "Error", "Failed to open the file " + file);
@@ -494,6 +506,10 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
 
 void MainWindow::on_actionSimulate_triggered(){
      qDebug() << "Simulating..";
+    if (engine != NULL)
+        if(engine)
+            if(engine->isVisible())
+                engine->hide();
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
     if(ui->actionEnable_Graphics_Engine->isChecked()){
@@ -526,8 +542,9 @@ void MainWindow::on_actionSimulate_triggered(){
 
 void MainWindow::on_actionNew_triggered(){
 
-    FileLoader *loader = new FileLoader(this, CREATE_FILE);
-    loader->show();
+    reBuildProjectFile();
+    //FileLoader *loader = new FileLoader(this, CREATE_FILE);
+    //loader->show();
     //addEditorWindow();
 
 }
@@ -819,6 +836,25 @@ bool MainWindow::validateTempProjectFiles(bool forceAll = true)
     return true;
 }
 
+bool MainWindow::closeAllWindows(){
+    QList<QMdiSubWindow *> subWindows = ui->mdiAreaCode->subWindowList();
+    foreach (QMdiSubWindow *currentWindow, subWindows){
+        CodeEditorWindow *editorWindow = dynamic_cast<CodeEditorWindow*>(currentWindow);
+        if (editorWindow){
+            if (editorWindow->isEdited()){
+                QMessageBox::StandardButton btn = QMessageBox::question(this, QString("Close"), QString("The changes to the file " + editorWindow->getTitle().trimmed() + " have not be saved\nDo you want to save the file before closing?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+                if (btn == QMessageBox::Yes){
+                    editorWindow->saveFile();
+                }else if (btn != QMessageBox::No)
+                    return false;
+            }
+        }
+    }
+    ui->mdiAreaCode->closeAllSubWindows();
+    return true;
+
+}
+
 void MainWindow::openProjectFile(QString tempProjectFileName)
 {
 
@@ -831,6 +867,8 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
     QTextStream stream(&tempProjectFile);
 
     if (tempProjectFile.open(QIODevice::ReadOnly | QIODevice::ReadOnly)){
+        if (!closeAllWindows())
+            return;
         tempCurrentProjectString = "";
         while (!stream.atEnd()){
             line = stream.readLine();
@@ -847,7 +885,8 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
                     MainWindow::projectPath = tempProjectPath;
                     currentProjectString = tempCurrentProjectString;
                     loadProjectTree();
-                    ui->mdiAreaCode->closeAllSubWindows();
+
+                    //ui->mdiAreaCode->closeAllSubWindows();
                     applyProjectSettings();
                     QTreeWidgetItemIterator it(treeWidget);
                     while (*it) {
@@ -881,6 +920,11 @@ void MainWindow::applyProjectSettings(){
 
 }
 
+bool MainWindow::hasDataFile(){
+    return projectDataFile.trimmed() != "";
+
+}
+
 void MainWindow::on_actionInput_triggered()
 {
     inputManager = new InputManager(this, memory);
@@ -902,7 +946,15 @@ void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int colum
                     return;
                 }
             }
-            addEditorWindow(fileName, item->text(0));
+            ExplorerTreeItem *itm = dynamic_cast<ExplorerTreeItem*>(item);
+            if (!itm)
+                return;
+            if (itm->getItemType() == TEXT_CHILD || itm->getItemType() == TEXT_MAIN)
+                addEditorWindow(fileName, item->text(0), TEXT_FILE);
+            else if (itm->getItemType() == DATA_CHILD)
+                addEditorWindow(fileName, item->text(0), DATA_FILE);
+            else
+                qDebug() << "Error: " << (dynamic_cast<ExplorerTreeItem*>(item))->getItemType();
             if(dynamic_cast<CodeEditorWindow*> (ui->mdiAreaCode->activeSubWindow()))
                 ((dynamic_cast<CodeEditorWindow*> (ui->mdiAreaCode->activeSubWindow())))->setOpened();
 
@@ -1067,6 +1119,72 @@ void MainWindow::refreshGraphicsAction(){
 
 
 void MainWindow::reBuildProjectFile(){
+    if (projectFile.isOpen()){
+        QFile tempProject(projectFile.fileName());
+        if (tempProject.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)){
+            QTextStream writer(&tempProject);
+            writer << "<MirageProject>" << endl;
+            writer << "<ProjectTitle>" << endl;
+            writer << MainWindow::projectTitle << endl;
+            writer << "</ProjectTitle>" << endl;
+            writer << "<TextSegment>" << endl;
+            if (MainWindow::projectMainFile.trimmed() != ""){
+                writer << "<MainFile>" << endl;
+                writer << MainWindow::projectMainFile.trimmed() << endl;
+                writer << "</MainFile>" << endl;
+            }
+            foreach(QString fileName, MainWindow::projectTextFiles){
+                if (fileName.trimmed() != MainWindow::projectMainFile.trimmed()){
+                    writer << "<File>" << endl;
+                    writer << fileName.trimmed() << endl;
+                    writer << "</File>" << endl;
+                }
+            }
+            writer << "</TextSegment>" << endl;
+            writer << "<DataSegment>" << endl;
+            if (MainWindow::projectDataFile.trimmed() != ""){
+                writer << "<Data>" << endl;
+                writer << MainWindow::projectDataFile.trimmed() << endl;
+                writer << "</Data>" << endl;
+            }
+            writer << "</DataSegment>" << endl;
+            writer << "<Configure>" << endl;
+            writer << "<Endianness>" << endl;
+            if (!MainWindow::isLittleEndian())
+                writer << "big" << endl;
+            else
+                writer << "little" << endl;
+            writer << "</Endianness>" << endl;
+            if(MainWindow::isGFXEnabled()){
+                writer << "<EnableGFX>" << endl;
+                writer << "true" << endl;
+                writer << "</EnableGFX>" << endl;
+                writer << "<TileMapHeight>" << endl;
+                writer << MainWindow::getTileMapHeight() << endl;
+                writer << "</TileMapHeight>" << endl;
+                writer << "<TileMapWidth>" << endl;
+                writer << MainWindow::getTileMapWidth() << endl;
+                writer << "</TileMapWidth>" << endl;
+
+            }else{
+                writer << "<EnableGFX>" << endl;
+                writer << "false" << endl;
+                writer << "</EnableGFX>" << endl;
+                writer << "<TileMapHeight>" << endl;
+                writer << "4" << endl;
+                writer << "</TileMapHeight>" << endl;
+                writer << "<TileMapWidth>" << endl;
+                writer << "4" << endl;
+                writer << "</TileMapWidth>" << endl;
+            }
+            writer << "</Configure>" << endl;
+            writer << "</MirageProject>";
+            tempProject.close();
+            qDebug() << "Rebuilt";
+        }else
+            QMessageBox::critical(this, "Error", "Could not save the project file");
+    }else
+        QMessageBox::critical(this, "Error", "Could not save the project file");
 
 }
 
@@ -1119,3 +1237,4 @@ void MainWindow::on_actionSave_triggered(){
         activeWin->saveFile();
 
 }
+
