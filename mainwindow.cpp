@@ -593,7 +593,7 @@ void MainWindow::on_actionAssemble_triggered(){
                     }
 
                 }
-                assem = new Assembler(&instrs, memory, &mainProcessorRegisters);
+                assem = new Assembler(&instrs, &instrs, memory, &mainProcessorRegisters);
                 assemblerInitialized = true;
             }else
                 QMessageBox::critical(this, "Error", "Error 1");

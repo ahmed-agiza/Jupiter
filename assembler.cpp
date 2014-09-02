@@ -266,7 +266,7 @@ QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensit
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 QRegExp invalidR(invalidRegisterFormat, Qt::CaseInsensitive), invalidM(invalidMemoryFormat, Qt::CaseInsensitive), invalidI(invalidImmediateFormat, Qt::CaseInsensitive), invalidSh(invalidShiftFormat, Qt::CaseInsensitive);
 
-Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRegisters)
+Assembler::Assembler(QStringList* textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> * mRegisters)
 {
     this->mem = memory;
     this->registers = mRegisters;
@@ -275,8 +275,8 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
 
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
 
-    //parseDataSegment(stringList);
-    parseTextSegment(stringList);
+    parseDataSegment(dataFileStringList);
+    parseTextSegment(textFileStringList);
 
 }
 
@@ -345,7 +345,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         if(end > 0xffff && directiveName == "half"){
                             errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber));
                         }
-                        for(int i=0; i<=(end-start+1); i++){
+                        for(int i=0; i<(end-start+1); i++){
                             if (directiveName == "half")
                                 mem->storeHWord(mem->dataSegmentBaseAddress + address, start + i);
                             else
@@ -407,6 +407,9 @@ void Assembler::parseDataSegment(QStringList* stringList)
                             errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber));
                         }
                         mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(parameters));
+                        address++;
+                    }else if(QRegExp("^'(.|\\')'$").indexIn(parameters) == 0){
+                        mem->storeByte(mem->dataSegmentBaseAddress + address, parameters.toStdString()[1]);
                         address++;
                     }else{
                         errorList.append(Error("Syntax error", lineNumber));

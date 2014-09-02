@@ -51,7 +51,7 @@ private:
     int stringDistance(std::string, std::string);
     int minimum4(int, int, int, int);
 public:
-    Assembler(QStringList *stringList, Memory *memory, QVector<int> *mRegisters);
+    Assembler(QStringList *textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> *mRegisters);
     void parseTextSegment(QStringList*);
     void parseDataSegment(QStringList*);
     int getNumber(QString);
