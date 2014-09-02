@@ -25,6 +25,10 @@ public:
     void selectAll();
     void quickFind();
     void findAndReplace();
+    void setDestryoed(bool);
+    bool isDestroyed();
+    QString getContent();
+    QStringList getContentList();
 
     QString getTitle();
 
@@ -53,8 +57,9 @@ private:
     QString title;
     MirageFileType fileType;
     bool edited;
+    bool destroyed;
 
-    //void closeEvent(QCloseEvent *closeEvent);
+    void closeEvent(QCloseEvent *closeEvent);
 
     void init();
 };

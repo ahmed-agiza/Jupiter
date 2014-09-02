@@ -89,19 +89,27 @@ bool CodeEditorWindow::saveFile(){
 
 }
 
-/*void CodeEditorWindow::closeEvent(QCloseEvent *closeEvent){
+void CodeEditorWindow::closeEvent(QCloseEvent *closeEvent){
+    if (destroyed){
+        closeEvent->accept();
+        return;
+    }
     if (edited){
-        QMessageBox::StandardButton btn = QMessageBox::question(this, QString("Close"), QString("The changes to the file " + title.trimmed() + " have not be changed\nDo you want to save the file before closing?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+        QMessageBox::StandardButton btn = QMessageBox::question(this, QString("Close"), QString("The changes to the file " + title.trimmed() + " have not be saved\nDo you want to save the file before closing?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
         if (btn == QMessageBox::Yes){
             saveFile();
             closeEvent->accept();
+            return;
         }else if (btn == QMessageBox::No){
             closeEvent->accept();
-        }else
+            return;
+        }else{
             closeEvent->ignore();
+            return;
+        }
     }
     closeEvent->accept();
-}*/
+}
 
 
 void CodeEditorWindow::selectAll()
@@ -115,6 +123,24 @@ void CodeEditorWindow::quickFind(){
 
 void CodeEditorWindow::findAndReplace(){
 
+}
+
+void CodeEditorWindow::setDestryoed(bool value){
+    destroyed = value;
+}
+
+bool CodeEditorWindow::isDestroyed()
+{
+    return destroyed;
+}
+
+QString CodeEditorWindow::getContent(){
+    return editor->toPlainText();
+
+}
+
+QStringList CodeEditorWindow::getContentList(){
+    return editor->toPlainText().split("\n");
 }
 
 QString CodeEditorWindow::getTitle(){
@@ -202,4 +228,5 @@ void CodeEditorWindow::init(){
     setAttribute(Qt::WA_DeleteOnClose, 1);
     widgetsContainer->showMaximized();
     connect(editor, SIGNAL(textChanged()), this, SLOT(editedSlot()));
+    destroyed = false;
 }

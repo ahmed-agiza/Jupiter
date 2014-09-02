@@ -565,43 +565,60 @@ void MainWindow::printS(){
 }
 
 void MainWindow::on_actionAssemble_triggered(){
-     qDebug() << "Assembling..";
-    QTreeWidgetItemIterator it(treeWidget);
-    while (*it) {
-        if ((*it)->text(0).trimmed() == MainWindow::getProjectMainFile()){
-            on_treeFiles_itemDoubleClicked((*it), 0);
-            break;
-        }
-        ++it;
+
+    if(MainWindow::getProjectMainFile() == ""){
+        QMessageBox::critical(this, "Error", "Cannot find main text file");
+        return;
     }
 
+    qDebug() << "Assembling..";
+    QTreeWidgetItemIterator itMain(treeWidget);
+    while (*itMain) {
+        if ((*itMain)->text(0).trimmed() == MainWindow::getProjectMainFile()){
+            on_treeFiles_itemDoubleClicked((*itMain), 0);
+            break;
+        }
+        ++itMain;
+    }
+    QStringList textInstrs;
+    QStringList dataInstrs;
+    CodeEditorWindow *currentWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
+    if (currentWindow){
+        textInstrs = currentWindow->getContentList();
+    }
 
-    if (ui->mdiAreaCode->currentSubWindow())
-    {
-        QWidget *W  = ui->mdiAreaCode->currentSubWindow()->findChild <QWidget *> ("NW");
-        if (W){
-            CodeEditor  *E = W->findChild  <CodeEditor*> ("CodeE");
-            if (E){
-                //qDebug() << E->toPlainText();
-                QStringList instrs = E->toPlainText().split("\n");
-                if(assemblerInitialized){
-                    delete assem;
-                    if (memory){
-                        Memory *tempMemory = memory;
-                        memory = new Memory(this);
-                        delete tempMemory;
-                    }
+    if (MainWindow::projectDataFile.trimmed() != ""){
+        QTreeWidgetItemIterator itData(treeWidget);
+        while (*itData) {
+            if ((*itData)->text(0).trimmed() == MainWindow::getProjectDataFile()){
+                on_treeFiles_itemDoubleClicked((*itData), 0);
+                break;
+            }
+            ++itData;
+        }
+        CodeEditorWindow *currentDataWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
 
-                }
-                assem = new Assembler(&instrs, &instrs, memory, &mainProcessorRegisters);
-                assemblerInitialized = true;
-            }else
-                QMessageBox::critical(this, "Error", "Error 1");
-        }else
-            QMessageBox::critical(this, "Error", "Error 2");
+        if (currentDataWindow){
+            dataInstrs = currentDataWindow->getContentList();
+        }
+    }
 
-    }else
-        QMessageBox::critical(this, "Error", "Error 3");
+    if(assemblerInitialized){
+        delete assem;
+        if (memory){
+            Memory *tempMemory = memory;
+            memory = new Memory(this);
+            delete tempMemory;
+        }
+
+    }
+    assem = new Assembler(&textInstrs, &dataInstrs, memory, &mainProcessorRegisters);
+    assemblerInitialized = true;
+
+    if (currentWindow)
+        ui->mdiAreaCode->setActiveSubWindow(currentWindow);
+
+
     qDebug() << "Assembled.";
 
 }
@@ -862,6 +879,13 @@ bool MainWindow::closeAllWindows(){
             }
         }
     }
+
+    foreach (QMdiSubWindow *currentWindow, subWindows){
+        CodeEditorWindow *editorWindow = dynamic_cast<CodeEditorWindow*>(currentWindow);
+        if (editorWindow)
+            editorWindow->setDestryoed(true);
+    }
+
     ui->mdiAreaCode->closeAllSubWindows();
     return true;
 
