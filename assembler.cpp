@@ -275,8 +275,8 @@ Assembler::Assembler(QStringList* stringList, Memory *memory, QVector<int> * mRe
 
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
 
-    parseDataSegment(stringList);
-    //parseTextSegment(stringList);
+    //parseDataSegment(stringList);
+    parseTextSegment(stringList);
 
 }
 

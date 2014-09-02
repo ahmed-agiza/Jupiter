@@ -493,7 +493,7 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
 }
 
 void MainWindow::on_actionSimulate_triggered(){
-    // qDebug() << "Simulating..";
+     qDebug() << "Simulating..";
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
     if(ui->actionEnable_Graphics_Engine->isChecked()){
@@ -519,7 +519,7 @@ void MainWindow::on_actionSimulate_triggered(){
         ui->heapTable->setModel(heapModel);
 
         resizeColumns();
-        // qDebug() << "Simulated.";
+        qDebug() << "Simulated.";
     }
 
 }
@@ -528,7 +528,7 @@ void MainWindow::on_actionNew_triggered(){
 
     FileLoader *loader = new FileLoader(this, CREATE_FILE);
     loader->show();
-    addEditorWindow();
+    //addEditorWindow();
 
 }
 
@@ -537,7 +537,7 @@ void MainWindow::printS(){
 }
 
 void MainWindow::on_actionAssemble_triggered(){
-    // qDebug() << "Assembling..";
+     qDebug() << "Assembling..";
     QTreeWidgetItemIterator it(treeWidget);
     while (*it) {
         if ((*it)->text(0).trimmed() == MainWindow::getProjectMainFile()){
@@ -574,7 +574,7 @@ void MainWindow::on_actionAssemble_triggered(){
 
     }else
         QMessageBox::critical(this, "Error", "Error 3");
-    //qDebug() << "Assembled.";
+    qDebug() << "Assembled.";
 
 }
 
