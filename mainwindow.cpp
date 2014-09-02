@@ -523,6 +523,7 @@ void MainWindow::on_actionSimulate_triggered(){
         engine->show();
     }
 
+
     if (assemblerInitialized){
         assem->simulate();
         mainProcessorRegisters = *assem->registers;
@@ -542,8 +543,9 @@ void MainWindow::on_actionSimulate_triggered(){
         ui->heapTable->setModel(heapModel);
 
         resizeColumns();
-        qDebug() << "Simulated.";
+
     }
+    qDebug() << "Simulated.";
 
 }
 
@@ -607,7 +609,7 @@ void MainWindow::on_actionAssemble_triggered(){
         }
 
     }
-    assem = new Assembler(&textInstrs, &dataInstrs, memory, &mainProcessorRegisters);
+    assem = new Assembler(&textInstrs, &dataInstrs, memory, &mainProcessorRegisters, this);
     assemblerInitialized = true;
 
     if (currentWindow)

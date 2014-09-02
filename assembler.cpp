@@ -1,4 +1,5 @@
 #include "Assembler.h"
+#include "mainwindow.h"
 #include <QDebug>
 #include <iostream>
 #include <math.h>
@@ -267,8 +268,9 @@ QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensit
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 QRegExp invalidR(invalidRegisterFormat, Qt::CaseInsensitive), invalidM(invalidMemoryFormat, Qt::CaseInsensitive), invalidI(invalidImmediateFormat, Qt::CaseInsensitive), invalidSh(invalidShiftFormat, Qt::CaseInsensitive);
 
-Assembler::Assembler(QStringList* textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> * mRegisters)
+Assembler::Assembler(QStringList* textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> * mRegisters, MainWindow * mainW)
 {
+    this->mainW = mainW;
     this->mem = memory;
     this->registers = mRegisters;
     initializeRegisters();
@@ -1794,85 +1796,88 @@ void Assembler::simulate()
     int activePC = (PC - 1)/4;
     while (PC != -1 && ((PC - 1)/4) < instructions.size() && i < 100)
     {
-        sf::Event event;
-        while(mem->getTileEngine()->pollEvent(event))
-        {
-            if(event.type == sf::Event::KeyPressed){
-                qDebug() << event.key.code << " pressed";
-                switch(event.key.code){
-                case Keyboard::Down:
-                    emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::Left:
-                    emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::Right:
-                    emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::Up:
-                    emit Assembler::buttonPressed(UP_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::Z:
-                    emit Assembler::buttonPressed(A_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::X:
-                    emit Assembler::buttonPressed(B_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::D:
-                    emit Assembler::buttonPressed(R_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::A:
-                    emit Assembler::buttonPressed(L_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::Return:
-                    emit Assembler::buttonPressed(START_KEY_INDEX,0, true);
-                    break;
-                case Keyboard::BackSpace:
-                    emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, true);
-                    break;
-                default:
-                    qDebug() << "Another button was pressed";
+
+        if(mainW->isGFXEnabled()){
+            sf::Event event;
+            while(mem->getTileEngine()->pollEvent(event))
+            {
+                if(event.type == sf::Event::KeyPressed){
+                    qDebug() << event.key.code << " pressed";
+                    switch(event.key.code){
+                    case Keyboard::Down:
+                        emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Left:
+                        emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Right:
+                        emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Up:
+                        emit Assembler::buttonPressed(UP_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Z:
+                        emit Assembler::buttonPressed(A_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::X:
+                        emit Assembler::buttonPressed(B_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::D:
+                        emit Assembler::buttonPressed(R_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::A:
+                        emit Assembler::buttonPressed(L_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Return:
+                        emit Assembler::buttonPressed(START_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::BackSpace:
+                        emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, true);
+                        break;
+                    default:
+                        qDebug() << "Another button was pressed";
+                    }
+                } else if(event.type == sf::Event::KeyReleased){
+                    qDebug() << event.key.code << " released";
+                    switch(event.key.code){
+                    case Keyboard::Down:
+                        emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Left:
+                        emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Right:
+                        emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Up:
+                        emit Assembler::buttonPressed(UP_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Z:
+                        emit Assembler::buttonPressed(A_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::X:
+                        emit Assembler::buttonPressed(B_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::D:
+                        emit Assembler::buttonPressed(R_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::A:
+                        emit Assembler::buttonPressed(L_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Return:
+                        emit Assembler::buttonPressed(START_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::BackSpace:
+                        emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, false);
+                        break;
+                    default:
+                        qDebug() << "Another button was released";
+                    }
+                } else if(event.type == sf::Event::JoystickButtonPressed){
+                    qDebug() << event.joystickButton.button << " pressed";
+                } else if(event.type == sf::Event::JoystickButtonReleased){
+                    qDebug() << event.joystickButton.button << " released";
                 }
-            } else if(event.type == sf::Event::KeyReleased){
-                qDebug() << event.key.code << " released";
-                switch(event.key.code){
-                case Keyboard::Down:
-                    emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::Left:
-                    emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::Right:
-                    emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::Up:
-                    emit Assembler::buttonPressed(UP_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::Z:
-                    emit Assembler::buttonPressed(A_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::X:
-                    emit Assembler::buttonPressed(B_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::D:
-                    emit Assembler::buttonPressed(R_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::A:
-                    emit Assembler::buttonPressed(L_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::Return:
-                    emit Assembler::buttonPressed(START_KEY_INDEX,0, false);
-                    break;
-                case Keyboard::BackSpace:
-                    emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, false);
-                    break;
-                default:
-                    qDebug() << "Another button was released";
-                }
-            } else if(event.type == sf::Event::JoystickButtonPressed){
-                qDebug() << event.joystickButton.button << " pressed";
-            } else if(event.type == sf::Event::JoystickButtonReleased){
-                qDebug() << event.joystickButton.button << " released";
             }
         }
 

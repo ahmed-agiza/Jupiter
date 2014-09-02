@@ -27,6 +27,7 @@ public:
     QString description;
 };
 
+class MainWindow;
 class Assembler: public QObject
 {
     Q_OBJECT
@@ -40,6 +41,7 @@ private:
 
 
     Memory *mem;
+    MainWindow *mainW;
     TileEngine *engine;
     int address;
     int lineNumber;
@@ -51,7 +53,7 @@ private:
     int stringDistance(std::string, std::string);
     int minimum4(int, int, int, int);
 public:
-    Assembler(QStringList *textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> *mRegisters);
+    Assembler(QStringList *textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> *mRegisters, MainWindow*);
     void parseTextSegment(QStringList*);
     void parseDataSegment(QStringList*);
     int getNumber(QString);
