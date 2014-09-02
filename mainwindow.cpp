@@ -26,6 +26,7 @@
 #include "memory.h"
 #include "InstructionFuncs.h"
 #include "startupdialog.h"
+#include "deletefiledialog.h"
 
 QString MainWindow::projectPath;
 QString MainWindow::projectFileName;
@@ -72,6 +73,8 @@ MainWindow::MainWindow(QWidget *parent) :
     if(fontsDB.families().contains("Consolas")){
         editorFont = fontsDB.font("Consolas", "Normal", 10);
     }
+
+    ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
     treeWidget = ui->treeFiles;
 
@@ -191,9 +194,9 @@ void MainWindow::closeProject()
 {
     //ui->mdiAreaCode->closeAllSubWindows();
     if (closeAllWindows()){
-    if (projectFile.isOpen()){
-        projectFile.close();
-    }
+        if (projectFile.isOpen()){
+            projectFile.close();
+        }
         ui->treeFiles->clear();
         currentProjectString = "";
         MainWindow::projectPath = "";
@@ -207,41 +210,6 @@ void MainWindow::closeProject()
     refreshActions();
 }
 
-void MainWindow::addEditorWindow()
-{
-    /*QMdiSubWindow *newWindow = new QMdiSubWindow(ui->mdiAreaCode);
-    newWindow->setObjectName("newW");
-    newWindow->setWindowTitle("Untitled");
-
-
-    QWidget *newWidgets = new QWidget(newWindow);
-    newWidgets->setObjectName("NW");
-    QHBoxLayout *HL = new QHBoxLayout(newWidgets);
-    CodeEditor *newCode = new CodeEditor(newWidgets);
-    QTextEdit *linesCount = new QTextEdit(newWidgets);
-
-    newCode->setObjectName("CodeE");
-    newCode->setFont(editorFont);
-
-    linesCount->setEnabled(false);
-    linesCount->setMinimumSize(10, 10);
-    linesCount->setMaximumSize(40, linesCount->maximumSize().height());
-    linesCount->setText("0");
-    newCode->setCounter(linesCount);
-
-    HL->setObjectName("HL");
-    HL->addWidget(linesCount);
-    HL->addWidget(newCode);
-
-    newWidgets->setLayout(HL);
-
-    newWindow->setWidget(newWidgets);
-
-    newWindow->setAttribute(Qt::WA_DeleteOnClose, 1);*/
-    CodeEditorWindow *editorWindow = new CodeEditorWindow(ui->mdiAreaCode, editorFont);
-    ui->mdiAreaCode->addSubWindow(editorWindow);
-    //newWidgets->showMaximized();
-}
 
 void MainWindow::addEditorWindow(QString file, QString title, MirageFileType type)
 {
@@ -256,23 +224,24 @@ void MainWindow::addEditorWindow(QString file, QString title, MirageFileType typ
 
 }
 
-void MainWindow::createDataFile(QString file){
-
-}
-
-void MainWindow::creatTextFile(QString file){
-
-}
 
 void MainWindow::addDataFile(QString file){
+    if (MainWindow::projectDataFile.trimmed() != ""){
+        if (QMessageBox::question(this, "Data File Already Exists", "The project contains data file\nAre you sure you want to replace it?") != QMessageBox::Yes)
+            return;
+    }
     MainWindow::projectDataFile = file;
-    reBuildProjectFile();
+    rebuildProjectFile();
     loadProjectTree();
 }
 
 void MainWindow::addTextFile(QString file){
+    if (MainWindow::projectTextFiles.contains(file)){
+        QMessageBox::information(this, "Cannot load the text file", "A text file with the same name already exists in this project");
+        return;
+    }
     MainWindow::projectTextFiles.append(file);
-    reBuildProjectFile();
+    rebuildProjectFile();
     loadProjectTree();
     QTreeWidgetItemIterator it(treeWidget);
     while (*it) {
@@ -289,15 +258,107 @@ void MainWindow::addResourceFile(QString file){
 }
 
 void MainWindow::removeDataFile(QString file){
-
+    deleteConfirmed = false;
+    deleteFromDisk = false;
+    DeleteFileDialog *deleteDialog = new DeleteFileDialog(this);
+    deleteDialog->setText("Are you sure you want to remove the file " + file + " from the project?");
+    deleteDialog->exec();
+    if (deleteConfirmed){
+        if (deleteFromDisk){
+            if (QMessageBox::warning(this, "Warning", "You are about to delete the file from the disk permanently\nAre you sure you want to proceed?", QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
+                return;
+            if (!QFile::remove(MainWindow::projectPath + file)){
+                QMessageBox::critical(this, "Error", "Failed to remove the file from the disk");
+                return;
+            }
+        }
+        if (!closeFileWindow(file.trimmed())){
+            QMessageBox::critical(this, "Error", "Cannot remove the file " + file);
+            return;
+        }
+        MainWindow::projectDataFile = "";
+        rebuildProjectFile();
+        loadProjectTree();
+    }
+    qDebug() << "Removed data file " << file;
 }
+
 
 void MainWindow::removeTextFile(QString file){
+    deleteConfirmed = false;
+    deleteFromDisk = false;
+    DeleteFileDialog *deleteDialog = new DeleteFileDialog(this);
+    deleteDialog->setText("Are you sure you want to remove the file " + file + " from the project?");
+    deleteDialog->exec();
+    if (deleteConfirmed){
+        if (deleteFromDisk){
+            if (QMessageBox::warning(this, "Warning", "You are about to delete the file from the disk permanently\nAre you sure you want to proceed?", QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
+                return;
+            if (!QFile::remove(MainWindow::projectPath + file)){
+                QMessageBox::critical(this, "Error", "Failed to remove the file from the disk");
+                return;
+            }
+        }
+        if (!closeFileWindow(file.trimmed())){
+            QMessageBox::critical(this, "Error", "Cannot remove the file " + file);
+            return;
+        }
+        for (int i = 0; i < MainWindow::projectTextFiles.size(); i++){
+            if (MainWindow::projectTextFiles.at(i).trimmed() == file.trimmed()){
+                MainWindow::projectTextFiles.removeAt(i);
+                rebuildProjectFile();
+                loadProjectTree();
+                break;
+            }
 
+        }
+
+    }
+    qDebug() << "Removed text file " << file;
 }
 
-void MainWindow::removeResourceFile(QString file){
+void MainWindow::removeMainTextFile(QString file){
+    deleteConfirmed = false;
+    deleteFromDisk = false;
+    DeleteFileDialog *deleteDialog = new DeleteFileDialog(this);
+    deleteDialog->setText("Are you sure you want to remove the file " + file + " from the project?");
+    deleteDialog->exec();
+    if (deleteConfirmed){
+        if (deleteFromDisk){
+            if (QMessageBox::warning(this, "Warning", "You are about to delete the file from the disk permanently\nAre you sure you want to proceed?", QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
+                return;
+            if (!QFile::remove(MainWindow::projectPath + file)){
+                QMessageBox::critical(this, "Error", "Failed to remove the file from the disk");
+                return;
+            }
+        }
+        if (!closeFileWindow(file.trimmed())){
+            QMessageBox::critical(this, "Error", "Cannot remove the file " + file);
+            return;
+        }
+        MainWindow::projectMainFile = "";
+        for (int i = 0; i < MainWindow::projectTextFiles.size(); i++){
+            if (MainWindow::projectTextFiles.at(i).trimmed() == file.trimmed()){
+                MainWindow::projectTextFiles.removeAt(i);
+                rebuildProjectFile();
+                loadProjectTree();
+                break;
+            }
 
+        }
+
+    }
+    qDebug() << "Removed main text file " << file;
+}
+
+
+void MainWindow::removeResourceFile(QString file){
+    qDebug() << "Remove resource " << file;
+}
+
+
+bool MainWindow::containsTextFile(QString textFileName){
+    return MainWindow::projectTextFiles.contains(textFileName);
 }
 
 QString MainWindow::loadFileText(QString fileName){
@@ -475,30 +536,55 @@ void MainWindow::resizeDataColumns(){
 }
 
 void MainWindow::projectExplorerMenuRequested(QPoint loc){
-    // QModelIndex index = ui->treeFiles->indexAt(loc);
     ExplorerTreeItem *itm = (ExplorerTreeItem*) ui->treeFiles->itemAt(loc);
     QMenu *menu=new QMenu(this);
     if (itm && (itm->getItemType() == TEXT_CHILD || itm->getItemType() == TEXT_MAIN || itm->getItemType() == DATA_CHILD)){
-        //qDebug() << itm->text(0);
         QTreeWidgetItem *rawItem = ui->treeFiles->itemAt(loc);
         QAction *openAction = new QAction(this);
-        QSignalMapper *mapper = new QSignalMapper(this);
-        mapper->setMapping(openAction, (QObject *) rawItem);
-        QObject::connect(openAction, SIGNAL(triggered()), mapper, SLOT(map()));
-        QObject::connect(mapper, SIGNAL(mapped(QObject*)), this, SLOT(openTreeItem(QObject*)));
+        QSignalMapper *openMapper = new QSignalMapper(this);
+        openMapper->setMapping(openAction, (QObject *) rawItem);
+        QObject::connect(openAction, SIGNAL(triggered()), openMapper, SLOT(map()));
+        QObject::connect(openMapper, SIGNAL(mapped(QObject*)), this, SLOT(openTreeItem(QObject*)));
         openAction->setText("Open");
+        menu->addAction(openAction);
 
-        QAction *setMainAction = new QAction(this);
-        setMainAction->setText("Set as Main File");
-
-        QAction *removeAction = new QAction(this);
-        removeAction->setText("Remove");
+        if (itm->getItemType() == TEXT_CHILD){
+            QAction *setMainAction = new QAction(this);
+            QSignalMapper *setMainMapper = new QSignalMapper(this);
+            setMainMapper->setMapping(setMainAction, rawItem->text(0).trimmed());
+            QObject::connect(setMainAction, SIGNAL(triggered()), setMainMapper, SLOT(map()));
+            QObject::connect(setMainMapper, SIGNAL(mapped(QString)), this, SLOT(setMainProjectFile(QString)));
+            setMainAction->setText("Set as Main File");
+            menu->addAction(setMainAction);
+        }
 
         QAction *renameAction = new QAction(this);
+        QSignalMapper *renameMapper = new QSignalMapper(this);
+        renameMapper->setMapping(renameAction, (rawItem->text(0).trimmed()));
+        QObject::connect(renameAction, SIGNAL(triggered()), renameMapper, SLOT(map()));
         renameAction->setText("Rename");
 
-        menu->addAction(openAction);
-        menu->addAction(setMainAction);
+        QAction *removeAction = new QAction(this);
+        QSignalMapper *removeMapper = new QSignalMapper(this);
+        removeMapper->setMapping(removeAction, (rawItem->text(0).trimmed()));
+        QObject::connect(removeAction, SIGNAL(triggered()), removeMapper, SLOT(map()));
+        removeAction->setText("Remove");
+
+
+
+        if (itm){
+            if (itm->getItemType() == TEXT_CHILD){
+                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameTextItem(QString)));
+                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeTextFile(QString)));
+            }else if (itm->getItemType() == TEXT_MAIN){
+                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameMainTextItem(QString)));
+                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeMainTextFile(QString)));
+            }else if (itm->getItemType() == DATA_CHILD){
+                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameDataItem(QString)));
+                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeDataFile(QString)));
+            }
+        }
+
         menu->addAction(renameAction);
         menu->addAction(removeAction);
 
@@ -506,13 +592,16 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
         menu->addAction(ui->actionNew);
         menu->addAction(ui->actionOpen);
     }
+    if (itm &&(itm->getItemType() == PROJECT_TITLE)){
+        menu->addAction(ui->actionClose);
+    }
 
 
     menu->popup(ui->treeFiles->viewport()->mapToGlobal(loc));
 }
 
 void MainWindow::on_actionSimulate_triggered(){
-     qDebug() << "Simulating..";
+    qDebug() << "Simulating..";
     if (engine != NULL)
         if(engine)
             if(engine->isVisible())
@@ -551,8 +640,8 @@ void MainWindow::on_actionSimulate_triggered(){
 
 void MainWindow::on_actionNew_triggered(){
 
-   FileLoader *loader = new FileLoader(this, CREATE_FILE);
-   loader->show();
+    FileLoader *loader = new FileLoader(this, CREATE_FILE);
+    loader->show();
     //addEditorWindow();
 
 }
@@ -806,17 +895,17 @@ void MainWindow::loadProjectTree()
 bool MainWindow::validateProjectFiles(bool forceAll = true)
 {
     if (MainWindow::projectTextFiles.size() > 0)
-    foreach(const QString &textFile, MainWindow::projectTextFiles){
-        if (textFile.trimmed() == "") continue;
-        QFile testFile(MainWindow::projectPath + textFile);
-        if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
-            QMessageBox::critical(this, "Error", QString("Failed to load the file ") + textFile  + QString("\n") + testFile.errorString());
-            if(!forceAll)
-                return false;
-        }else{
-            testFile.close();
+        foreach(const QString &textFile, MainWindow::projectTextFiles){
+            if (textFile.trimmed() == "") continue;
+            QFile testFile(MainWindow::projectPath + textFile);
+            if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+                QMessageBox::critical(this, "Error", QString("Failed to load the file ") + textFile  + QString("\n") + testFile.errorString());
+                if(!forceAll)
+                    return false;
+            }else{
+                testFile.close();
+            }
         }
-    }
     if (MainWindow::projectDataFile.trimmed() != ""){
         QFile testFile(MainWindow::projectPath + MainWindow::projectDataFile);
         if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
@@ -836,17 +925,17 @@ bool MainWindow::validateProjectFiles(bool forceAll = true)
 bool MainWindow::validateTempProjectFiles(bool forceAll = true)
 {
     if (MainWindow::projectTextFiles.size() > 0)
-    foreach(const QString &textFile, tempProjectTextFiles){
-        if (textFile.trimmed() == "") continue;
-        QFile testFile(tempProjectPath + textFile);
-        if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
-            QMessageBox::critical(this, "Error", QString("Failed to load the file ") + textFile  + QString("\n") + testFile.errorString());
-            if(!forceAll)
-                return false;
-        }else{
-            testFile.close();
+        foreach(const QString &textFile, tempProjectTextFiles){
+            if (textFile.trimmed() == "") continue;
+            QFile testFile(tempProjectPath + textFile);
+            if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+                QMessageBox::critical(this, "Error", QString("Failed to load the file ") + textFile  + QString("\n") + testFile.errorString());
+                if(!forceAll)
+                    return false;
+            }else{
+                testFile.close();
+            }
         }
-    }
     if (tempProjectDataFile.trimmed() != ""){
         QFile testFile(tempProjectPath + tempProjectDataFile);
         if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text)){
@@ -961,6 +1050,30 @@ bool MainWindow::hasDataFile(){
 void MainWindow::setOpenWith(QString openWith){
     openWithArg = openWith;
     openProjectFile(openWith);
+}
+
+void MainWindow::setDeleteConfirmed(bool value){
+    deleteConfirmed = value;
+}
+
+void MainWindow::setDeleteFromDisk(bool value){
+    deleteFromDisk = value;
+}
+
+bool MainWindow::closeFileWindow(QString fileName){
+    QList<QMdiSubWindow *> windows = ui->mdiAreaCode->subWindowList();
+    foreach (QMdiSubWindow *currentWindow, windows){
+        CodeEditorWindow *editorWindow = dynamic_cast<CodeEditorWindow *>(currentWindow);
+        if (editorWindow){
+            if(editorWindow->getTitle().trimmed() == fileName.trimmed()){
+                editorWindow->setDestryoed(true);
+                //editorWindow->setParent(0);
+                return editorWindow->close();
+            }
+        }
+    }
+    return true;
+
 }
 
 void MainWindow::on_actionInput_triggered()
@@ -1156,7 +1269,7 @@ void MainWindow::refreshGraphicsAction(){
 
 
 
-void MainWindow::reBuildProjectFile(){
+void MainWindow::rebuildProjectFile(){
     if (projectFile.isOpen()){
         QFile tempProject(projectFile.fileName());
         if (tempProject.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)){
@@ -1228,8 +1341,34 @@ void MainWindow::reBuildProjectFile(){
 
 void MainWindow::setMainProjectFile(QString file)
 {
+    if (!MainWindow::projectTextFiles.contains(file)){
+        QMessageBox::critical(this, "Error", "Cannot find the specified text fie");
+        return;
+    }
     MainWindow::projectMainFile = file;
+    rebuildProjectFile();
+    loadProjectTree();
 }
+
+void MainWindow::renameDataItem(QString newName){
+    qDebug() << "Rename data " << newName;
+
+}
+
+void MainWindow::renameResItem(QString newName){
+    qDebug() << "Rename res " << newName;
+}
+
+void MainWindow::renameMainTextItem(QString newName){
+    qDebug() << "Rename main " << newName;
+}
+
+
+void MainWindow::renameTextItem(QString newName){
+    qDebug() << "Rename text " << newName;
+
+}
+
 
 void MainWindow::on_actionNew_Project_triggered(){
     ProjectCreator *builder = new ProjectCreator(this);
@@ -1283,5 +1422,5 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
     else
         MainWindow::projectConf["EnableGFX"] = "false";
 
-    reBuildProjectFile();
+    rebuildProjectFile();
 }

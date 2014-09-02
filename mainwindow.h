@@ -38,19 +38,13 @@ public:
 
     void closeProject();
 
-    void addEditorWindow();
     void addEditorWindow(QString file, QString title, MirageFileType type);
-
-    void createDataFile(QString file);
-    void creatTextFile(QString file);
 
     void addDataFile(QString file);
     void addTextFile(QString file);
     void addResourceFile(QString file);
 
-    void removeDataFile(QString file);
-    void removeTextFile(QString file);
-    void removeResourceFile(QString file);
+    bool containsTextFile(QString textFileName);
 
 
     QString loadFileText(QString fileName);
@@ -78,6 +72,11 @@ public:
     bool hasDataFile();
 
     void setOpenWith(QString openWith);
+
+    void setDeleteConfirmed(bool value);
+    void setDeleteFromDisk(bool value);
+
+    bool closeFileWindow(QString fileName);
 
 
 
@@ -150,7 +149,7 @@ private slots:
     void refreshEditActions();
     void refreshGraphicsAction();
 
-    void reBuildProjectFile();
+    void rebuildProjectFile();
 
 
     void on_actionNew_Project_triggered();
@@ -163,6 +162,20 @@ private slots:
 
 
     void on_actionEnable_Graphics_Engine_triggered();
+
+public slots:
+
+    void setMainProjectFile(QString);
+
+    void renameTextItem(QString);
+    void renameMainTextItem(QString);
+    void renameDataItem(QString);
+    void renameResItem(QString);
+
+    void removeDataFile(QString file);
+    void removeTextFile(QString file);
+    void removeMainTextFile(QString file);
+    void removeResourceFile(QString file);
 
 private:
     Ui::MainWindow *ui;
@@ -194,7 +207,6 @@ private:
     static QMap<QString, QString> projectConf;
 
     QFile projectFile;
-    void setMainProjectFile(QString);
 
 
     bool parseProjectXML(QFile &);
@@ -205,6 +217,9 @@ private:
     bool closeAllWindows();
 
     void closeEvent(QCloseEvent *);
+
+    bool deleteConfirmed;
+    bool deleteFromDisk;
 
     QString openWithArg;
 

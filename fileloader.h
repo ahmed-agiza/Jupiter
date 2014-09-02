@@ -16,6 +16,8 @@ class FileLoader : public QDialog
 
 public:
     explicit FileLoader(MainWindow *parent = 0, FileDialogType type = CREATE_FILE);
+    void setFileName(QString name);
+    void setMain(bool value);
     ~FileLoader();
 
 private slots:
@@ -29,6 +31,8 @@ private:
     Ui::FileLoader *ui;
     FileDialogType dialogType;
     MainWindow *p;
+    QString fileName;
+    bool mainFile;
 };
 
 #endif // FILELOADER_H

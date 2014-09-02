@@ -43,7 +43,9 @@ SOURCES += main.cpp\
     explorertreeitem.cpp \
     startupdialog.cpp \
     projectcreator.cpp \
-    keyboardmanager.cpp
+    keyboardmanager.cpp \
+    filenamedialog.cpp \
+    deletefiledialog.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -77,7 +79,9 @@ HEADERS  += mainwindow.h \
     explorertreeitem.h \
     startupdialog.h \
     projectcreator.h \
-    keyboardmanager.h
+    keyboardmanager.h \
+    filenamedialog.h \
+    deletefiledialog.h
 
 
 FORMS    += \
@@ -90,7 +94,9 @@ FORMS    += \
     inputmanager.ui \
     fileloader.ui \
     startupdialog.ui \
-    projectcreator.ui
+    projectcreator.ui \
+    filenamedialog.ui \
+    deletefiledialog.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \
