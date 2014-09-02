@@ -54,18 +54,12 @@ QMap<QString, QString> tempProjectConf;
 QString tempProjectPath;
 
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow){
-
-
-
     ui->setupUi(this);
     setCentralWidget(ui->dockCode);
-
     installEventFilter(this);
-
-
-
     ui->actionTileset_viewer->setEnabled(false);
     //ui->actionBitmap_Display->setEnabled(false);
     ui->actionPalette_Viewer->setEnabled(false);
@@ -157,17 +151,17 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
     QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
 
-
-
 }
 
 
 bool MainWindow::eventFilter(QObject *o, QEvent *e){
     if (e->type() == QEvent::Show){
         ui->actionDefaultLayout->trigger();
-        StartupDialog *sdialog = new StartupDialog(this);
-        sdialog->show();
-        sdialog->setModal(true);
+        if(openWithArg.trimmed() == ""){
+            StartupDialog *sdialog = new StartupDialog(this);
+            sdialog->show();
+            sdialog->setModal(true);
+        }
 
     }
 
@@ -181,6 +175,7 @@ void MainWindow::closeEvent(QCloseEvent *e){
         e->ignore();
     }
 }
+
 
 void MainWindow::openProjectAction()
 {
@@ -959,6 +954,11 @@ void MainWindow::applyProjectSettings(){
 bool MainWindow::hasDataFile(){
     return projectDataFile.trimmed() != "";
 
+}
+
+void MainWindow::setOpenWith(QString openWith){
+    openWithArg = openWith;
+    openProjectFile(openWith);
 }
 
 void MainWindow::on_actionInput_triggered()

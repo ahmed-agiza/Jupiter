@@ -77,6 +77,8 @@ public:
 
     bool hasDataFile();
 
+    void setOpenWith(QString openWith);
+
 
 
     ~MainWindow();
@@ -203,6 +205,8 @@ private:
     bool closeAllWindows();
 
     void closeEvent(QCloseEvent *);
+
+    QString openWithArg;
 
     //Menus
 };
