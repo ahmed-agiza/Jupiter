@@ -20,8 +20,8 @@ QString dataSegmentDirectives = "\\.(align|asciiz?|byte|double|float|half|space|
 // Matches invalid directives
 QString invalidDirectivesRegex = "\\.(?!align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
 // Matches strings
-QString cstringsRegex = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\""; // "\".*[^\\\\]\"";
-QRegExp characterRegex ("^'(?:[^'\\\\\\n\\r]|\\\\')'$"); //
+QString cstringsRegex = "^\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\""; // "\".*[^\\\\]\"$";
+QRegExp characterRegex ("^'((?:[^'\\\\\\n\\r]|(?:\\\\['nrtb])))'$"); //
 // Matches strings
 QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 
@@ -395,9 +395,15 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     }else if(parameters.contains(',')){
                         QStringList variables = parameters.remove(' ').remove('\t').split(',', QString::SkipEmptyParts);
                         foreach (QString immediateNumber, variables) {
-                            if(characterRegex.indexIn(immediateNumber) == 0)
-                                mem->storeByte(mem->dataSegmentBaseAddress + address, characterRegex.cap(1).toStdString()[characterRegex.cap(1).size()-1]);
-                            else if(numberRegExp.indexIn(immediateNumber) == 0)
+                            if(characterRegex.indexIn(immediateNumber) == 0){
+                                QString matchedChar = characterRegex.cap(1);
+                                matchedChar.replace("\\'","'");
+                                matchedChar.replace("\\t","\t");
+                                matchedChar.replace("\\n","\n");
+                                matchedChar.replace("\\r","\r");
+                                matchedChar.replace("\\b","\b");
+                                mem->storeByte(mem->dataSegmentBaseAddress + address, matchedChar.toStdString()[0]);
+                            }else if(numberRegExp.indexIn(immediateNumber) == 0)
                                 mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
                             else
                                 errorList.append(Error("Syntax error", lineNumber));
@@ -413,7 +419,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(parameters));
                         address++;
                     }else if(characterRegex.indexIn(parameters) == 0){
-                        mem->storeByte(mem->dataSegmentBaseAddress + address, parameters.toStdString()[parameters.size()-2]);
+                        parameters.replace("\\'","'");
+                        parameters.replace("\\t","\t");
+                        parameters.replace("\\n","\n");
+                        parameters.replace("\\r","\r");
+                        parameters.replace("\\b","\b");
+                        mem->storeByte(mem->dataSegmentBaseAddress + address, parameters.toStdString()[1]);
                         address++;
                     }else{
                         errorList.append(Error("Syntax error", lineNumber));
