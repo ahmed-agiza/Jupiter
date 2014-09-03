@@ -153,6 +153,43 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
     QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
+    ui->toolBar->setAccessibleName("Toolbar");
+    setAcceptDrops(true);
+
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *e){
+    if(e->mimeData()->hasUrls())
+        if(e->mimeData()->urls().size() == 1){
+         e->acceptProposedAction();
+        }else
+            qDebug() << e->mimeData()->urls().size();
+
+}
+
+void MainWindow::dropEvent(QDropEvent *e){
+    const QMimeData *mime = e->mimeData();
+
+    if(mime->hasUrls()){
+        QList<QUrl> murls = mime->urls();
+        qDebug() << "URL found";
+        qDebug() << murls.size();
+        if(murls.size() == 1){
+            QString fileName = murls.at(0).toLocalFile();
+            QFile tempProject(fileName);
+            if (!parseProjectXML(tempProject, false)){
+                return;
+            }
+            if(projectFile.isOpen()){
+                if(fileName == MainWindow::projectPath + MainWindow::projectFileName)
+                    return;
+                if(QMessageBox::question(this, "Close Project", "Are you sure you want to close the active project?", QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes){
+                    return;
+                }
+            }
+            openProjectFile(fileName);
+        }
+    }
 
 }
 
@@ -193,10 +230,12 @@ void MainWindow::createProjectAction()
 void MainWindow::closeProject()
 {
     //ui->mdiAreaCode->closeAllSubWindows();
+
     if (closeAllWindows()){
         if (projectFile.isOpen()){
             projectFile.close();
         }
+        setWindowTitle("Mirage");
         ui->treeFiles->clear();
         currentProjectString = "";
         MainWindow::projectPath = "";
@@ -797,7 +836,7 @@ void MainWindow::on_actionOpen_Project_triggered()
 
 
 
-bool MainWindow::parseProjectXML(QFile &data){
+bool MainWindow::parseProjectXML(QFile &data, bool load = true){
     if(!data.open( QIODevice::ReadOnly | QIODevice::Text ) ){
         QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + data.errorString());
         qDebug() << "Failed to open!";
@@ -854,11 +893,13 @@ bool MainWindow::parseProjectXML(QFile &data){
             child = child.nextSibling();
 
         }
-        MainWindow::projectTitle =  tempProjectTitle;
-        MainWindow::projectMainFile =  tempProjectMainFile;
-        MainWindow::projectTextFiles = tempProjectTextFiles;
-        MainWindow::projectDataFile = tempProjectDataFile;
-        MainWindow::projectConf = tempProjectConf;
+        if (load){
+            MainWindow::projectTitle =  tempProjectTitle;
+            MainWindow::projectMainFile =  tempProjectMainFile;
+            MainWindow::projectTextFiles = tempProjectTextFiles;
+            MainWindow::projectDataFile = tempProjectDataFile;
+            MainWindow::projectConf = tempProjectConf;
+        }
         return true;
     }
     qDebug() << "Failed to parse";
@@ -1034,6 +1075,7 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
                         }
                         ++it;
                     }
+                    setWindowTitle("Mirage - " + tempProjectTitle);
                 }else{
                     projectFile.setFileName(tempCurrentProjectFileName);
                 }

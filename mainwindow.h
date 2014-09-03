@@ -211,7 +211,7 @@ private:
     QFile projectFile;
 
 
-    bool parseProjectXML(QFile &);
+    bool parseProjectXML(QFile &, bool);
     void loadProjectTree();
     bool validateProjectFiles(bool forceAll);
     bool validateTempProjectFiles(bool forceAll);
@@ -219,6 +219,9 @@ private:
     bool closeAllWindows();
 
     void closeEvent(QCloseEvent *);
+    void dropEvent(QDropEvent *);
+    void dragEnterEvent(QDragEnterEvent *);
+
 
     bool deleteConfirmed;
     bool deleteFromDisk;
