@@ -46,7 +46,6 @@ private:
     int address;
     int lineNumber;
     int PC;
-
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
 

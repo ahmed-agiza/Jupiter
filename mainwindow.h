@@ -79,6 +79,8 @@ public:
     bool closeFileWindow(QString fileName);
     void renameFileWindow(QString fileName, QString newName);
 
+    void appendErrorMessage(QString msg);
+
 
 
     ~MainWindow();
@@ -163,6 +165,8 @@ private slots:
 
 
     void on_actionEnable_Graphics_Engine_triggered();
+
+    void on_btnClearConsole_clicked();
 
 public slots:
 

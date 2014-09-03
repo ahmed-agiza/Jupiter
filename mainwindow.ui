@@ -216,7 +216,7 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="tab_4">
+       <widget class="QWidget" name="tabProjectFiles">
         <attribute name="title">
          <string>Project Files</string>
         </attribute>
@@ -235,13 +235,31 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_5">
+       <widget class="QWidget" name="tabConsole">
         <attribute name="title">
-         <string>Notes</string>
+         <string>Console</string>
         </attribute>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item alignment="Qt::AlignRight">
+          <widget class="QToolButton" name="btnClearConsole">
+           <property name="toolTip">
+            <string>Clear Console</string>
+           </property>
+           <property name="text">
+            <string>Clear</string>
+           </property>
+           <property name="icon">
+            <iconset resource="res.qrc">
+             <normaloff>:/icons/toolbar/icons/toolbar/close.png</normaloff>:/icons/toolbar/icons/toolbar/close.png</iconset>
+           </property>
+          </widget>
+         </item>
          <item>
-          <widget class="QTextEdit" name="textEditNotes"/>
+          <widget class="QTextEdit" name="textConsole">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -751,13 +769,13 @@
        <property name="currentIndex">
         <number>1</number>
        </property>
-       <widget class="QWidget" name="tabConsole">
+       <widget class="QWidget" name="tabNotes">
         <attribute name="title">
-         <string>Console</string>
+         <string>Notes</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
-          <widget class="QTextEdit" name="textEditConsole"/>
+          <widget class="QTextEdit" name="textNotes"/>
          </item>
         </layout>
        </widget>
@@ -781,6 +799,11 @@
              <item>
               <property name="text">
                <string>Numbers</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Both</string>
               </property>
              </item>
             </widget>

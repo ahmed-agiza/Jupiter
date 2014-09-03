@@ -7,6 +7,7 @@ const QString B16("Hexadecimal");
 const QString B02("Binary");
 const QString NUM("Numbers");
 const QString STR("Names");
+const QString BTH("Both");
 
 QString getPaddedBinary(int number, int padding);
 
@@ -118,8 +119,10 @@ QVariant RegistersModel::data(const QModelIndex &index, int role) const
         if (index.column() == 0){
             if (nameMode->currentText() == NUM){
                 return "$" + QString::number(index.row());
-            }else{
+            }else if (nameMode->currentText() == STR){
                 return registersMap[index.row()];
+            }else{
+                return "$" + QString::number(index.row()) + "/" + registersMap[index.row()];
             }
 
         }else if (index.column() == 1){

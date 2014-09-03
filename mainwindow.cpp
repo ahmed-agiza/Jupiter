@@ -674,9 +674,11 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
 void MainWindow::on_actionSimulate_triggered(){
     qDebug() << "Simulating..";
     if (engine != NULL)
-        if(engine)
+        if(engine){
             if(engine->isVisible())
                 engine->hide();
+            delete engine;
+        }
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
     if(ui->actionEnable_Graphics_Engine->isChecked()){
@@ -684,7 +686,7 @@ void MainWindow::on_actionSimulate_triggered(){
     }
 
 
-    if (assemblerInitialized){
+    if (assemblerInitialized && assem){
         assem->simulate();
         mainProcessorRegisters = *assem->registers;
 
@@ -714,6 +716,7 @@ void MainWindow::on_actionNew_triggered(){
     FileLoader *loader = new FileLoader(this, CREATE_FILE);
     loader->show();
     //addEditorWindow();
+
 
 }
 
@@ -762,8 +765,11 @@ void MainWindow::on_actionAssemble_triggered(){
     }
 
     ui->actionAssemble->setEnabled(false);
+    ui->actionSimulate->setEnabled(false);
+    ui->actionAssemble_and_Simulate->setEnabled(false);
     if(assemblerInitialized){
-        delete assem;
+        if (assem)
+            delete assem;
         if (memory){
             Memory *tempMemory = memory;
             memory = new Memory(this);
@@ -771,9 +777,10 @@ void MainWindow::on_actionAssemble_triggered(){
         }
 
     }
+    ui->tabsProject->setCurrentIndex(1);
     assem = new Assembler(&textInstrs, &dataInstrs, memory, &mainProcessorRegisters, this);
     assemblerInitialized = true;
-    ui->actionAssemble->setEnabled(true);
+    refreshActions();
 
     if (currentWindow)
         ui->mdiAreaCode->setActiveSubWindow(currentWindow);
@@ -1167,6 +1174,11 @@ void MainWindow::renameFileWindow(QString fileName, QString newName){
 
 }
 
+void MainWindow::appendErrorMessage(QString msg){
+    QString currentText = ui->textConsole->toPlainText();
+    ui->textConsole->setText((currentText.trimmed() == "")? msg : ui->textConsole->toPlainText() + QString("\n") + msg);
+}
+
 void MainWindow::on_actionInput_triggered()
 {
     inputManager = new InputManager(this, memory);
@@ -1539,4 +1551,8 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
         MainWindow::projectConf["EnableGFX"] = "false";
 
     rebuildProjectFile();
+}
+
+void MainWindow::on_btnClearConsole_clicked(){
+    ui->textConsole->clear();
 }

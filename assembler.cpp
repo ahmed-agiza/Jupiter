@@ -458,6 +458,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
 
     for (int i = 0; i<errorList.size(); i++)
     {
+        mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
 
@@ -1020,6 +1021,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
 
     for (int i = 0; i<errorList.size(); i++)
     {
+        mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
 
