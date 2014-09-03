@@ -266,10 +266,12 @@ int addi(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    __int32 res = Rtr + imm;
+    __int32 res = Rsr + imm;
 
-    if ((Rtr > 0 && imm > 0 && res <0) || (Rtr < 0 && imm < 0 && res > 0))
+    if ((Rtr > 0 && imm > 0 && res <0) || (Rtr < 0 && imm < 0 && res > 0)){
+        qDebug() << "Addi OF";
         return OVExNo;
+    }
 
     Rtr = res;
 
@@ -282,7 +284,7 @@ int addiu(fParam2)
     UNUSE_I
     Q_UNUSED(PC);
     Q_UNUSED(mem);
-    Rtr = Rsr - imm;
+    Rtr = Rsr + imm;
     incPC;
     return 0;
 }
@@ -368,19 +370,18 @@ int beq(fParam2)
     UNUSE_I
     Q_UNUSED(mem);
     if(Rtr == Rsr)
-        PC = PC + imm;
-    else
-        incPC;
+        PC = PC + imm * 4;
+
+    incPC;
     return 0;
 }
 int bne(fParam2)
 {
     UNUSE_I
     Q_UNUSED(mem);
-    if(Rtr == Rsr)
-        PC = PC + imm;
-    else
-        incPC;
+    if(Rtr != Rsr)
+        PC = PC + imm * 4;
+    incPC;
     return 0;
 }
 int lui(fParam2)

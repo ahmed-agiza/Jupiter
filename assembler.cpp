@@ -1922,6 +1922,7 @@ void Assembler::simulate()
                 + " Im" + QString::number(instructions[activePC].getImm());
         instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
         instructions[activePC].execute(PC);
+        (*registers)[0] = 0;
         logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
         logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
         + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
