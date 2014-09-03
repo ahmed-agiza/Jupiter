@@ -2,6 +2,20 @@
 #include <QDebug>
 #include <QAbstractItemView>
 #include <QKeyEvent>
+#include <QTableView>
+#include <QStandardItemModel>
+#include <QHeaderView>
+#include <QListView>
+#include <QStringListModel>
+
+#include "completerlist.h"
+
+#define PlusR + QString(" $rd, $rs, $rt")
+#define PlusR + QString("")
+#define PlusI + QString(" $rt, $rs, immediate")
+#define PlusJ + QString(" destination")
+
+
 
 CodeEditor::CodeEditor(QWidget *parent) :
     QTextEdit(parent)
@@ -12,29 +26,137 @@ CodeEditor::CodeEditor(QWidget *parent) :
 
     //Auto-complete setup:
     QStringList compList; //Completion list.
-    compList << "add" << "addu" << "sub" << "subu" << "and" << "or" << "xor"
-             << "srlv" << "sllv" << "srav" << "slt" << "sltu" << "addi" <<"addiu"
-             << "andi" << "ori" << "nori" << "xori" << "srl" << "sll" << "sra"
-             << "slti" << "sltiu" << "beq" << "bne" << "lui" << "sb" << "lb" << "lbu"
-             << "sh" << "lh" << "lhu" << "sw" << "lw" << "lwl" << "lwr" << "swl"
-             << "swr" <<"ll" << "sc" << "jr" << "jalr" << "mfhi" << "mflo"
-             << "mthi" << "mtlo" << "mult" << "multu" << "div" << "divu"
-             << "j" << "jal" << "syscal" << "nop";
+    compList << "add"
+             << "addu"
+             << "sub"
+             << "subu"
+             << "and"
+             << "or"
+             << "xor"
+             << "srlv"
+             << "sllv"
+             << "srav"
+             << "slt"
+             << "sltu"
+             << "addi"
+             << "addiu"
+             << "andi"
+             << "ori"
+             << "nori"
+             << "xori"
+             << "srl"
+             << "sll"
+             << "sra"
+             << "slti"
+             << "sltiu"
+             << "beq"
+             << "bne"
+             << "lui"
+             << "sb"
+             << "lb"
+             << "lbu"
+             << "sh"
+             << "lh"
+             << "lhu"
+             << "sw"
+             << "lw"
+             << "lwl"
+             << "lwr"
+             << "swl"
+             << "swr"
+             <<"ll"
+             << "sc"
+             << "jr"
+             << "jalr"
+             << "mfhi"
+             << "mflo"
+             << "mthi"
+             << "mtlo"
+             << "mult"
+             << "multu"
+             << "div"
+             << "divu"
+             << "j"
+             << "jal"
+             << "syscall"
+             << "nop";
 
     //for (int i = 0; i < 32; i++) compList.append(QString("$" + QString::number(i)));
-    compList << "$0" << "$zero" << "$at" << "$v0" << "$v1" <<"$a0" << "$a1" << "$a2" << "$a3"
-             << "$t0" << "$t1" << "$t2" << "$t3" << "$t4" << "$t5" << "$t6" << "$t7"
-             << "$s0" << "$s1" << "$s2" << "$s3" << "$s4" << "$s5" << "$s6" << "$s7"
-             << "$t8" << "$t9" << "$gp" << "$fp" << "$ra";
+    compList << "$0"
+             << "$zero"
+             << "$at"
+             << "$v0"
+             << "$v1"
+             <<"$a0"
+             << "$a1"
+             << "$a2"
+             << "$a3"
+             << "$t0"
+             << "$t1"
+             << "$t2"
+             << "$t3"
+             << "$t4"
+             << "$t5"
+             << "$t6"
+             << "$t7"
+             << "$s0"
+             << "$s1"
+             << "$s2"
+             << "$s3"
+             << "$s4"
+             << "$s5"
+             << "$s6"
+             << "$s7"
+             << "$t8"
+             << "$t9"
+             << "$gp"
+             << "$fp"
+             << "$ra";
+
+    compList << "blt"  <<  "bgt"
+                        <<  "ble"
+                        <<  "bge"
+                        <<  "bltu"
+                        <<  "bgtu"
+                        <<  "bleu"
+                        <<  "bgeu"
+                        <<  "blti"
+                        <<  "bgti"
+                        <<  "blei"
+                        <<  "bgei"
+                        <<  "bltiu"
+                        <<  "bgtiu"
+                        <<  "bleiu"
+                        <<  "bgeiu"
+                        <<  "beqz"
+                        <<  "bnez"
+                        <<  "bltz"
+                        <<  "bgtz"
+                        <<  "blez"
+                        <<  "bgez"
+                        <<  "li"
+                        <<  "ror"
+                        <<  "rol"
+                        <<  "not"
+                        <<  "neg"
+                        <<  "move"
+                        <<  "abs"
+                        <<  "mul"
+                        <<  "div"
+                        <<  "rem"
+                        <<  "clear"
+                        <<  "subi"
+                        <<  "la";
 
 
-
-
-
-    codeCompleter = new QCompleter(compList, this);
+    QStringListModel *model = new QStringListModel(compList, this);
+    codeCompleter = new QCompleter(model, this);
+    codeCompleter->setCompletionMode(QCompleter::PopupCompletion);
+    CompleterList *cl = new CompleterList(this);
+    codeCompleter->setPopup(cl);
     codeCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     codeCompleter->setWidget(this);
-    codeCompleter->setCompletionMode(QCompleter::PopupCompletion);
+
     QObject::connect(codeCompleter, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounter()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));
@@ -67,11 +189,9 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         return;
     }
     else if (e->key() == Qt::Key_D && (e->modifiers() & Qt::ControlModifier)){
-            qDebug() << "Delete line.";
             deleteCurrentLine();
 
     } else if (e->key() == Qt::Key_Up && (e->modifiers() & Qt::AltModifier)){
-            qDebug() << "Copy line up.";
             QTextCursor currentPos = textCursor();
             textCursor().setKeepPositionOnInsert(true);
             currentPos.select(QTextCursor::LineUnderCursor);
@@ -83,7 +203,6 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
             setTextCursor(currentPos);
 
     }else if (e->key() == Qt::Key_Up && (e->modifiers() & Qt::ControlModifier)) {
-            qDebug() << "Move line up.";
             QString line = getCurrentLine();
             QTextCursor currentPos = deleteCurrentLine();
             currentPos.movePosition(QTextCursor::StartOfLine);
@@ -92,7 +211,6 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
             setTextCursor(currentPos);
 
     } else if (e->key() == Qt::Key_Down && (e->modifiers() & Qt::AltModifier)){
-            qDebug() << "Copy line down.";
             QTextCursor currentPos = textCursor();
             textCursor().setKeepPositionOnInsert(true);
             currentPos.select(QTextCursor::LineUnderCursor);
@@ -103,18 +221,15 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
             currentPos.movePosition(QTextCursor::EndOfBlock);
             setTextCursor(currentPos);
     }else if (e->key() == Qt::Key_Down && (e->modifiers() & Qt::ControlModifier)){
-            qDebug() << "Move line down.";
             QString line = getCurrentLine();
             QTextCursor cursCopy = textCursor();
             QTextCursor currentPos = deleteCurrentLine();
-            //QTextCursor currentPos = textCursor();
             currentPos.movePosition(QTextCursor::EndOfLine);
             if (!cursCopy.selectionStart() == 0)
                 currentPos.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, line.length() + 1);
             currentPos.insertText('\n' + line);
             setTextCursor(currentPos);
     }else if (e->key() == Qt::Key_Space &&(e->modifiers() & Qt::ControlModifier)){
-            qDebug() << "Pop suggestions";
             QRect popRect = this->cursorRect();
             popRect.setWidth(50);
             codeCompleter->complete(popRect);
@@ -158,15 +273,13 @@ QTextCursor CodeEditor::deleteCurrentLine()
     return currentPos;
 }
 
-QString CodeEditor::getCurrentLine()
-{
+QString CodeEditor::getCurrentLine(){
     QTextCursor currentPos = textCursor();
     currentPos.select(QTextCursor::LineUnderCursor);
     return currentPos.selectedText();
 }
 
-void CodeEditor::insertCompletion(QString completion)
-{
+void CodeEditor::insertCompletion(QString completion){
     QTextCursor currentPos = textCursor();
     int compLength = completion.length() - codeCompleter->completionPrefix().length();
     currentPos.movePosition(QTextCursor::Left);
@@ -176,8 +289,7 @@ void CodeEditor::insertCompletion(QString completion)
     codeCompleter->popup()->hide();
 }
 
-void CodeEditor::highlightLine()
-{
+void CodeEditor::highlightLine(){
 
     QList<QTextEdit::ExtraSelection> linesHL;
     QTextEdit::ExtraSelection lineHL;

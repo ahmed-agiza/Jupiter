@@ -45,7 +45,8 @@ SOURCES += main.cpp\
     projectcreator.cpp \
     keyboardmanager.cpp \
     filenamedialog.cpp \
-    deletefiledialog.cpp
+    deletefiledialog.cpp \
+    completerlist.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -81,7 +82,8 @@ HEADERS  += mainwindow.h \
     projectcreator.h \
     keyboardmanager.h \
     filenamedialog.h \
-    deletefiledialog.h
+    deletefiledialog.h \
+    completerlist.h
 
 
 FORMS    += \

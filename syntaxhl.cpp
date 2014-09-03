@@ -140,7 +140,8 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
                        <<  "div"
                        <<  "rem"
                        <<  "clear"
-                       <<  "subi";
+                       <<  "subi"
+                       <<  "la";
 
 
 

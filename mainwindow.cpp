@@ -68,7 +68,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionReload_Tiles_Memory->setEnabled(false);
     ui->actionTile_loader->setEnabled(false);
     ui->actionSprite_Editor->setEnabled(false);
-
     QFontDatabase fontsDB;
     fontsDB.addApplicationFont(":/font/consolas.ttf");
     if(fontsDB.families().contains("Consolas")){
@@ -672,6 +671,7 @@ void MainWindow::on_actionAssemble_triggered(){
     }
 
     qDebug() << "Assembling..";
+
     QTreeWidgetItemIterator itMain(treeWidget);
     while (*itMain) {
         if ((*itMain)->text(0).trimmed() == MainWindow::getProjectMainFile()){
@@ -703,6 +703,7 @@ void MainWindow::on_actionAssemble_triggered(){
         }
     }
 
+    ui->actionAssemble->setEnabled(false);
     if(assemblerInitialized){
         delete assem;
         if (memory){
@@ -714,6 +715,7 @@ void MainWindow::on_actionAssemble_triggered(){
     }
     assem = new Assembler(&textInstrs, &dataInstrs, memory, &mainProcessorRegisters, this);
     assemblerInitialized = true;
+    ui->actionAssemble->setEnabled(true);
 
     if (currentWindow)
         ui->mdiAreaCode->setActiveSubWindow(currentWindow);
