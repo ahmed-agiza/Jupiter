@@ -1815,12 +1815,9 @@ Assembler::Assembler(){
 
 }
 
-void Assembler::simulate()
+/*void Assembler::simulate()
 {
-    /*for (int i = 0; i < registers->size(); i++)
-        (*registers)[i] = 0;
-    (*registers)[28] = 0x10008000;
-    (*registers)[29] = 0x7FFFEFFC;*/
+
     QStringList logData;
 
     PC = 1;
@@ -1914,6 +1911,124 @@ void Assembler::simulate()
         }
 
         activePC = ((PC - 1)/4);
+        QString logText = QString::number(i) + ": PC: " + QString::number(PC)
+                + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
+                + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+                + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+                + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "  "
+                + " Im" + QString::number(instructions[activePC].getImm());
+        instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
+        instructions[activePC].execute(PC);
+        (*registers)[0] = 0;
+        logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
+        logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+        + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+        + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "\n\n\n");
+
+        logData.append(logText);
+        i++;
+    }
+    mainW->appendErrorMessage("***Simulation results for testing**");
+    foreach(QString text, logData)
+        mainW->appendErrorMessage(text);
+}*/
+
+void Assembler::simulate()
+{
+
+    QStringList logData;
+
+    PC = 0;
+    int i = 0;
+    int activePC = PC/4;
+    while (PC != -1 && ((PC/4) < instructions.size() && i < 100))
+    {
+
+        if(mainW->isGFXEnabled()){
+            sf::Event event;
+            while(mem->getTileEngine()->pollEvent(event))
+            {
+                if(event.type == sf::Event::KeyPressed){
+                    qDebug() << event.key.code << " pressed";
+                    switch(event.key.code){
+                    case Keyboard::Down:
+                        emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Left:
+                        emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Right:
+                        emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Up:
+                        emit Assembler::buttonPressed(UP_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Z:
+                        emit Assembler::buttonPressed(A_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::X:
+                        emit Assembler::buttonPressed(B_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::D:
+                        emit Assembler::buttonPressed(R_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::A:
+                        emit Assembler::buttonPressed(L_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::Return:
+                        emit Assembler::buttonPressed(START_KEY_INDEX,0, true);
+                        break;
+                    case Keyboard::BackSpace:
+                        emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, true);
+                        break;
+                    default:
+                        qDebug() << "Another button was pressed";
+                    }
+                } else if(event.type == sf::Event::KeyReleased){
+                    qDebug() << event.key.code << " released";
+                    switch(event.key.code){
+                    case Keyboard::Down:
+                        emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Left:
+                        emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Right:
+                        emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Up:
+                        emit Assembler::buttonPressed(UP_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Z:
+                        emit Assembler::buttonPressed(A_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::X:
+                        emit Assembler::buttonPressed(B_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::D:
+                        emit Assembler::buttonPressed(R_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::A:
+                        emit Assembler::buttonPressed(L_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::Return:
+                        emit Assembler::buttonPressed(START_KEY_INDEX,0, false);
+                        break;
+                    case Keyboard::BackSpace:
+                        emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, false);
+                        break;
+                    default:
+                        qDebug() << "Another button was released";
+                    }
+                } else if(event.type == sf::Event::JoystickButtonPressed){
+                    qDebug() << event.joystickButton.button << " pressed";
+                } else if(event.type == sf::Event::JoystickButtonReleased){
+                    qDebug() << event.joystickButton.button << " released";
+                }
+            }
+        }
+
+        activePC = PC/4;
         QString logText = QString::number(i) + ": PC: " + QString::number(PC)
                 + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
                 + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "

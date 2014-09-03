@@ -402,8 +402,10 @@ int jr(fParam2)
 }
 int jalr(fParam2)
 {
+    /*(*base)[31] = PC + PC0Addr + 4;
+    PC = imm * 4;*/
     Q_UNUSED(imm); Q_UNUSED(shamt); Q_UNUSED(mem);
-    Rdr = PC + PC0Addr + 8; //To be checked.
+    Rdr = PC - PC0Addr + 4;
     PC = Rsr;
     incPC;
     return 0;
@@ -464,13 +466,15 @@ int divu(fParam2)
 }
 int j_(fParam2)
 {
-    PC = imm + 4;
+    PC = imm;
+    incPC;
     return 0;
 }
 int jal(fParam2)
 {
-    PC = imm + 4;
-    (*base)[31] = PC + PC0Addr + 8; //To be checked.
+    (*base)[31] = PC + PC0Addr + 4;
+    PC = imm * 4;
+    //incPC;
     return 0;
 }
 int syscall(fParam2)

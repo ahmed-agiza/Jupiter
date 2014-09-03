@@ -19,7 +19,7 @@
 
 #define incPC PC += 4
 
-#define PC0Addr 0x00400000
+#define PC0Addr 0//0x00400000
 
 #define data0Addr 0//0x10010000
 
