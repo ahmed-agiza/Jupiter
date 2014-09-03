@@ -600,6 +600,8 @@ void MainWindow::resizeDataColumns(){
 }
 
 void MainWindow::projectExplorerMenuRequested(QPoint loc){
+    if (!projectFile.isOpen())
+        return;
     ExplorerTreeItem *itm = (ExplorerTreeItem*) ui->treeFiles->itemAt(loc);
     QMenu *menu=new QMenu(this);
     if (itm && (itm->getItemType() == TEXT_CHILD || itm->getItemType() == TEXT_MAIN || itm->getItemType() == DATA_CHILD)){
