@@ -402,8 +402,6 @@ int jr(fParam2)
 }
 int jalr(fParam2)
 {
-    /*(*base)[31] = PC + PC0Addr + 4;
-    PC = imm * 4;*/
     Q_UNUSED(imm); Q_UNUSED(shamt); Q_UNUSED(mem);
     Rdr = PC - PC0Addr + 4;
     PC = Rsr;
@@ -466,8 +464,8 @@ int divu(fParam2)
 }
 int j_(fParam2)
 {
-    PC = imm;
-    incPC;
+    PC = imm * 4;
+    //incPC;
     return 0;
 }
 int jal(fParam2)
