@@ -180,7 +180,7 @@ QString pRILFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pRILInstructio
 //  bgez
 //  la
 
-QString pZlabelInstructions = "(beqz|bnez|bltz|bgtz|blez|bgez)";
+QString pZlabelInstructions = "(beqz|bnez|bltz|bgtz|blez|bgez|la)";
 QString pZlabelFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + pZlabelInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*([a-zA-Z_]\\w*)"+ "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -313,10 +313,10 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         int factor = std::pow(2, alignNumber);
                         address = ((address + factor - 1) / factor ) * factor;
                         if(labelName.size()){
-                            if(labels.contains(labelName)){
+                            if(dataLabels.contains(labelName)){
                                 errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                             }
-                            labels[labelName] = address;
+                            dataLabels[labelName] = address;
                         }
                     }else{
                         errorList.append(Error(".align directive must be followed by a number between 0 and 4", lineNumber));
@@ -335,6 +335,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         for(i=address; i<actualString.size() + address; i++){
                             mem->storeByte(i + mem->dataSegmentBaseAddress , actualString[i]);
                         }
+                        if(labelName.size()){
+                            if(dataLabels.contains(labelName)){
+                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                            }
+                            dataLabels[labelName] = address;
+                        }
                         address = i;
                         if(directiveName.endsWith("z")) mem->storeByte(address++ + mem->dataSegmentBaseAddress , NULL);
                     }else if(QRegExp(invalidCstringsRegex).indexIn(parameters) == 0){
@@ -346,6 +352,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     int alignNumber = ((directiveName == "half")? 1:2);
                     int factor = std::pow(2, alignNumber);
                     address = ((address + factor - 1) / factor ) * factor;
+                    if(labelName.size()){
+                        if(dataLabels.contains(labelName)){
+                            errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                        }
+                        dataLabels[labelName] = address;
+                    }
                     if(parameters.contains(':')){
                         int start = getNumber(parameters.mid(0,parameters.indexOf(':')));
                         int end = getNumber(parameters.mid(parameters.indexOf(':')+1));
@@ -384,6 +396,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         errorList.append(Error("Syntax error", lineNumber));
                     }
                 }else if(directiveName == "byte"){
+                    if(labelName.size()){
+                        if(dataLabels.contains(labelName)){
+                            errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                        }
+                        dataLabels[labelName] = address;
+                    }
                     if(parameters.contains(':')){
                         int start = getNumber(parameters.mid(0,parameters.indexOf(':')));
                         int end = getNumber(parameters.mid(parameters.indexOf(':')+1));
@@ -435,10 +453,10 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     int spaceNumber = getNumber(parameters);
                     if(numberRegExp.indexIn(parameters) == 0){
                         if(labelName.size()){
-                            if(labels.contains(labelName)){
+                            if(dataLabels.contains(labelName)){
                                 errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
                             }
-                            labels[labelName] = address;
+                            dataLabels[labelName] = address;
                         }
                         address += spaceNumber;
                     }else{
@@ -971,9 +989,9 @@ void Assembler::parseTextSegment(QStringList* stringList)
             }else{
                 errorList.push_back(Error("Syntax Error",lineNumber));
             }
-            address++;
-            lineNumber++;
         }
+        address++;
+        lineNumber++;
     }
 
     for (int i=0; i<missingBranchLabels.size(); i++)
@@ -1699,7 +1717,18 @@ void Assembler::handlePZ(QRegExp m, QString line)
     }
     else if(m.cap(2) == "la")
     {
-
+        QString datalbl = m.cap(4);
+        if(dataLabels.contains(datalbl)){
+            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0,dataLabels[datalbl] >> 16,0,IFormat));
+            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,dataLabels[datalbl] & 0xffff,0,IFormat));
+        }else if(labels.contains(datalbl)){
+            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0,labels[datalbl] >> 16,0,IFormat));
+            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,labels[datalbl] & 0xffff,0,IFormat));
+        }else{
+            errorList.push_back(Error("Invalid label \""+ datalbl +"\".", lineNumber));
+        }
+        if(m.cap(1).size()) labels[m.cap(1)] = address;
+        address++;
     }
 }
 
@@ -1707,7 +1736,7 @@ void Assembler::handlePSI(QRegExp m, QString line)
 {
     if(m.cap(2) == "li")
     {
-        int numberToLoad = getNumber(m.cap(3));
+        int numberToLoad = getNumber(m.cap(4));
         if(numberToLoad > 0xffff){
             instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0,numberToLoad >> 16,0,IFormat));
             instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,numberToLoad & 0xffff,0,IFormat));

@@ -36,6 +36,7 @@ private:
     QVector<Error> errorList;
     QMap<QString, int> registerIndex;
     QMap<QString, int> labels;
+    QMap<QString, int> dataLabels;
     QMap<QString, int> opcode;
     QMap<QString, int (*)(fParam2)> functionsMap;
 
