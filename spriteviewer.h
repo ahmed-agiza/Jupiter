@@ -15,7 +15,7 @@ class SpriteViewer : public QDialog
 public:
     explicit SpriteViewer(QWidget *parent, Memory *memory);
     ~SpriteViewer();
-
+    void setViewOnly(bool);
 private slots:
     void on_sizeTilesPushButton_clicked();
 

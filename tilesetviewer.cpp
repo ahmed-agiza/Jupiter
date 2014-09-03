@@ -35,6 +35,14 @@ TileSetViewer::~TileSetViewer()
     delete ui;
 }
 
+void TileSetViewer::setViewOnly(bool viewOnly)
+{
+    ui->loadPushButton->setEnabled(!viewOnly);
+    ui->browsePushButton->setEnabled(!viewOnly);
+    ui->lineEdit->setEnabled(!viewOnly);
+    ui->savePushButton->setEnabled(!viewOnly);
+    ui->editTilePushButton->setEnabled(!viewOnly);
+}
 
 void TileSetViewer::on_pushButton_clicked()
 {

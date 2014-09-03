@@ -33,6 +33,28 @@ void SpriteViewer::on_sizeTilesPushButton_clicked()
     emit renderScreen();
 }
 
+void SpriteViewer::setViewOnly(bool viewOnly)
+{
+    ui->attachementOrientationPushButton->setDisabled(viewOnly);
+    ui->layerSpinBox->setDisabled(viewOnly);
+    ui->positionXlineEdit->setDisabled(viewOnly);
+    ui->positionYlineEdit->setDisabled(viewOnly);
+    ui->renderingEnabledCheckbox->setDisabled(viewOnly);
+    ui->scaleXPushButton->setDisabled(viewOnly);
+    ui->scaleYPushButton->setDisabled(viewOnly);
+    ui->sizeTilesPushButton->setDisabled(viewOnly);
+    ui->tile0FlippingCheckbox->setDisabled(viewOnly);
+    ui->tile0FlippingYCheckbox->setDisabled(viewOnly);
+    ui->tile1FlippingCheckbox->setDisabled(viewOnly);
+    ui->tile1FlippingYCheckbox->setDisabled(viewOnly);
+    ui->tile0Index->setDisabled(viewOnly);
+    ui->tile0RotateLeft_PushButton->setDisabled(viewOnly);
+    ui->tile0RotateRight_PushButton->setDisabled(viewOnly);
+    ui->tile1Index->setDisabled(viewOnly);
+    ui->tile1RotateLeft_PushButton->setDisabled(viewOnly);
+    ui->tile1RotateRight_PushButton->setDisabled(viewOnly);
+}
+
 void SpriteViewer::on_attachementOrientationPushButton_clicked()
 {
     if(ui->attachementOrientationPushButton->text() == "Vertical"){

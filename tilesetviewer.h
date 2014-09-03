@@ -21,6 +21,7 @@ public:
     ~TileSetViewer();
 
     sf::Uint32 colorToInt(sf::Color);
+    void setViewOnly(bool);
 
 private slots:
     void on_pushButton_clicked();
