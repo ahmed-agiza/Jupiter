@@ -8,7 +8,8 @@ namespace Ui {
 class FileLoader;
 }
 
-enum FileDialogType{ADD_FILE, CREATE_FILE};
+enum FileDialogType{ADD_FILE, CREATE_FILE, DROP_FILE};
+enum DropFileType {DROP_TEXT, DROP_DATA};
 
 class FileLoader : public QDialog
 {
@@ -16,8 +17,10 @@ class FileLoader : public QDialog
 
 public:
     explicit FileLoader(MainWindow *parent = 0, FileDialogType type = CREATE_FILE);
+    explicit FileLoader(MainWindow *parent = 0, DropFileType type = DROP_TEXT, QString file = "");
     void setFileName(QString name);
     void setMain(bool value);
+    void setFileType(DropFileType);
     ~FileLoader();
 
 private slots:
@@ -32,7 +35,9 @@ private:
     FileDialogType dialogType;
     MainWindow *p;
     QString fileName;
+    DropFileType fileType;
     bool mainFile;
+    void init();
 };
 
 #endif // FILELOADER_H

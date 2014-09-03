@@ -14,24 +14,30 @@ FileLoader::FileLoader(MainWindow *parent, FileDialogType type) :
 {
     ui->setupUi(this);
     dialogType = type;
-    this->setModal(true);
-    this->setFixedSize(this->width(), this->height());
     p = parent;
-    mainFile = false;
+    init();
 
-    if(dialogType == CREATE_FILE){
-        this->setWindowTitle("Creat New File");
-        ui->btnRes->setEnabled(false);
-    }else
-        setWindowTitle("Add Existing File");
+}
 
-
-
-    QRect screenGeo = QApplication::desktop()->screenGeometry(0);
-    QPoint centerPoint = screenGeo.center();
-    centerPoint.setX(centerPoint.x() - this->width()/2);
-    centerPoint.setY(centerPoint.y() - this->height()/2);
-    move(centerPoint);
+FileLoader::FileLoader(MainWindow *parent, DropFileType type, QString file) :
+    QDialog(parent),
+    ui(new Ui::FileLoader)
+{
+    ui->setupUi(this);
+    dialogType = DROP_FILE;
+    p = parent;
+    fileName = file.trimmed();
+    fileType = type;
+    init();
+    if (file.trimmed() != ""){
+        if (fileType == DROP_TEXT){
+            hide();
+            ui->btnText->click();
+        }else if (fileType == DROP_DATA){
+            hide();
+            ui->btnData->click();
+        }
+    }
 
 }
 
@@ -41,6 +47,10 @@ void FileLoader::setFileName(QString name){
 
 void FileLoader::setMain(bool value){
     mainFile = value;
+}
+
+void FileLoader::setFileType(DropFileType nType){
+    fileType = nType;
 }
 
 FileLoader::~FileLoader()
@@ -85,9 +95,9 @@ void FileLoader::on_btnText_clicked(){
             QMessageBox::critical(this, "Error", "Could not add the new text file");
         }
 
-    }else if (dialogType == ADD_FILE){
-
-        fileName = QFileDialog::getOpenFileName(this, "Add Text File", MainWindow::getProjectPath(), "Mirage Text File(*.mtxt)").trimmed();
+    }else if (dialogType == ADD_FILE || dialogType == DROP_FILE){
+        if (dialogType == ADD_FILE)
+            fileName = QFileDialog::getOpenFileName(this, "Add Text File", MainWindow::getProjectPath(), "Mirage Text File(*.mtxt)").trimmed();
         QString strippedFileName = QFileInfo(fileName).fileName();
         if (fileName == "")
             return;
@@ -170,9 +180,9 @@ void FileLoader::on_btnData_clicked(){
             QMessageBox::critical(this, "Error", "Could not add the new data file");
         }
 
-    }else if (dialogType == ADD_FILE){
-
-        fileName = QFileDialog::getOpenFileName(this, "Add Data File", MainWindow::getProjectPath(), "Mirage Data File(*.mdat)").trimmed();
+    }else if (dialogType == ADD_FILE || dialogType == DROP_FILE){
+        if (dialogType == ADD_FILE)
+            fileName = QFileDialog::getOpenFileName(this, "Add Data File", MainWindow::getProjectPath(), "Mirage Data File(*.mdat)").trimmed();
         QString strippedFileName = QFileInfo(fileName).fileName();
         if (fileName == "")
             return;
@@ -217,8 +227,26 @@ void FileLoader::on_btnData_clicked(){
     hide();
 }
 
-void FileLoader::on_btnRes_clicked()
-{
-    this->hide();
+void FileLoader::on_btnRes_clicked(){
+    hide();
+}
 
+void FileLoader::init(){
+    setModal(true);
+    setFixedSize(width(), height());
+    mainFile = false;
+
+    QRect screenGeo = QApplication::desktop()->screenGeometry(0);
+    QPoint centerPoint = screenGeo.center();
+    centerPoint.setX(centerPoint.x() - this->width()/2);
+    centerPoint.setY(centerPoint.y() - this->height()/2);
+    move(centerPoint);
+
+    if(dialogType == CREATE_FILE){
+        this->setWindowTitle("Creat New File");
+        ui->btnRes->setEnabled(false);
+    }else if (dialogType == DROP_FILE){
+        setWindowTitle("Select the File Type");
+    }else
+        setWindowTitle("Add Existing File");
 }

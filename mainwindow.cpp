@@ -161,9 +161,9 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::dragEnterEvent(QDragEnterEvent *e){
     if(e->mimeData()->hasUrls())
         if(e->mimeData()->urls().size() == 1){
-         e->acceptProposedAction();
-        }else
-            qDebug() << e->mimeData()->urls().size();
+            if (projectFile.isOpen() || QFileInfo(e->mimeData()->urls().at(0).toLocalFile()).suffix() == "mpro")
+                e->acceptProposedAction();
+        }
 
 }
 
@@ -172,22 +172,39 @@ void MainWindow::dropEvent(QDropEvent *e){
 
     if(mime->hasUrls()){
         QList<QUrl> murls = mime->urls();
-        qDebug() << "URL found";
-        qDebug() << murls.size();
         if(murls.size() == 1){
             QString fileName = murls.at(0).toLocalFile();
-            QFile tempProject(fileName);
-            if (!parseProjectXML(tempProject, false)){
-                return;
-            }
-            if(projectFile.isOpen()){
-                if(fileName == MainWindow::projectPath + MainWindow::projectFileName)
-                    return;
-                if(QMessageBox::question(this, "Close Project", "Are you sure you want to close the active project?", QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes){
+            QString extension = QFileInfo(fileName).suffix();
+            if (extension == "mpro"){
+                QFile tempProject(fileName);
+                if (!parseProjectXML(tempProject, false)){
                     return;
                 }
+                if(projectFile.isOpen()){
+                    if(fileName == MainWindow::projectPath + MainWindow::projectFileName)
+                        return;
+                    if(QMessageBox::question(this, "Close Project", "Are you sure you want to close the active project?", QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes){
+                        return;
+                    }
+                }
+                openProjectFile(fileName);
+            }else if(projectFile.isOpen()){
+                if (extension == "mtxt"){
+                    if(MainWindow::projectTextFiles.contains(QFileInfo(fileName).fileName().trimmed()))
+                        return;
+                    FileLoader *loader = new FileLoader(this, DROP_TEXT, fileName);
+                    Q_UNUSED(loader);
+                }else if (extension == "mdat"){
+                    if(MainWindow::projectDataFile == QFileInfo(fileName).fileName().trimmed())
+                        return;
+                    FileLoader *loader = new FileLoader(this, DROP_DATA, fileName);
+                    Q_UNUSED(loader);
+                }else{
+                    FileLoader *loader = new FileLoader(this, DROP_FILE);
+                    loader->setFileName(fileName);
+                    loader->exec();
+                }
             }
-            openProjectFile(fileName);
         }
     }
 
@@ -1298,6 +1315,7 @@ void MainWindow::activeWindowFindAndReplace()
 
 void MainWindow::refreshActions(){
     bool value = projectFile.isOpen();
+    //setAcceptDrops(value);
     ui->actionAssemble->setEnabled(value);
     ui->actionAssemble_and_Simulate->setEnabled(value);
     ui->actionClose->setEnabled(value);
