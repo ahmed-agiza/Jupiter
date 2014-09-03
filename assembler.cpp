@@ -1817,10 +1817,11 @@ Assembler::Assembler(){
 
 void Assembler::simulate()
 {
-    for (int i = 0; i < registers->size(); i++)
+    /*for (int i = 0; i < registers->size(); i++)
         (*registers)[i] = 0;
     (*registers)[28] = 0x10008000;
-    (*registers)[29] = 0x7FFFEFFC;
+    (*registers)[29] = 0x7FFFEFFC;*/
+    QStringList logData;
 
     PC = 1;
     int i = 0;
@@ -1913,10 +1914,25 @@ void Assembler::simulate()
         }
 
         activePC = ((PC - 1)/4);
+        QString logText = QString::number(i) + ": PC: " + QString::number(PC)
+                + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
+                + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+                + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+                + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "  "
+                + " Im" + QString::number(instructions[activePC].getImm());
         instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
         instructions[activePC].execute(PC);
+        logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
+        logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+        + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+        + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "\n\n\n");
+
+        logData.append(logText);
         i++;
     }
+    mainW->appendErrorMessage("***Simulation results for testing**");
+    foreach(QString text, logData)
+        mainW->appendErrorMessage(text);
 }
 
 
@@ -2028,6 +2044,11 @@ void Assembler::initializeRegisters()
     opcode["swr"] = 46;
     opcode["ll"] = 48;
     opcode["sc"] = 56;
+
+    for (int i = 0; i < registers->size(); i++)
+            (*registers)[i] = 0;
+        (*registers)[28] = 0x10008000;
+        (*registers)[29] = 0x7FFFEFFC;
 
     //registers = new QVector<int>(32,0);
 

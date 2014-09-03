@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QStringListModel>
 #include <QLineEdit>
+#include <QThread>
 #include <QTextEdit>
 #include <QMdiSubWindow>
 #include <QMdiArea>
