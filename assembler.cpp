@@ -109,23 +109,23 @@ QString singleimmFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleimm
 
 //  instruction $register
 //      jr
-//      jalr
 //      mfhi
 //      mflo
 //      mtlo
 //      mthi
 
-QString singleRegisterInstructions = "(jr|jalr|mfhi|mflo|mtlo|mthi)";
+QString singleRegisterInstructions = "(jr|mfhi|mflo|mtlo|mthi)";
 QString singleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + singleRegisterInstructions + "[ \\t]+" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register
+//      jalr
 //      mult
 //      multu
 //      div
 //      divu
 
-QString doubleRegisterInstructions = "(mult|multu|div|divu)";
+QString doubleRegisterInstructions = "(mult|multu|div|divu|jalr)";
 QString doubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + doubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -526,11 +526,11 @@ void Assembler::parseTextSegment(QStringList* stringList)
         else if((L.indexIn(line, 0)) != -1)
         {
             if(labels.contains(L.cap(5))){
-                instructions.push_back(Instruction(L.cap(2),registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
+                instructions.push_back(Instruction(L.cap(2),registers,opcode[L.cap(2)],registerIndex[L.cap(3)],registerIndex[L.cap(4)],0,labels[L.cap(5)]-address-1,0,IFormat));
             }
             else{
                 missingBranchLabels.push_back(qMakePair(qMakePair(address,lineNumber),L.cap(5)));
-                instructions.push_back(Instruction(L.cap(2),registers,opcode[L.cap(2)],registerIndex[I.cap(3)],registerIndex[I.cap(4)],0,0,0,IFormat));
+                instructions.push_back(Instruction(L.cap(2),registers,opcode[L.cap(2)],registerIndex[L.cap(3)],registerIndex[L.cap(4)],0,0,0,IFormat));
             }
             QString labelName = L.cap(1);
             if(labelName.size()){
@@ -542,7 +542,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         }
         else if((SR.indexIn(line, 0)) != -1)
         {
-            if(SR.cap(2) == "j" || SR.cap(2) == "jal")
+            if(SR.cap(2) == "jr")
                 instructions.push_back(Instruction(SR.cap(2),registers,opcode[SR.cap(2)],registerIndex[SR.cap(3)],0,0,0,0,RFormat));
             else
                 instructions.push_back(Instruction(SR.cap(2),registers,opcode[SR.cap(2)],0,0,registerIndex[SR.cap(3)],0,0,RFormat));
@@ -567,7 +567,10 @@ void Assembler::parseTextSegment(QStringList* stringList)
         }
         else if((DR.indexIn(line, 0)) != -1)
         {
-            instructions.push_back(Instruction(DR.cap(2),registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
+            if(DR.cap(2) == "jalr")
+                instructions.push_back(Instruction(DR.cap(2),registers,opcode[DR.cap(2)],registerIndex[DR.cap(5)],0,registerIndex[DR.cap(3)],0,0,RFormat));
+            else
+                instructions.push_back(Instruction(DR.cap(2),registers,opcode[DR.cap(2)],registerIndex[DR.cap(3)],registerIndex[DR.cap(4)],0,0,0,RFormat));
             QString labelName = DR.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
@@ -580,7 +583,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         {
             if(labels.contains(J.cap(3))){
                 qDebug()<<"Yes!";
-                instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,labels[J.cap(3)],0,JFormat));
+                instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,(labels[J.cap(3)]&0xfffffff)>>2,0,JFormat));
             }
             else{
                 missingJumpLabels.push_back(qMakePair(qMakePair(address,lineNumber),J.cap(3)));
@@ -1007,7 +1010,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
     {
         QPair<QPair<int,int>,QString> lbl = missingJumpLabels[i];
         if(labels.contains(lbl.second)){
-            instructions[lbl.first.first].setImm(labels[lbl.second]);
+            instructions[lbl.first.first].setImm((labels[lbl.second]&0xfffffff)>>2);
         } else {
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second));
         }
