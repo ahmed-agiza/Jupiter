@@ -24,6 +24,7 @@ public:
     bool openFile(QString fileName, QString fileTitle);
     bool saveFile();
     void selectAll();
+    void deleteText();
     void quickFind();
     void findAndReplace();
     void setDestryoed(bool);

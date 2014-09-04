@@ -1310,6 +1310,11 @@
     <string>Reset Layout</string>
    </property>
   </action>
+  <action name="actionDeleteSelection">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="res.qrc"/>

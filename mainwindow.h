@@ -149,6 +149,7 @@ private slots:
     void activeWindowSelectAll();
     void activeWindowQuickFind();
     void activeWindowFindAndReplace();
+    void activeWindowDelete();
 
     void refreshActions();
     void refreshEditActions();
@@ -188,7 +189,7 @@ public slots:
     void removeMainTextFile(QString file);
     void removeResourceFile(QString file);
 
-    void simulationProgress(int value);
+    void assemblingProgress(int value);
 
 private:
     Ui::MainWindow *ui;
@@ -209,6 +210,7 @@ private:
 
     QTreeWidget *treeWidget;
 
+    QThread assemblyThread;
     QThread simulationThread;
     QProgressBar *simulationBar;
 
@@ -244,6 +246,7 @@ private:
     QString openWithArg;
 
     bool assembling;
+    bool simulating;
     bool simulateAfterAssembling;
 signals:
     void assembleSignal(QStringList, QStringList);

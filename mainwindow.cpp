@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
         editorFont = fontsDB.font("Consolas", "Normal", 10);
     }
 
-   // ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
+    ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
     treeWidget = ui->treeFiles;
 
@@ -122,6 +122,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionSelect_All, SIGNAL(triggered()), this, SLOT(activeWindowSelectAll()));
     QObject::connect(ui->actionQuickFind, SIGNAL(triggered()), this, SLOT(activeWindowQuickFind()));
     QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
+    QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
 
 
     minDataTableWidth0 = ui->dataTable->columnWidth(0);
@@ -423,7 +424,7 @@ void MainWindow::removeResourceFile(QString file){
     qDebug() << "Remove resource " << file;
 }
 
-void MainWindow::simulationProgress(int value){
+void MainWindow::assemblingProgress(int value){
     if (simulationBar != NULL)
         simulationBar->setValue(value);
 }
@@ -552,8 +553,8 @@ MainWindow::~MainWindow(){
     if (engine)
         delete engine;
     delete ui;
-    simulationThread.quit();
-    simulationThread.wait();
+    assemblyThread.quit();
+    assemblyThread.wait();
 }
 
 void MainWindow::resizeTextColumns(){
@@ -736,7 +737,7 @@ void MainWindow::printS(){
 
 void MainWindow::on_actionAssemble_triggered(){
 
-   if(MainWindow::getProjectMainFile() == ""){
+    if(MainWindow::getProjectMainFile() == ""){
         QMessageBox::critical(this, "Error", "Cannot find main text file");
         return;
     }
@@ -781,10 +782,10 @@ void MainWindow::on_actionAssemble_triggered(){
         if (assem){
             qDebug() << "Disconnecting";
             QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
-            QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(simulationProgress(int)));
+            QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
             QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-            simulationThread.quit();
-            simulationThread.wait();
+            assemblyThread.quit();
+            assemblyThread.wait();
             delete assem;
         }if (memory){
             Memory *tempMemory = memory;
@@ -803,19 +804,19 @@ void MainWindow::on_actionAssemble_triggered(){
         ui->mdiAreaCode->setActiveSubWindow(currentWindow);
 
 
-   // qDebug() << "Assembled.";
+    // qDebug() << "Assembled.";
     assemblerInitialized = false;
-    assem->moveToThread(&simulationThread);
+    assem->moveToThread(&assemblyThread);
     QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
-    QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(simulationProgress(int)));
+    QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-    simulationThread.start();
+    assemblyThread.start();
     assembling = true;
     //QStringList *dataPtr = &dataInstrs;
     //QStringList *textPtr = &textInstrs;
     //qDebug() << "Before singal";
     //foreach(QString line, *textPtr)
-        //qDebug() << line;
+    //qDebug() << line;
     //qDebug() << "After singal";
     emit assembleSignal(dataInstrs, textInstrs);
     if (simulationBar == NULL)
@@ -869,7 +870,7 @@ void MainWindow::on_actionReload_Tiles_Memory_triggered()
 void MainWindow::on_actionAssemble_and_Simulate_triggered()
 {
     simulateAfterAssembling = true;
-    ui->actionAssemble->trigger();    
+    ui->actionAssemble->trigger();
     //ui->actionSimulate->trigger();
 }
 
@@ -1360,6 +1361,13 @@ void MainWindow::activeWindowFindAndReplace()
     CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
     if (activeWindow){
         activeWindow->findAndReplace();
+    }
+}
+
+void MainWindow::activeWindowDelete(){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        activeWindow->deleteText();
     }
 }
 

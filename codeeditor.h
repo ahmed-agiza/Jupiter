@@ -23,6 +23,8 @@ private:
     QString getCurrentLine();
 
 signals:
+public slots:
+    void deleteSelection();
 
 private slots:
     void insertCompletion(QString completion);

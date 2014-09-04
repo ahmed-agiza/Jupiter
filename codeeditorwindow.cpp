@@ -120,6 +120,11 @@ void CodeEditorWindow::closeEvent(QCloseEvent *closeEvent){
 
 void CodeEditorWindow::selectAll(){
     editor->selectAll();
+
+}
+
+void CodeEditorWindow::deleteText(){
+    editor->deleteSelection();
 }
 
 void CodeEditorWindow::quickFind(){

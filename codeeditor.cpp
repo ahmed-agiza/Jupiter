@@ -279,6 +279,12 @@ QString CodeEditor::getCurrentLine(){
     return currentPos.selectedText();
 }
 
+void CodeEditor::deleteSelection(){
+    QTextCursor currentPos = textCursor();
+    currentPos.removeSelectedText();
+
+}
+
 void CodeEditor::insertCompletion(QString completion){
     QTextCursor currentPos = textCursor();
     int compLength = completion.length() - codeCompleter->completionPrefix().length();
