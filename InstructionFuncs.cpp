@@ -209,36 +209,32 @@ int lw(fParam2)
     incPC;
     return 0;
 }
-int lwl(fParam2)
-{
+int lwl(fParam2){
     UNUSE_I
     Q_UNUSED(PC);
-    //Rtr = (Rtr & 0x0000FFFF)|((short)(mem->loadWordL(Rsr - data0Addr, imm)) << 16) ;
+    Rtr = (Rtr & 0x0000FFFF)|((short)(mem->loadWordL(Rsr - data0Addr + imm)) << 16) ;
     incPC;
     return 0;
 }
-int lwr(fParam2)
-{
+int lwr(fParam2){
     UNUSE_I
     Q_UNUSED(PC);
-    //Rtr = (Rtr & 0xFFFF0000) | ((short)mem->loadWordR(Rsr - data0Addr, imm)) ;
+    Rtr = (Rtr & 0xFFFF0000) | ((short)mem->loadWordR(Rsr - data0Addr + imm)) ;
     incPC;
     return 0;
 }
 
-int swl(fParam2)
-{
+int swl(fParam2){
     UNUSE_I
     Q_UNUSED(PC);
-    //mem->storeWordL(Rsr - data0Addr, imm, Rtr);
+    mem->storeWordL(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
-int swr(fParam2)
-{
+int swr(fParam2){
     UNUSE_I
     Q_UNUSED(PC);
-    //mem->storeWordR(Rsr - data0Addr, imm, Rtr);
+    mem->storeWordR(Rsr - data0Addr + imm, Rtr);
     incPC;
     return 0;
 }
@@ -471,7 +467,7 @@ int j_(fParam2)
 int jal(fParam2)
 {
     (*base)[31] = PC + PC0Addr + 4;
-    PC = imm * 4;
+    PC = (PC & 0xF0000000) | (imm * 4);
     //incPC;
     return 0;
 }
@@ -511,6 +507,7 @@ int syscall(fParam2)
             break;
         case 10:
             PC = -1;
+            return SyscallExNo;
             break;
         case 11:
 

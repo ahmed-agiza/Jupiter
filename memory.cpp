@@ -262,6 +262,36 @@ void Memory::storeHWord(unsigned int addr, short data)
     }
 }
 
+void Memory::storeWordL(unsigned int addr, short data){
+        if(getHWordSegment(addr) == OUT_OF_RANGE){
+            //emit raiseException(OUT_OF_RANGE_EX_NO);
+            return;
+        }
+
+        if(isLittleEndian()) {
+            storeByte(addr, (data&0xFF000000) >> 24);
+            storeByte(addr+1, (data&0x00FF0000) >> 16);
+        } else {
+            storeByte(addr, (data&0x00FF0000) >> 16);
+            storeByte(addr+1, (data&0xFF000000) >> 24);
+        }
+}
+
+void Memory::storeWordR(unsigned int addr, short data){
+    if(getHWordSegment(addr) == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
+        return;
+    }
+
+    if(isLittleEndian()) {
+        storeByte(addr,data&0xff);
+        storeByte(addr+1, data>>8);
+    } else {
+        storeByte(addr,data>>8);
+        storeByte(addr+1, data&0xff);
+    }
+}
+
 
 short Memory::loadHWord(unsigned int addr) const
 {
@@ -276,6 +306,31 @@ short Memory::loadHWord(unsigned int addr) const
         return ((unsigned short)(loadByte(addr + 1) << 8) | loadByteU(addr));
     else
         return ((unsigned short)(loadByte(addr) << 8) | loadByteU(addr + 1));
+}
+
+short Memory::loadWordL(unsigned int addr) const{
+        if(getHWordSegment(addr) == OUT_OF_RANGE){
+            //emit raiseException(OUT_OF_RANGE_EX_NO);
+            return 0;
+        }
+
+        if(isLittleEndian())
+            return ((unsigned short)(loadByte(addr + 1) << 8) | loadByteU(addr));
+        else
+            return ((unsigned short)(loadByte(addr) << 8) | loadByteU(addr + 1));
+
+}
+
+short Memory::loadWordR(unsigned int addr) const{
+    if(getHWordSegment(addr) == OUT_OF_RANGE){
+        //emit raiseException(OUT_OF_RANGE_EX_NO);
+        return 0;
+    }
+
+    if(isLittleEndian())
+        return ((unsigned short)(loadByte(addr + 3) << 8) | loadByteU(addr + 2));
+    else
+        return ((unsigned short)(loadByte(addr + 2) << 8) | loadByteU(addr + 3));
 }
 
 unsigned short Memory::loadHWordU(unsigned int addr) const

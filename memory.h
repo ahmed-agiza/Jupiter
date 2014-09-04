@@ -28,7 +28,11 @@ public:
     unsigned char loadByteU(unsigned int) const;
 
     void storeHWord(unsigned int, short);
+    void storeWordL(unsigned int, short);
+    void storeWordR(unsigned int, short);
     short loadHWord(unsigned int) const;
+    short loadWordL(unsigned int) const;
+    short loadWordR(unsigned int) const;
     unsigned short loadHWordU(unsigned int) const;
 
     void storeWord(unsigned int, int);

@@ -2,6 +2,7 @@
 #define CODEEDITORWINDOW_H
 
 #include <QMdiSubWindow>
+#include <QMdiArea>
 #include <QHBoxLayout>
 #include <QTextEdit>
 #include <QList>
@@ -46,6 +47,7 @@ public:
     void paste();
     void undo();
     void redo();
+    ~CodeEditorWindow();
 private slots:
     void editedSlot();
 
@@ -57,6 +59,8 @@ private:
     QString filePath;
     QString title;
     MirageFileType fileType;
+    QMdiArea *p;
+
     bool edited;
     bool destroyed;
 

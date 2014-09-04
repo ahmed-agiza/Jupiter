@@ -6,6 +6,8 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QFile>
+#include <QThread>
+#include <QProgressBar>
 
 #include "syntaxhl.h"
 #include "assembler.h"
@@ -168,6 +170,9 @@ private slots:
 
     void on_btnClearConsole_clicked();
 
+    void simulationComplete();
+    void assemblyComplete();
+
 public slots:
 
     void setMainProjectFile(QString);
@@ -182,6 +187,8 @@ public slots:
     void removeTextFile(QString file);
     void removeMainTextFile(QString file);
     void removeResourceFile(QString file);
+
+    void simulationProgress(int value);
 
 private:
     Ui::MainWindow *ui;
@@ -201,6 +208,10 @@ private:
     QFont editorFont;
 
     QTreeWidget *treeWidget;
+
+    QThread simulationThread;
+    QProgressBar *simulationBar;
+
 
     //Projecet Configuration
     QString currentProjectString;
@@ -232,7 +243,11 @@ private:
 
     QString openWithArg;
 
-    //Menus
+    bool assembling;
+    bool simulateAfterAssembling;
+signals:
+    void assembleSignal(QStringList, QStringList);
+    void simulateSignal();
 };
 
 #endif // MAINWINDOW_H

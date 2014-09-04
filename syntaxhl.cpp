@@ -99,7 +99,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
               << "sh" << "lh" << "lhu" << "sw" << "lw" << "lwl" << "lwr" << "swl"
               <<"swr" <<"ll" << "sc" << "jr" << "jalr" << "mfhi" << "mflo"
               << "mthi" << "mtlo" << "mult" << "multu" << "div" << "divu"
-              << "j" << "jal" << "syscal" << "nop";
+              << "j" << "jal" << "syscall" << "nop";
 
 
    foreach(QString pattern, instructionsList)

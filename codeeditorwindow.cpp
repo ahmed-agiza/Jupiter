@@ -18,7 +18,7 @@ CodeEditorWindow::CodeEditorWindow(QWidget *parent, QFont editorFont, MirageFile
     palette.setColor(QPalette::Disabled, QPalette::Text, QColor(Qt::white).darker(50));
     linesCounter->setPalette(palette);
     fileType = nType;
-
+    p = dynamic_cast<QMdiArea *>(parent);
 }
 
 
@@ -40,6 +40,7 @@ bool CodeEditorWindow::operator== (CodeEditorWindow &window){
 
 void CodeEditorWindow::setFilePath(QString path){
     filePath = path;
+
 }
 
 bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
@@ -82,14 +83,13 @@ bool CodeEditorWindow::saveFile(){
                 setWindowTitle(title);
                 edited = false;
                 return true;
-            }else{
+            }else
                 QMessageBox::critical(this, "Error", "Cannot open the file for saving");
-            }
+
     }
     return false;
 
 }
-
 void CodeEditorWindow::closeEvent(QCloseEvent *closeEvent){
     if (destroyed){
         closeEvent->accept();
@@ -109,12 +109,16 @@ void CodeEditorWindow::closeEvent(QCloseEvent *closeEvent){
             return;
         }
     }
+    if(p)
+        p->activateNextSubWindow();
+    else
+        qDebug() << "Parent QMdiArea not found";
+
     closeEvent->accept();
 }
 
 
-void CodeEditorWindow::selectAll()
-{
+void CodeEditorWindow::selectAll(){
     editor->selectAll();
 }
 
@@ -130,14 +134,12 @@ void CodeEditorWindow::setDestryoed(bool value){
     destroyed = value;
 }
 
-bool CodeEditorWindow::isDestroyed()
-{
+bool CodeEditorWindow::isDestroyed(){
     return destroyed;
 }
 
 QString CodeEditorWindow::getContent(){
     return editor->toPlainText();
-
 }
 
 QStringList CodeEditorWindow::getContentList(){
@@ -154,7 +156,6 @@ void CodeEditorWindow::setTitle(QString newTitle){
         setWindowTitle(title + "*");
     }else
         setWindowTitle(title);
-
 }
 
 void CodeEditorWindow::setFileType(MirageFileType nType){
@@ -173,8 +174,7 @@ CodeEditor *CodeEditorWindow::codeEditor(){
     return editor;
 }
 
-bool CodeEditorWindow::isEdited()
-{
+bool CodeEditorWindow::isEdited(){
     return edited;
 }
 
@@ -196,6 +196,9 @@ void CodeEditorWindow::undo(){
 
 void CodeEditorWindow::redo(){
     editor->redo();
+}
+
+CodeEditorWindow::~CodeEditorWindow(){
 }
 
 void CodeEditorWindow::editedSlot(){
@@ -239,4 +242,5 @@ void CodeEditorWindow::init(){
     widgetsContainer->showMaximized();
     connect(editor, SIGNAL(textChanged()), this, SLOT(editedSlot()));
     destroyed = false;
+
 }

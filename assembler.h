@@ -10,6 +10,7 @@
 #include <QMap>
 #include <QSet>
 #include <QTextEdit>
+#include <QStringList>
 #include "memory.h"
 #include "keyboardmanager.h"
 //#include "InstructionFuncs.h"
@@ -41,19 +42,24 @@ private:
     QMap<QString, int (*)(fParam2)> functionsMap;
 
 
+
     Memory *mem;
     MainWindow *mainW;
     TileEngine *engine;
     int address;
     int lineNumber;
     int PC;
+
+    int currentProgress;
+    int totalCount;
+
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
 
     int stringDistance(std::string, std::string);
     int minimum4(int, int, int, int);
 public:
-    Assembler(QStringList *textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> *mRegisters, MainWindow*);
+    Assembler(Memory *memory, QVector<int> *mRegisters, MainWindow*);
     void parseTextSegment(QStringList*);
     void parseDataSegment(QStringList*);
     int getNumber(QString);
@@ -75,10 +81,16 @@ public:
 
      Trie instructionSet;
      QVector<QString> instructionList;
-private slots:
+public slots:
     void exceptionHandler(int);
+    void assemble(QStringList dataFileStringList, QStringList textFileStringList);
 signals:
     void buttonPressed(int, int, bool);
+    void simulationComplete();
+    void assemblyComplete();
+    void progressUpdate(int);
 };
+
+
 
 #endif // ASSEMBLER_H

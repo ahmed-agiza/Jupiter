@@ -268,18 +268,13 @@ QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensit
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 QRegExp invalidR(invalidRegisterFormat, Qt::CaseInsensitive), invalidM(invalidMemoryFormat, Qt::CaseInsensitive), invalidI(invalidImmediateFormat, Qt::CaseInsensitive), invalidSh(invalidShiftFormat, Qt::CaseInsensitive);
 
-Assembler::Assembler(QStringList* textFileStringList, QStringList *dataFileStringList, Memory *memory, QVector<int> * mRegisters, MainWindow * mainW)
+Assembler::Assembler(Memory *memory, QVector<int> * mRegisters, MainWindow * mainW)
 {
     this->mainW = mainW;
     this->mem = memory;
     this->registers = mRegisters;
-    initializeRegisters();
-    initializeFunctions();
-
-    connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
-
-    parseDataSegment(dataFileStringList);
-    parseTextSegment(textFileStringList);
+    totalCount = 0;
+    currentProgress = 0;
 
 }
 
@@ -302,6 +297,8 @@ void Assembler::parseDataSegment(QStringList* stringList)
     QRegExp directivesRegex( "(?:[\\t ]*(" + labelRegex + "):[\\t ]*)?\\.([a-zA-Z]+)[\\t ]+([^\\r\\n]+)(?:#.+)?", Qt::CaseInsensitive);
     foreach (QString line, *stringList)
     {
+        emit progressUpdate(((float)currentProgress++/totalCount)*100);
+
         if(directivesRegex.indexIn(line, 0) != -1){
             QString directiveName = directivesRegex.cap(2);
             QString labelName = directivesRegex.cap(1);
@@ -487,6 +484,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
     address = lineNumber = 0;
     foreach (QString line, *stringList)
     {
+        emit progressUpdate(((float)currentProgress++/totalCount)*100);
         if((R.indexIn(line, 0)) != -1)
         {
             instructions.push_back(Instruction(R.cap(2),registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
@@ -583,7 +581,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         {
             if(labels.contains(J.cap(3))){
                 qDebug()<<"Yes!";
-                instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,(labels[J.cap(3)]&0xfffffff)>>2,0,JFormat));
+                instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,(labels[J.cap(3)]&0xfffffff),0,JFormat));
             }
             else{
                 missingJumpLabels.push_back(qMakePair(qMakePair(address,lineNumber),J.cap(3)));
@@ -1010,7 +1008,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
     {
         QPair<QPair<int,int>,QString> lbl = missingJumpLabels[i];
         if(labels.contains(lbl.second)){
-            instructions[lbl.first.first].setImm((labels[lbl.second]&0xfffffff)>>2);
+            instructions[lbl.first.first].setImm((labels[lbl.second]&0xfffffff));
         } else {
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second));
         }
@@ -1022,7 +1020,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         instructions[i].setMem(mem);
         mem->storeWord(addr,instructions[i].getWord());
         addr += 4;
-        //QObject::connect(&ins, SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
+        QObject::connect(&(instructions[i]), SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }
 
 
@@ -1045,7 +1043,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
-
+    emit assemblyComplete();
 }
 
 Assembler::~Assembler()
@@ -1944,7 +1942,7 @@ void Assembler::simulate()
     PC = 0;
     int i = 0;
     int activePC = PC/4;
-    while (PC != -1 && ((PC/4) < instructions.size() && i < 100))
+    while (PC != -1 && ((PC/4) < instructions.size() && i < 15))
     {
 
         if(mainW->isGFXEnabled()){
@@ -1973,7 +1971,7 @@ void Assembler::simulate()
                         emit Assembler::buttonPressed(B_KEY_INDEX,0, true);
                         break;
                     case Keyboard::D:
-                        emit Assembler::buttonPressed(R_KEY_INDEX,0, true);
+                         Assembler::buttonPressed(R_KEY_INDEX,0, true);
                         break;
                     case Keyboard::A:
                         emit Assembler::buttonPressed(L_KEY_INDEX,0, true);
@@ -2217,7 +2215,18 @@ int Assembler::stringDistance(std::string s, std::string t){
     return cost;
 }
 
-void Assembler::exceptionHandler(int exceptionNumber)
-{
+void Assembler::exceptionHandler(int exceptionNumber){
+    qDebug() << "Exception: " << exceptionNumber;
 
+}
+
+void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStringList){
+    initializeRegisters();
+    initializeFunctions();
+
+    connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
+    totalCount = dataFileStringList.size() + textFileStringList.size();
+    currentProgress = 0;
+    parseDataSegment(&dataFileStringList);
+    parseTextSegment(&textFileStringList);
 }

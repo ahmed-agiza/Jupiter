@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QStringListModel>
 #include <QLineEdit>
-#include <QThread>
 #include <QTextEdit>
 #include <QMdiSubWindow>
 #include <QMdiArea>
@@ -75,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
         editorFont = fontsDB.font("Consolas", "Normal", 10);
     }
 
-    ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
+   // ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
     treeWidget = ui->treeFiles;
 
@@ -156,6 +155,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
     ui->toolBar->setAccessibleName("Toolbar");
     setAcceptDrops(true);
+    simulationBar = NULL;
+    assembling = false;
+    simulateAfterAssembling = false;
 
 }
 
@@ -421,6 +423,11 @@ void MainWindow::removeResourceFile(QString file){
     qDebug() << "Remove resource " << file;
 }
 
+void MainWindow::simulationProgress(int value){
+    if (simulationBar != NULL)
+        simulationBar->setValue(value);
+}
+
 
 bool MainWindow::containsTextFile(QString textFileName){
     return MainWindow::projectTextFiles.contains(textFileName);
@@ -545,6 +552,8 @@ MainWindow::~MainWindow(){
     if (engine)
         delete engine;
     delete ui;
+    simulationThread.quit();
+    simulationThread.wait();
 }
 
 void MainWindow::resizeTextColumns(){
@@ -727,12 +736,12 @@ void MainWindow::printS(){
 
 void MainWindow::on_actionAssemble_triggered(){
 
-    if(MainWindow::getProjectMainFile() == ""){
+   if(MainWindow::getProjectMainFile() == ""){
         QMessageBox::critical(this, "Error", "Cannot find main text file");
         return;
     }
 
-    qDebug() << "Assembling..";
+
 
     QTreeWidgetItemIterator itMain(treeWidget);
     while (*itMain) {
@@ -768,10 +777,16 @@ void MainWindow::on_actionAssemble_triggered(){
     ui->actionAssemble->setEnabled(false);
     ui->actionSimulate->setEnabled(false);
     ui->actionAssemble_and_Simulate->setEnabled(false);
-    if(assemblerInitialized){
-        if (assem)
+    if(assemblerInitialized || assem){
+        if (assem){
+            qDebug() << "Disconnecting";
+            QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
+            QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(simulationProgress(int)));
+            QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
+            simulationThread.quit();
+            simulationThread.wait();
             delete assem;
-        if (memory){
+        }if (memory){
             Memory *tempMemory = memory;
             memory = new Memory(this);
             delete tempMemory;
@@ -779,16 +794,35 @@ void MainWindow::on_actionAssemble_triggered(){
 
     }
     ui->tabsProject->setCurrentIndex(1);
-    assem = new Assembler(&textInstrs, &dataInstrs, memory, &mainProcessorRegisters, this);
-    assemblerInitialized = true;
-    refreshActions();
+    assem = new Assembler(memory, &mainProcessorRegisters, this);
+
+    //assemblerInitialized = true;
+    //refreshActions();
 
     if (currentWindow)
         ui->mdiAreaCode->setActiveSubWindow(currentWindow);
 
 
-    qDebug() << "Assembled.";
-
+   // qDebug() << "Assembled.";
+    assemblerInitialized = false;
+    assem->moveToThread(&simulationThread);
+    QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
+    QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(simulationProgress(int)));
+    QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
+    simulationThread.start();
+    assembling = true;
+    //QStringList *dataPtr = &dataInstrs;
+    //QStringList *textPtr = &textInstrs;
+    //qDebug() << "Before singal";
+    //foreach(QString line, *textPtr)
+        //qDebug() << line;
+    //qDebug() << "After singal";
+    emit assembleSignal(dataInstrs, textInstrs);
+    if (simulationBar == NULL)
+        simulationBar = new QProgressBar(this);
+    statusBar()->show();
+    simulationBar->setValue(0);
+    statusBar()->addWidget(simulationBar);
 }
 
 void MainWindow::on_actionClose_triggered(){
@@ -834,8 +868,9 @@ void MainWindow::on_actionReload_Tiles_Memory_triggered()
 
 void MainWindow::on_actionAssemble_and_Simulate_triggered()
 {
-    ui->actionAssemble->trigger();
-    ui->actionSimulate->trigger();
+    simulateAfterAssembling = true;
+    ui->actionAssemble->trigger();    
+    //ui->actionSimulate->trigger();
 }
 
 void MainWindow::on_actionSprite_Editor_triggered()
@@ -1331,14 +1366,16 @@ void MainWindow::activeWindowFindAndReplace()
 void MainWindow::refreshActions(){
     bool value = projectFile.isOpen();
     //setAcceptDrops(value);
-    ui->actionAssemble->setEnabled(value);
-    ui->actionAssemble_and_Simulate->setEnabled(value);
+    if (!assembling){
+        ui->actionAssemble->setEnabled(value);
+        ui->actionAssemble_and_Simulate->setEnabled(value);
+        ui->actionSimulate->setEnabled(value);
+    }
     ui->actionClose->setEnabled(value);
     ui->actionEnable_Graphics_Engine->setEnabled(value);
     ui->actionInput->setEnabled(value);
     ui->actionInsert_Breakpoint->setEnabled(value);
     ui->actionSaveAs->setEnabled(value);
-    ui->actionSimulate->setEnabled(value);
     ui->actionNew->setEnabled(value);
     ui->actionOpen->setEnabled(value);
 }
@@ -1556,4 +1593,24 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
 
 void MainWindow::on_btnClearConsole_clicked(){
     ui->textConsole->clear();
+}
+
+void MainWindow::simulationComplete(){
+
+}
+
+void MainWindow::assemblyComplete(){
+    qDebug() << "Assembled";
+    assembling = false;
+    refreshActions();
+    assemblerInitialized = true;
+
+    //statusBar()->removeWidget(simulationBar);
+    if (simulationBar != NULL){
+        simulationBar->setValue(100);
+        simulationBar->hide();
+    }
+    if (simulateAfterAssembling)
+        ui->actionSimulate->trigger();
+    simulateAfterAssembling = false;
 }
