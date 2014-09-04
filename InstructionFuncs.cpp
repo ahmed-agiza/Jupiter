@@ -464,7 +464,7 @@ int divu(fParam2)
 }
 int j_(fParam2)
 {
-    PC = imm * 4;
+    PC = (PC & 0xF0000000) | (imm * 4);
     //incPC;
     return 0;
 }
@@ -522,7 +522,7 @@ int syscall(fParam2)
 
             break;
         default:
-            incPC; //To be checked.
+            incPC;
             return UnknownSyscall;
             break;
     }

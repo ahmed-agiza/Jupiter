@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "tileengine.h"
+#include "mainwindow.h"
 
 #define TEXT_SEGMENT 1
 #define DATA_SEGMENT 2
@@ -22,9 +23,8 @@
 
 #define TILE_SIZE 16
 
-bool isLittleEndian()
-{
-    return true;
+bool isLittleEndian(){
+    return MainWindow::isLittleEndian();
 }
 
 unsigned int getScreensHeightCount()
