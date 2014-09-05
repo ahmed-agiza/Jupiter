@@ -1721,11 +1721,13 @@ void Assembler::handlePZ(QRegExp m, QString line)
     {
         QString datalbl = m.cap(4);
         if(dataLabels.contains(datalbl)){
-            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0,dataLabels[datalbl] >> 16,0,IFormat));
-            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,dataLabels[datalbl] & 0xffff,0,IFormat));
+            int addrrr = mem->dataSegmentBaseAddress+(labels[datalbl]<<2);
+            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0, addrrr >> 16,0,IFormat));
+            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,addrrr & 0xffff,0,IFormat));
         }else if(labels.contains(datalbl)){
-            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0,labels[datalbl] >> 16,0,IFormat));
-            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,labels[datalbl] & 0xffff,0,IFormat));
+            int addrrr = mem->textSegmentBaseAddress+(labels[datalbl]<<2);
+            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0, addrrr >> 16,0,IFormat));
+            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,addrrr & 0xffff,0,IFormat));
         }else{
             errorList.push_back(Error("Invalid label \""+ datalbl +"\".", lineNumber));
         }
