@@ -74,7 +74,7 @@ public:
     void handlePSR(QRegExp m, QString line);
     void handlePI(QRegExp m, QString line);
 
-    void simulate();
+
     QVector<int> *registers;
     ~Assembler();
     Assembler();
@@ -84,11 +84,15 @@ public:
 public slots:
     void exceptionHandler(int);
     void assemble(QStringList dataFileStringList, QStringList textFileStringList);
+    void simulate();
 signals:
     void buttonPressed(int, int, bool);
     void simulationComplete();
     void assemblyComplete();
     void progressUpdate(int);
+    void simulating();
+    void logStringSignal(QString);
+    void logDataSignal(QStringList); //For testing.
 };
 
 

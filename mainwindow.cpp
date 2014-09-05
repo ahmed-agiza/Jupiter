@@ -18,6 +18,7 @@
 #include <QFileDialog>
 #include <QTreeWidgetItemIterator>
 #include <QInputDialog>
+#include <QStatusBar>
 
 #include "projectcreator.h"
 #include "codeeditor.h"
@@ -54,7 +55,6 @@ QStringList tempProjectTextFiles;
 QString tempProjectDataFile;
 QMap<QString, QString> tempProjectConf;
 QString tempProjectPath;
-
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -433,6 +433,13 @@ void MainWindow::assemblingProgress(int value){
         simulationBar->setValue(value);
 }
 
+void MainWindow::simulationProgress(int){
+    static int simProg = 0;
+    qDebug() << simProg;
+    statusBar()->showMessage("Simulating " + QString(".").repeated(simProg++%3));
+
+}
+
 
 bool MainWindow::containsTextFile(QString textFileName){
     return MainWindow::projectTextFiles.contains(textFileName);
@@ -557,8 +564,8 @@ MainWindow::~MainWindow(){
     if (engine)
         delete engine;
     delete ui;
-    assemblyThread.quit();
-    assemblyThread.wait();
+    simulationThread.quit();
+    simulationThread.wait();
 }
 
 void MainWindow::resizeTextColumns(){
@@ -719,6 +726,8 @@ void MainWindow::editorWindowMenuRequested(QPoint loc){
 }
 
 void MainWindow::on_actionSimulate_triggered(){
+
+
     qDebug() << "Simulating..";
     if (engine != NULL)
         if(engine){
@@ -734,27 +743,22 @@ void MainWindow::on_actionSimulate_triggered(){
 
 
     if (assemblerInitialized && assem){
-        assem->simulate();
-        mainProcessorRegisters = *assem->registers;
+        ui->actionAssemble->setEnabled(false);
+        ui->actionSimulate->setEnabled(false);
+        ui->actionAssemble_and_Simulate->setEnabled(false);
 
 
-        regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
-        ui->tableMainRegisters->setModel(regModel);
-
-        textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
-        dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
-        stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
-        heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
-
-        ui->textTable->setModel(textModel);
-        ui->dataTable->setModel(dataModel);
-        ui->stackTable->setModel(stackModel);
-        ui->heapTable->setModel(heapModel);
-
-        resizeColumns();
-
+        assemblerInitialized = false;
+        QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
+        QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
+        QObject::connect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
+        simulating = true;
+        simulationThread.start();
+        emit simulateSignal();
+        statusBar()->showMessage("Simulating");
+        appendErrorMessage("--Showing simulation log for testing--");
     }
-    qDebug() << "Simulated.";
+
 
 }
 
@@ -765,6 +769,7 @@ void MainWindow::on_actionNew_triggered(){
 
 
 void MainWindow::on_actionAssemble_triggered(){
+
 
     if(MainWindow::getProjectMainFile() == ""){
         QMessageBox::critical(this, "Error", "Cannot find main text file");
@@ -811,8 +816,11 @@ void MainWindow::on_actionAssemble_triggered(){
             QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
             QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
             QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-            assemblyThread.quit();
-            assemblyThread.wait();
+            QObject::disconnect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
+            QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
+            QObject::disconnect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
+            simulationThread.quit();
+            simulationThread.wait();
             delete assem;
         }if (memory){
             Memory *tempMemory = memory;
@@ -833,11 +841,11 @@ void MainWindow::on_actionAssemble_triggered(){
 
     // qDebug() << "Assembled.";
     assemblerInitialized = false;
-    assem->moveToThread(&assemblyThread);
+    assem->moveToThread(&simulationThread);
     QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
     QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-    assemblyThread.start();
+    simulationThread.start();
     assembling = true;
     //QStringList *dataPtr = &dataInstrs;
     //QStringList *textPtr = &textInstrs;
@@ -1401,7 +1409,7 @@ void MainWindow::activeWindowDelete(){
 void MainWindow::refreshActions(){
     bool value = projectFile.isOpen();
     //setAcceptDrops(value);
-    if (!assembling){
+    if (!(assembling || simulating)){
         ui->actionAssemble->setEnabled(value);
         ui->actionAssemble_and_Simulate->setEnabled(value);
         ui->actionSimulate->setEnabled(value);
@@ -1588,17 +1596,17 @@ void MainWindow::on_actionDefaultLayout_triggered()
     ui->dockMemory->setVisible(true);
     ui->dockProject->setVisible(true);
 
-    this->removeDockWidget(ui->dockAsm);
-    this->removeDockWidget(ui->dockCode);
-    this->removeDockWidget(ui->dockMemory);
-    this->removeDockWidget(ui->dockProject);
+    removeDockWidget(ui->dockAsm);
+    removeDockWidget(ui->dockCode);
+    removeDockWidget(ui->dockMemory);
+    removeDockWidget(ui->dockProject);
 
-    this->addDockWidget(Qt::LeftDockWidgetArea, ui->dockCode);
-    this->setCentralWidget(ui->dockCode);
+    addDockWidget(Qt::LeftDockWidgetArea, ui->dockCode);
+    setCentralWidget(ui->dockCode);
 
-    this->addDockWidget(Qt::LeftDockWidgetArea, ui->dockProject);
-    this->addDockWidget(Qt::RightDockWidgetArea, ui->dockMemory);
-    this->addDockWidget(Qt::LeftDockWidgetArea, ui->dockAsm);
+    addDockWidget(Qt::LeftDockWidgetArea, ui->dockProject);
+    addDockWidget(Qt::RightDockWidgetArea, ui->dockMemory);
+    addDockWidget(Qt::LeftDockWidgetArea, ui->dockAsm);
 
     ui->dockAsm->setFloating(false);
     ui->dockCode->setFloating(false);
@@ -1634,6 +1642,32 @@ void MainWindow::on_btnClearConsole_clicked(){
 }
 
 void MainWindow::simulationComplete(){
+    simulating = false;
+    refreshActions();
+
+    simulationThread.quit();
+    simulationThread.wait();
+
+    mainProcessorRegisters = *assem->registers;
+
+    regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
+    ui->tableMainRegisters->setModel(regModel);
+
+    textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
+    dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
+    stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
+    heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
+
+    ui->textTable->setModel(textModel);
+    ui->dataTable->setModel(dataModel);
+    ui->stackTable->setModel(stackModel);
+    ui->heapTable->setModel(heapModel);
+
+    resizeColumns();
+
+    statusBar()->clearMessage();
+    statusBar()->showMessage("Simulated!", 2000);
+    qDebug() << "Simulated.";
 
 }
 
@@ -1643,11 +1677,14 @@ void MainWindow::assemblyComplete(){
     refreshActions();
     assemblerInitialized = true;
 
-    //statusBar()->removeWidget(simulationBar);
+    simulationThread.quit();
+    simulationThread.wait();
+
     if (simulationBar != NULL){
         simulationBar->setValue(100);
         simulationBar->hide();
     }
+    statusBar()->showMessage("Assembled", 2000);
     if (simulateAfterAssembling)
         ui->actionSimulate->trigger();
     simulateAfterAssembling = false;

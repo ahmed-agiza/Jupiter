@@ -81,7 +81,7 @@ public:
     bool closeFileWindow(QString);
     void renameFileWindow(QString, QString);
 
-    void appendErrorMessage(QString);
+
 
 
 
@@ -170,6 +170,9 @@ public slots:
     void removeResourceFile(QString);
 
     void assemblingProgress(int);
+    void simulationProgress(int);
+
+    void appendErrorMessage(QString);
 
 private:
     Ui::MainWindow *ui;
@@ -190,8 +193,8 @@ private:
 
     QTreeWidget *treeWidget;
 
-    QThread assemblyThread;
     QThread simulationThread;
+    //QThread simulationThread;
     QProgressBar *simulationBar;
 
 
