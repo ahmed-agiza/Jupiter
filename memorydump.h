@@ -4,6 +4,7 @@
 #include <QDialog>
 #include "memory.h"
 #include "loadmemorythread.h"
+#include "savememorythread.h"
 
 namespace Ui {
 class MemoryDump;
@@ -14,7 +15,7 @@ class MemoryDump : public QDialog
     Q_OBJECT
 
 public:
-    explicit MemoryDump(QWidget *parent = 0, Memory *mem);
+    explicit MemoryDump(QWidget *parent, Memory *mem);
     ~MemoryDump();
 
 private slots:
@@ -24,11 +25,11 @@ private slots:
 
 public slots:
     void onNumberChanged(int);
-    void complete(int);
+    void complete();
 private:
     Ui::MemoryDump *ui;
     int claculateMemorySize(const QVector<bool>& segments);
-
+    Memory *mem;
     LoadMemoryThread *loadingThread;
     SaveMemoryThread *savingThread;
 };

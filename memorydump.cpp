@@ -10,7 +10,6 @@ MemoryDump::MemoryDump(QWidget *parent, Memory *mem) :
     ui->setupUi(this);
     ui->loadFromFilePushButton->setEnabled(1);
     ui->saveToFilePushButton->setEnabled(1);
-    ui->gpuPushButton->setEnabled(1);
     ui->textSegmentCheckBox->setEnabled(1);
     ui->dataSegmentCheckBox->setEnabled(1);
     ui->progressBar->setVisible(0);
@@ -41,7 +40,6 @@ void MemoryDump::complete()
 {
     ui->loadFromFilePushButton->setEnabled(1);
     ui->saveToFilePushButton->setEnabled(1);
-    ui->gpuPushButton->setEnabled(1);
     ui->textSegmentCheckBox->setEnabled(1);
     ui->dataSegmentCheckBox->setEnabled(1);
     ui->progressBar->setVisible(0);
@@ -54,7 +52,6 @@ void MemoryDump::on_loadFromFilePushButton_clicked()
         QObject::connect(mem, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
         ui->loadFromFilePushButton->setEnabled(false);
         ui->saveToFilePushButton->setEnabled(false);
-        ui->gpuPushButton->setEnabled(false);
         ui->textSegmentCheckBox->setEnabled(false);
         ui->dataSegmentCheckBox->setEnabled(false);
         ui->progressBar->setVisible(true);
@@ -78,7 +75,6 @@ void MemoryDump::on_saveToFilePushButton_clicked()
         QObject::connect(mem, SIGNAL(savingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
         ui->loadFromFilePushButton->setEnabled(false);
         ui->saveToFilePushButton->setEnabled(false);
-        ui->gpuPushButton->setEnabled(false);
         ui->textSegmentCheckBox->setEnabled(false);
         ui->dataSegmentCheckBox->setEnabled(false);
         ui->progressBar->setVisible(true);
