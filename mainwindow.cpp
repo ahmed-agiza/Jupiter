@@ -433,11 +433,9 @@ void MainWindow::assemblingProgress(int value){
         simulationBar->setValue(value);
 }
 
-void MainWindow::simulationProgress(int){
+void MainWindow::simulationProgress(){
     static int simProg = 0;
-    qDebug() << simProg;
-    statusBar()->showMessage("Simulating " + QString(".").repeated(simProg++%3));
-
+    statusBar()->showMessage("Simulating " + QString(".").repeated(simProg++%3 + 1));
 }
 
 
@@ -750,6 +748,7 @@ void MainWindow::on_actionSimulate_triggered(){
 
         assemblerInitialized = false;
         QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
+        QObject::connect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
         QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
         QObject::connect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
         simulating = true;
@@ -817,6 +816,7 @@ void MainWindow::on_actionAssemble_triggered(){
             QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
             QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
             QObject::disconnect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
+            QObject::disconnect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
             QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
             QObject::disconnect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
             simulationThread.quit();

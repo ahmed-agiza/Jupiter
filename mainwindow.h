@@ -170,7 +170,7 @@ public slots:
     void removeResourceFile(QString);
 
     void assemblingProgress(int);
-    void simulationProgress(int);
+    void simulationProgress();
 
     void appendErrorMessage(QString);
 

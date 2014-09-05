@@ -1910,7 +1910,7 @@ void Assembler::simulate()
                 }
             }
         }
-        emit simulating();
+        emit simulationActive();
         activePC = PC/4;
         QString logText = QString::number(i) + ": PC: " + QString::number(PC)
                 + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()

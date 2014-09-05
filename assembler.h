@@ -90,7 +90,7 @@ signals:
     void simulationComplete();
     void assemblyComplete();
     void progressUpdate(int);
-    void simulating();
+    void simulationActive();
     void logStringSignal(QString);
     void logDataSignal(QStringList); //For testing.
 };
