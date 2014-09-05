@@ -77,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
     console = new IOConsole(ui->tabConsole);
-    console->addText("This is some locked text\nInput:");
+    console->addText("This is some locked text\nInput:", false);
 
     treeWidget = ui->treeFiles;
 

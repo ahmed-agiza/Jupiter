@@ -8,6 +8,7 @@ IOConsole::IOConsole(QWidget *parent) :
     lockPosition = 0;
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorChanged()));
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(onSelectionChanged()));
+    selectionLocker = false;
 }
 
 void IOConsole::setLock(int pos){
@@ -15,9 +16,10 @@ void IOConsole::setLock(int pos){
     qDebug() << "Locked at " << lockPosition;
 }
 
-void IOConsole::addText(QString text){
+void IOConsole::addText(QString text, bool ro = true){
     setText(toPlainText() + text);
     lockPosition += text.length();
+    setReadOnly(ro);
     qDebug() << "Locked at " << lockPosition;
 }
 
@@ -44,7 +46,9 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
         cursor.setPosition(lockPosition, QTextCursor::KeepAnchor);
         emit dataInput(cursor.selectedText());
         qDebug() << cursor.selectedText();
-        setLock(lockPosition + cursor.selectedText().length() + 1);
+        setReadOnly(true);
+        setLock(lockPosition + cursor.selectedText().length());
+
     }else if (e->key() == Qt::Key_Backspace){
         if (textCursor().position() <= lockPosition){
             e->ignore();
@@ -52,6 +56,14 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
         }
     }
     QTextEdit::keyPressEvent(e);
+}
+
+void IOConsole::enableEditing(bool ro){
+    setReadOnly(ro);
+}
+
+void IOConsole::getInput(){
+    setReadOnly(true);
 }
 
 void IOConsole::onCursorChanged(){
@@ -70,9 +82,12 @@ void IOConsole::onSelectionChanged(){
         if (selectionEnd > lockPosition){
             cursor.setPosition(selectionEnd);
             cursor.setPosition(lockPosition, QTextCursor::KeepAnchor);
-        }
-        else
+        }else
             cursor.setPosition(lockPosition);
     }
-    setTextCursor(cursor);
+    if (!selectionLocker){
+        selectionLocker = true;
+        setTextCursor(cursor);
+        selectionLocker = false;
+    }
 }

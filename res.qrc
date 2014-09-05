@@ -66,6 +66,12 @@
         <file>icons/mirageicon2.png</file>
         <file>icons/mirageicon3.png</file>
         <file>icons/appicon.ico</file>
+        <file>icons/toolbar/debuggingicons/moveBack.png</file>
+        <file>icons/toolbar/debuggingicons/moveBack2.png</file>
+        <file>icons/toolbar/debuggingicons/moveStep.png</file>
+        <file>icons/toolbar/debuggingicons/moveStep2.png</file>
+        <file>icons/toolbar/debuggingicons/pause.png</file>
+        <file>icons/toolbar/debuggingicons/stop.png</file>
     </qresource>
     <qresource prefix="/joypad">
         <file>icons/joypad/ab.png</file>
