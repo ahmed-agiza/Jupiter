@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>305</height>
+    <height>265</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,14 +19,14 @@
      <x>0</x>
      <y>0</y>
      <width>411</width>
-     <height>291</height>
+     <height>251</height>
     </rect>
    </property>
    <property name="tabPosition">
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>4</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="generalTab">
     <attribute name="title">
@@ -35,8 +35,8 @@
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
-       <x>110</x>
-       <y>30</y>
+       <x>90</x>
+       <y>20</y>
        <width>91</width>
        <height>16</height>
       </rect>
@@ -49,7 +49,7 @@
      <property name="geometry">
       <rect>
        <x>190</x>
-       <y>220</y>
+       <y>200</y>
        <width>91</width>
        <height>23</height>
       </rect>
@@ -62,7 +62,7 @@
      <property name="geometry">
       <rect>
        <x>70</x>
-       <y>220</y>
+       <y>200</y>
        <width>91</width>
        <height>23</height>
       </rect>
@@ -77,7 +77,7 @@
        <x>110</x>
        <y>50</y>
        <width>115</width>
-       <height>141</height>
+       <height>121</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -129,11 +129,6 @@
      <string>Tilemaps</string>
     </attribute>
    </widget>
-   <widget class="QWidget" name="oamTab">
-    <attribute name="title">
-     <string>OAM</string>
-    </attribute>
-   </widget>
    <widget class="QWidget" name="paletteTab">
     <attribute name="title">
      <string>Palette</string>
@@ -141,8 +136,8 @@
     <widget class="QPushButton" name="dumpstdpalette">
      <property name="geometry">
       <rect>
-       <x>214</x>
-       <y>20</y>
+       <x>210</x>
+       <y>70</y>
        <width>131</width>
        <height>23</height>
       </rect>
@@ -154,14 +149,72 @@
     <widget class="QPushButton" name="pushButton">
      <property name="geometry">
       <rect>
-       <x>214</x>
-       <y>50</y>
+       <x>40</x>
+       <y>70</y>
        <width>131</width>
        <height>23</height>
       </rect>
      </property>
      <property name="text">
-      <string>Open Palette Viewer</string>
+      <string>Open palette viewer</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="line">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>110</y>
+       <width>340</width>
+       <height>1</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(90,90,90);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>130</y>
+       <width>131</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load palette image</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>130</y>
+       <width>131</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save palette image</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="line_2">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>35</y>
+       <width>1</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(90,90,90);</string>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </widget>
@@ -170,7 +223,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>290</y>
+     <y>250</y>
      <width>381</width>
      <height>16</height>
     </rect>
