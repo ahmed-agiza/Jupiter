@@ -276,7 +276,11 @@ void MainWindow::addEditorWindow(QString file, QString title, MirageFileType typ
     CodeEditorWindow *editorWindow = new CodeEditorWindow(ui->mdiAreaCode, editorFont, type);
     if(editorWindow->openFile(file, title)){
         ui->mdiAreaCode->addSubWindow(editorWindow);
-
+        editorWindow->codeEditor()->setContextMenuPolicy(Qt::CustomContextMenu);
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(editorWindowMenuRequested(QPoint)));
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(copyAvailable(bool)), this, SLOT(enableCopyCutDelete(bool)));
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(undoAvailable(bool)), this, SLOT(enableUndo(bool)));
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(redoAvailable(bool)), this, SLOT(enableRedo(bool)));
     }else{
         delete editorWindow;
         QMessageBox::critical(this, "Error", "Failed to open the file " + file);
@@ -599,6 +603,21 @@ void MainWindow::resizeRegsColumns(){
 
 }
 
+void MainWindow::enableCopyCutDelete(bool value){
+    ui->actionCopy->setEnabled(value);
+    ui->actionCut->setEnabled(value);
+    ui->actionPaste->setEnabled(value);
+    ui->actionDeleteSelection->setEnabled(value);
+}
+
+void MainWindow::enableUndo(bool value){
+    ui->actionUndo->setEnabled(value);
+}
+
+void MainWindow::enableRedo(bool value){
+    ui->actionRedo->setEnabled(value);
+}
+
 void MainWindow::resizeDataColumns(){
     ui->dataTable->resizeColumnsToContents();
 
@@ -682,6 +701,23 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
     menu->popup(ui->treeFiles->viewport()->mapToGlobal(loc));
 }
 
+void MainWindow::editorWindowMenuRequested(QPoint loc){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        QMenu *menu=new QMenu(this);
+        menu->addAction(ui->actionUndo);
+        menu->addAction(ui->actionRedo);
+        menu->addSeparator();
+        menu->addAction(ui->actionCut);
+        menu->addAction(ui->actionCopy);
+        menu->addAction(ui->actionPaste);
+        menu->addAction(ui->actionDeleteSelection);
+        menu->addSeparator();
+        menu->addAction(ui->actionSelect_All);
+        menu->popup(activeWindow->codeEditor()->viewport()->mapToGlobal(loc));
+    }
+}
+
 void MainWindow::on_actionSimulate_triggered(){
     qDebug() << "Simulating..";
     if (engine != NULL)
@@ -723,17 +759,10 @@ void MainWindow::on_actionSimulate_triggered(){
 }
 
 void MainWindow::on_actionNew_triggered(){
-
     FileLoader *loader = new FileLoader(this, CREATE_FILE);
     loader->show();
-    //addEditorWindow();
-
-
 }
 
-void MainWindow::printS(){
-
-}
 
 void MainWindow::on_actionAssemble_triggered(){
 
@@ -741,8 +770,6 @@ void MainWindow::on_actionAssemble_triggered(){
         QMessageBox::critical(this, "Error", "Cannot find main text file");
         return;
     }
-
-
 
     QTreeWidgetItemIterator itMain(treeWidget);
     while (*itMain) {
@@ -1390,15 +1417,18 @@ void MainWindow::refreshActions(){
 
 void MainWindow::refreshEditActions(){
     CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
-    ui->actionCopy->setEnabled(activeWindow);
-    ui->actionCut->setEnabled(activeWindow);
-    ui->actionPaste->setEnabled(activeWindow);
-    ui->actionUndo->setEnabled(activeWindow);
-    ui->actionRedo->setEnabled(activeWindow);
+    if (!activeWindow){
+        ui->actionCopy->setEnabled(false);
+        ui->actionCut->setEnabled(false);
+        ui->actionPaste->setEnabled(false);
+        ui->actionUndo->setEnabled(false);
+        ui->actionRedo->setEnabled(false);
+        ui->actionDeleteSelection->setEnabled(false);
+    }
     ui->actionFindandReplace->setEnabled(activeWindow);
     ui->actionQuickFind->setEnabled(activeWindow);
-    ui->actionSelect_All->setEnabled(activeWindow);
     ui->actionSave->setEnabled(activeWindow);
+    ui->actionSelect_All->setEnabled(activeWindow);
 }
 
 void MainWindow::refreshGraphicsAction(){

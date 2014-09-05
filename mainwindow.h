@@ -49,15 +49,15 @@ public:
     bool containsTextFile(QString textFileName);
 
 
-    QString loadFileText(QString fileName);
+    QString loadFileText(QString);
     static QString getProjectPath();
-    static void setProjectPath(QString path);
+    static void setProjectPath(QString);
     static QString getProjectFileName();
     static QString getProjectTitle();
     static QString getProjectMainFile();
     static QStringList getProjectTextFiles();
     static QString getProjectDataFile();
-    static QString getProjectConf(QString key);
+    static QString getProjectConf(QString);
     static bool isLittleEndian();
     static bool isGFXEnabled();
     static int getTileMapWidth();
@@ -67,21 +67,21 @@ public:
 
     bool hasOpenProject();
 
-    void openProjectFile(QString tempProjectFileName);
+    void openProjectFile(QString);
 
     void applyProjectSettings();
 
     bool hasDataFile();
 
-    void setOpenWith(QString openWith);
+    void setOpenWith(QString);
 
-    void setDeleteConfirmed(bool value);
-    void setDeleteFromDisk(bool value);
+    void setDeleteConfirmed(bool);
+    void setDeleteFromDisk(bool);
 
-    bool closeFileWindow(QString fileName);
-    void renameFileWindow(QString fileName, QString newName);
+    bool closeFileWindow(QString);
+    void renameFileWindow(QString, QString);
 
-    void appendErrorMessage(QString msg);
+    void appendErrorMessage(QString);
 
 
 
@@ -94,52 +94,38 @@ private slots:
     void resizeStackColumns();
     void resizeRegsColumns();
 
-    void projectExplorerMenuRequested(QPoint loc);
+    void enableCopyCutDelete(bool);
+    void enableUndo(bool);
+    void enableRedo(bool);
+    void projectExplorerMenuRequested(QPoint);
+    void editorWindowMenuRequested(QPoint);
 
     void on_actionNew_triggered();
-
     void on_actionAssemble_triggered();
-
     void on_actionSimulate_triggered();
-
     void on_actionClose_triggered();
-
     void on_actionTileset_viewer_triggered();
-
     void on_actionPalette_Viewer_triggered();
-
     void on_actionTile_loader_triggered();
-
     void on_actionSprite_Editor_triggered();
-
-    void printS();
-
     void on_actionReload_Tiles_Memory_triggered();
-
     void on_actionAssemble_and_Simulate_triggered();
-
     void on_actionOpen_Project_triggered();
-
     void on_actionInput_triggered();
 
-    void on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int column);
-
-    void on_treeFiles_itemExpanded(QTreeWidgetItem *item);
-
-    void on_treeFiles_itemCollapsed(QTreeWidgetItem *item);
+    void on_treeFiles_itemDoubleClicked(QTreeWidgetItem *, int);
+    void on_treeFiles_itemExpanded(QTreeWidgetItem *);
+    void on_treeFiles_itemCollapsed(QTreeWidgetItem *);
 
     void on_actionViewProjectManager_triggered();
-
     void on_actionViewAssemble_triggered();
-
     void on_actionViewCodeEditor_triggered();
-
     void on_actionViewMemory_triggered();
 
 
     void on_actionOpen_triggered();
 
-    void openTreeItem(QObject *itm);
+    void openTreeItem(QObject *);
 
     void activeWindowCopy();
     void activeWindowCut();
@@ -159,16 +145,10 @@ private slots:
 
 
     void on_actionNew_Project_triggered();
-
     void on_actionDefaultLayout_triggered();
 
-
-
     void on_actionSave_triggered();
-
-
     void on_actionEnable_Graphics_Engine_triggered();
-
     void on_btnClearConsole_clicked();
 
     void simulationComplete();
@@ -184,12 +164,12 @@ public slots:
     void renameDataItem(QString);
     void renameResItem(QString);
 
-    void removeDataFile(QString file);
-    void removeTextFile(QString file);
-    void removeMainTextFile(QString file);
-    void removeResourceFile(QString file);
+    void removeDataFile(QString);
+    void removeTextFile(QString);
+    void removeMainTextFile(QString);
+    void removeResourceFile(QString);
 
-    void assemblingProgress(int value);
+    void assemblingProgress(int);
 
 private:
     Ui::MainWindow *ui;
@@ -230,8 +210,8 @@ private:
 
     bool parseProjectXML(QFile &, bool);
     void loadProjectTree();
-    bool validateProjectFiles(bool forceAll);
-    bool validateTempProjectFiles(bool forceAll);
+    bool validateProjectFiles(bool);
+    bool validateTempProjectFiles(bool);
 
     bool closeAllWindows();
 
