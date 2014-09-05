@@ -294,11 +294,11 @@ void Assembler::parseDataSegment(QStringList* stringList)
     lineNumber = 0;
     address = 0;
 
-    QRegExp directivesRegex( "(?:[\\t ]*(" + labelRegex + "):[\\t ]*)?\\.([a-zA-Z]+)[\\t ]+([^\\r\\n]+)(?:#.+)?", Qt::CaseInsensitive);
+    QRegExp directivesRegex( "(?:[\\t ]*(" + labelRegex + "):[\\t ]*)?\\.([a-zA-Z]+)[ \\t]+([^\\r\\n]+)(?:#.+)?", Qt::CaseInsensitive);
+    directivesRegex.setMinimal(false);
     foreach (QString line, *stringList)
     {
         emit progressUpdate(((float)currentProgress++/totalCount)*100);
-
         if(directivesRegex.indexIn(line, 0) != -1){
             QString directiveName = directivesRegex.cap(2);
             QString labelName = directivesRegex.cap(1);
@@ -346,6 +346,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         errorList.append(Error("Invalid string", lineNumber));
                     }
                 }else if(directiveName == "half" || directiveName == "word"){
+                    parameters.remove(' ');
                     int alignNumber = ((directiveName == "half")? 1:2);
                     int factor = std::pow(2, alignNumber);
                     address = ((address + factor - 1) / factor ) * factor;
@@ -473,7 +474,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
 
     for (int i = 0; i<errorList.size(); i++)
     {
-        mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
+        //mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
 
@@ -1040,7 +1041,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
 
     for (int i = 0; i<errorList.size(); i++)
     {
-        mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
+        //mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
     emit assemblyComplete();
