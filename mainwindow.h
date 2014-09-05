@@ -102,6 +102,7 @@ private slots:
     void enableRedo(bool);
     void projectExplorerMenuRequested(QPoint);
     void editorWindowMenuRequested(QPoint);
+    void consoleMenuRequested(QPoint);
 
     void on_actionNew_triggered();
     void on_actionAssemble_triggered();
@@ -161,6 +162,12 @@ private slots:
     void on_actionMemory_Dump_triggered();
 
     void on_actionGPU_Memory_Dump_triggered();
+
+    void on_btnExportConsole_clicked();
+
+    void on_btnCopyConsole_clicked();
+
+    void on_btnClearConsole_clicked();
 
 public slots:
 

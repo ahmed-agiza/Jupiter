@@ -25,6 +25,13 @@ private:
 signals:
 public slots:
     void deleteSelection();
+    void deleteLine();
+    void moveLineUp();
+    void moveLineDown();
+    void copyLineUp();
+    void copyLineDown();
+    void popupSuggestions();
+    void commentLine();
 
 private slots:
     void insertCompletion(QString completion);

@@ -65,21 +65,21 @@ CodeEditor::CodeEditor(QWidget *parent) :
              << "swl"
              << "swr"
              <<"ll"
-             << "sc"
-             << "jr"
-             << "jalr"
-             << "mfhi"
-             << "mflo"
-             << "mthi"
-             << "mtlo"
-             << "mult"
-             << "multu"
-             << "div"
-             << "divu"
-             << "j"
-             << "jal"
-             << "syscall"
-             << "nop";
+            << "sc"
+            << "jr"
+            << "jalr"
+            << "mfhi"
+            << "mflo"
+            << "mthi"
+            << "mtlo"
+            << "mult"
+            << "multu"
+            << "div"
+            << "divu"
+            << "j"
+            << "jal"
+            << "syscall"
+            << "nop";
 
     //for (int i = 0; i < 32; i++) compList.append(QString("$" + QString::number(i)));
     compList << "$0"
@@ -88,65 +88,65 @@ CodeEditor::CodeEditor(QWidget *parent) :
              << "$v0"
              << "$v1"
              <<"$a0"
-             << "$a1"
-             << "$a2"
-             << "$a3"
-             << "$t0"
-             << "$t1"
-             << "$t2"
-             << "$t3"
-             << "$t4"
-             << "$t5"
-             << "$t6"
-             << "$t7"
-             << "$s0"
-             << "$s1"
-             << "$s2"
-             << "$s3"
-             << "$s4"
-             << "$s5"
-             << "$s6"
-             << "$s7"
-             << "$t8"
-             << "$t9"
-             << "$gp"
-             << "$fp"
-             << "$ra";
+            << "$a1"
+            << "$a2"
+            << "$a3"
+            << "$t0"
+            << "$t1"
+            << "$t2"
+            << "$t3"
+            << "$t4"
+            << "$t5"
+            << "$t6"
+            << "$t7"
+            << "$s0"
+            << "$s1"
+            << "$s2"
+            << "$s3"
+            << "$s4"
+            << "$s5"
+            << "$s6"
+            << "$s7"
+            << "$t8"
+            << "$t9"
+            << "$gp"
+            << "$fp"
+            << "$ra";
 
     compList << "blt"  <<  "bgt"
-                        <<  "ble"
-                        <<  "bge"
-                        <<  "bltu"
-                        <<  "bgtu"
-                        <<  "bleu"
-                        <<  "bgeu"
-                        <<  "blti"
-                        <<  "bgti"
-                        <<  "blei"
-                        <<  "bgei"
-                        <<  "bltiu"
+             <<  "ble"
+              <<  "bge"
+               <<  "bltu"
+                <<  "bgtu"
+                 <<  "bleu"
+                  <<  "bgeu"
+                   <<  "blti"
+                    <<  "bgti"
+                     <<  "blei"
+                      <<  "bgei"
+                       <<  "bltiu"
                         <<  "bgtiu"
-                        <<  "bleiu"
-                        <<  "bgeiu"
-                        <<  "beqz"
-                        <<  "bnez"
-                        <<  "bltz"
-                        <<  "bgtz"
-                        <<  "blez"
-                        <<  "bgez"
-                        <<  "li"
-                        <<  "ror"
-                        <<  "rol"
-                        <<  "not"
-                        <<  "neg"
-                        <<  "move"
-                        <<  "abs"
-                        <<  "mul"
-                        <<  "div"
-                        <<  "rem"
-                        <<  "clear"
-                        <<  "subi"
-                        <<  "la";
+                         <<  "bleiu"
+                          <<  "bgeiu"
+                           <<  "beqz"
+                            <<  "bnez"
+                             <<  "bltz"
+                              <<  "bgtz"
+                               <<  "blez"
+                                <<  "bgez"
+                                 <<  "li"
+                                  <<  "ror"
+                                   <<  "rol"
+                                    <<  "not"
+                                     <<  "neg"
+                                      <<  "move"
+                                       <<  "abs"
+                                        <<  "mul"
+                                         <<  "div"
+                                          <<  "rem"
+                                           <<  "clear"
+                                            <<  "subi"
+                                             <<  "la";
 
 
     QStringListModel *model = new QStringListModel(compList, this);
@@ -167,11 +167,11 @@ CodeEditor::CodeEditor(QWidget *parent) :
 
 
 void CodeEditor::focusInEvent(QFocusEvent *e)
- {
-     if (codeCompleter)
-         codeCompleter->setWidget(this);
-     QTextEdit::focusInEvent(e);
- }
+{
+    if (codeCompleter)
+        codeCompleter->setWidget(this);
+    QTextEdit::focusInEvent(e);
+}
 
 
 
@@ -189,61 +189,19 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         return;
     }
     else if (e->key() == Qt::Key_D && (e->modifiers() & Qt::ControlModifier)){
-            deleteCurrentLine();
-
+        deleteLine();
     } else if (e->key() == Qt::Key_Up && (e->modifiers() & Qt::AltModifier)){
-            QTextCursor currentPos = textCursor();
-            textCursor().setKeepPositionOnInsert(true);
-            currentPos.select(QTextCursor::LineUnderCursor);
-            QString line = currentPos.selectedText();
-            currentPos = textCursor();
-            currentPos.movePosition(QTextCursor::EndOfLine);
-            currentPos.insertText('\n' + line);
-            currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
-            setTextCursor(currentPos);
-
+        copyLineUp();
     }else if (e->key() == Qt::Key_Up && (e->modifiers() & Qt::ControlModifier)) {
-            QString line = getCurrentLine();
-            QTextCursor currentPos = deleteCurrentLine();
-            currentPos.movePosition(QTextCursor::StartOfLine);
-            currentPos.insertText(line + '\n');
-            currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
-            setTextCursor(currentPos);
-
+        moveLineUp();
     } else if (e->key() == Qt::Key_Down && (e->modifiers() & Qt::AltModifier)){
-            QTextCursor currentPos = textCursor();
-            textCursor().setKeepPositionOnInsert(true);
-            currentPos.select(QTextCursor::LineUnderCursor);
-            QString line = currentPos.selectedText();
-            currentPos = textCursor();
-            currentPos.movePosition(QTextCursor::EndOfLine);
-            currentPos.insertText('\n' + line);
-            currentPos.movePosition(QTextCursor::EndOfBlock);
-            setTextCursor(currentPos);
+        copyLineDown();
     }else if (e->key() == Qt::Key_Down && (e->modifiers() & Qt::ControlModifier)){
-            QString line = getCurrentLine();
-            QTextCursor cursCopy = textCursor();
-            QTextCursor currentPos = deleteCurrentLine();
-            currentPos.movePosition(QTextCursor::EndOfLine);
-            if (!cursCopy.selectionStart() == 0)
-                currentPos.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, line.length() + 1);
-            currentPos.insertText('\n' + line);
-            setTextCursor(currentPos);
+        moveLineDown();
     }else if (e->key() == Qt::Key_Space &&(e->modifiers() & Qt::ControlModifier)){
-            QRect popRect = this->cursorRect();
-            popRect.setWidth(50);
-            codeCompleter->complete(popRect);
-            codeCompleter->setCurrentRow(3);
-            codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));
+        popupSuggestions();
     }else if (e->key() == Qt::Key_3 && (e->modifiers() & Qt::ControlModifier)){
-        QTextCursor currentPos = textCursor();
-        currentPos.movePosition(QTextCursor::StartOfLine);
-        QTextCursor tempCursor(currentPos);
-        tempCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
-        if (tempCursor.selectedText() == "#")
-            tempCursor.removeSelectedText();
-        else
-             currentPos.insertText("#");
+        commentLine();
     } else
         QTextEdit::keyPressEvent(e);
 
@@ -255,6 +213,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
 QTextCursor CodeEditor::deleteCurrentLine()
 {
     QTextCursor currentPos = textCursor();
+    textCursor().beginEditBlock();
     currentPos.select(QTextCursor::BlockUnderCursor);
 
     if (currentPos.selectedText() == ""){
@@ -262,7 +221,7 @@ QTextCursor CodeEditor::deleteCurrentLine()
             currentPos.deleteChar();
         }else{
             currentPos.deletePreviousChar();
-         }
+        }
         currentPos.removeSelectedText();
     }
     else{
@@ -283,6 +242,75 @@ void CodeEditor::deleteSelection(){
     QTextCursor currentPos = textCursor();
     currentPos.removeSelectedText();
 
+}
+
+void CodeEditor::deleteLine(){
+    deleteCurrentLine().endEditBlock();
+}
+
+void CodeEditor::moveLineUp(){
+    QString line = getCurrentLine();
+    QTextCursor currentPos = deleteCurrentLine();
+    currentPos.movePosition(QTextCursor::StartOfLine);
+    currentPos.insertText(line + '\n');
+    currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
+    currentPos.endEditBlock();
+    setTextCursor(currentPos);
+}
+
+void CodeEditor::moveLineDown(){
+    QString line = getCurrentLine();
+    QTextCursor cursCopy = textCursor();
+    QTextCursor currentPos = deleteCurrentLine();
+    currentPos.movePosition(QTextCursor::EndOfLine);
+    if (!cursCopy.selectionStart() == 0)
+        currentPos.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, line.length() + 1);
+    currentPos.insertText('\n' + line);
+    currentPos.endEditBlock();
+    setTextCursor(currentPos);
+}
+
+void CodeEditor::copyLineUp(){
+    QTextCursor currentPos = textCursor();
+    textCursor().setKeepPositionOnInsert(true);
+    currentPos.select(QTextCursor::LineUnderCursor);
+    QString line = currentPos.selectedText();
+    currentPos = textCursor();
+    currentPos.movePosition(QTextCursor::EndOfLine);
+    currentPos.insertText('\n' + line);
+    currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
+    setTextCursor(currentPos);
+}
+
+void CodeEditor::copyLineDown(){
+    QTextCursor currentPos = textCursor();
+    textCursor().setKeepPositionOnInsert(true);
+    currentPos.select(QTextCursor::LineUnderCursor);
+    QString line = currentPos.selectedText();
+    currentPos = textCursor();
+    currentPos.movePosition(QTextCursor::EndOfLine);
+    currentPos.insertText('\n' + line);
+    currentPos.movePosition(QTextCursor::EndOfBlock);
+    setTextCursor(currentPos);
+}
+
+void CodeEditor::popupSuggestions(){
+    QRect popRect = this->cursorRect();
+    popRect.setWidth(50);
+    codeCompleter->complete(popRect);
+    codeCompleter->setCurrentRow(3);
+    codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));
+}
+
+void CodeEditor::commentLine(){
+    QTextCursor currentPos = textCursor();
+    currentPos.movePosition(QTextCursor::StartOfLine);
+    QTextCursor tempCursor(currentPos);
+    tempCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+    if (tempCursor.selectedText() == "#")
+        tempCursor.removeSelectedText();
+    else
+        currentPos.insertText("#");
 }
 
 void CodeEditor::insertCompletion(QString completion){
@@ -311,23 +339,23 @@ void CodeEditor::highlightLine(){
 void CodeEditor::updateCounter()
 {
     //Line count.
-   if(lCounter)
-   {
-       lCounter->clear();
-       lCounter->setAlignment(Qt::AlignCenter);
+    if(lCounter)
+    {
+        lCounter->clear();
+        lCounter->setAlignment(Qt::AlignCenter);
         int numLines = this->toPlainText().count("\n");
         for (int i = 0; i <= numLines; i++)
-           lCounter->append(QString::number(i));
+            lCounter->append(QString::number(i));
 
-   }
+    }
 }
 
 void CodeEditor::completerPop()
 {
     QTextCursor sel = textCursor();
-                sel.select(QTextCursor::WordUnderCursor);
+    sel.select(QTextCursor::WordUnderCursor);
     QTextCursor sel2 = textCursor();
-                sel2.select(QTextCursor::LineUnderCursor);
+    sel2.select(QTextCursor::LineUnderCursor);
 
     bool regS = (sel2.selectedText().mid(sel2.selectedText().lastIndexOf(QRegExp("( |,)+")) + 1, 1) == "$");
     if (regS)

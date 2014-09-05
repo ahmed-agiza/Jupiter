@@ -77,6 +77,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
     console = new IOConsole(ui->tabConsole);
+    console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->consoleHLayout->addWidget(console);
+    QObject::connect(console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(consoleMenuRequested(QPoint)));
     console->addText("This is some locked text\nInput:", false);
 
     treeWidget = ui->treeFiles;
@@ -724,6 +727,23 @@ void MainWindow::editorWindowMenuRequested(QPoint loc){
         menu->addAction(ui->actionSelect_All);
         menu->popup(activeWindow->codeEditor()->viewport()->mapToGlobal(loc));
     }
+}
+
+void MainWindow::consoleMenuRequested(QPoint loc){
+    QMenu *menu=new QMenu(this);
+    QAction *exportConsoleAction = new QAction("Export", this);
+    QAction *copyConsoleAction = new QAction ("Copy", this);
+    QAction *copyAllConsoleAction = new QAction("Copy All", this);
+    QAction *clearConsoleAction = new QAction("Clear", this);
+    QObject::connect(exportConsoleAction, SIGNAL(triggered()), this, SLOT(on_btnExportConsole_clicked()));
+    QObject::connect(copyConsoleAction, SIGNAL(triggered()), console, SLOT(copy()));
+    QObject::connect(copyAllConsoleAction, SIGNAL(triggered()), console, SLOT(copyAll()));
+    QObject::connect(clearConsoleAction, SIGNAL(triggered()), console, SLOT(clearConsole()));
+    menu->addAction(exportConsoleAction);
+    menu->addAction(copyConsoleAction);
+    menu->addAction(copyAllConsoleAction);
+    menu->addAction(clearConsoleAction);
+    menu->popup(console->viewport()->mapToGlobal(loc));
 }
 
 void MainWindow::on_actionSimulate_triggered(){
@@ -1705,4 +1725,33 @@ void MainWindow::on_actionGPU_Memory_Dump_triggered()
 {
     gpuMemoryDump = new GpuMemoryDump(this, memory);
     gpuMemoryDump->show();
+}
+
+void MainWindow::on_btnExportConsole_clicked(){
+    QString fileName;
+    if (projectFile.isOpen()){
+        fileName = QFileDialog::getSaveFileName(this, "Export Console", MainWindow::projectPath + "console.txt", "Text File(*.txt)");
+    }else{
+        fileName = QFileDialog::getSaveFileName(this, "Export Console", QDir::currentPath() + "/console.txt", "Text File(*.txt)");
+    }
+    if (fileName.trimmed() == "")
+        return;
+
+    QFile file(fileName);
+    if(file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)){
+        QTextStream writer(&file);
+        QStringList consoleText = console->toPlainText().split("\n");
+        foreach(QString line, consoleText)
+            writer << line << "\n";
+        file.close();
+    }else
+        QMessageBox::critical(this, "Error", "Failed to open the file for writing");
+}
+
+void MainWindow::on_btnCopyConsole_clicked(){
+    console->copyAll();
+}
+
+void MainWindow::on_btnClearConsole_clicked(){
+    console->clearConsole();
 }

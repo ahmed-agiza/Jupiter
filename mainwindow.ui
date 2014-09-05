@@ -242,6 +242,74 @@
         <attribute name="title">
          <string>Console</string>
         </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <layout class="QVBoxLayout" name="consoleHLayout">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <property name="sizeConstraint">
+              <enum>QLayout::SetDefaultConstraint</enum>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QWidget" name="consoleMarginalWidget" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item alignment="Qt::AlignRight">
+              <widget class="QToolButton" name="btnExportConsole">
+               <property name="toolTip">
+                <string>Export to File</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="res.qrc">
+                 <normaloff>:/icons/explorer/icons/explorer/textFileIcon.png</normaloff>:/icons/explorer/icons/explorer/textFileIcon.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item alignment="Qt::AlignHCenter">
+              <widget class="QToolButton" name="btnCopyConsole">
+               <property name="toolTip">
+                <string>Copy</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="res.qrc">
+                 <normaloff>:/icons/toolbar/icons/toolbar/copy.png</normaloff>:/icons/toolbar/icons/toolbar/copy.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item alignment="Qt::AlignHCenter">
+              <widget class="QToolButton" name="btnClearConsole">
+               <property name="toolTip">
+                <string>Clear Console</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="res.qrc">
+                 <normaloff>:/icons/toolbar/icons/toolbar/close.png</normaloff>:/icons/toolbar/icons/toolbar/close.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="tabLog">
         <attribute name="title">

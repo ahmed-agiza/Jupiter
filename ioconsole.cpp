@@ -1,6 +1,8 @@
 #include "ioconsole.h"
 #include <QDebug>
 #include <QKeyEvent>
+#include <QClipboard>
+#include <QApplication>
 
 IOConsole::IOConsole(QWidget *parent) :
     QTextEdit(parent){
@@ -9,6 +11,7 @@ IOConsole::IOConsole(QWidget *parent) :
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorChanged()));
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(onSelectionChanged()));
     selectionLocker = false;
+    setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
 void IOConsole::setLock(int pos){
@@ -21,6 +24,7 @@ void IOConsole::addText(QString text, bool ro = true){
     lockPosition += text.length();
     setReadOnly(ro);
     qDebug() << "Locked at " << lockPosition;
+    inputTrace.append(text);
 }
 
 int IOConsole::getLockPosition(){
@@ -32,9 +36,24 @@ void IOConsole::setLockAtEnd(){
     qDebug() << "Locked at " << lockPosition;
 }
 
+QString IOConsole::getInputAt(int index){
+    if (index < inputTrace.length())
+        return inputTrace.at(index);
+    return "";
+}
+
+void IOConsole::clearInputAt(int index){
+    if (index < inputTrace.length())
+        inputTrace.removeAt(index);
+}
+
+void IOConsole::reprint(){
+    clear();
+    foreach(QString line, inputTrace)
+        append(line + QString("\n"));
+}
+
 bool IOConsole::eventFilter(QObject *o, QEvent *e){
-
-
     return QTextEdit::eventFilter(o, e);
 }
 
@@ -44,10 +63,12 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::EndOfBlock);
         cursor.setPosition(lockPosition, QTextCursor::KeepAnchor);
-        emit dataInput(cursor.selectedText());
-        qDebug() << cursor.selectedText();
+        QString inputText = cursor.selectedText();
+        emit dataInput(inputText);
+        qDebug() << inputText;
         setReadOnly(true);
-        setLock(lockPosition + cursor.selectedText().length());
+        setLock(lockPosition + inputText.length());
+        inputTrace.append(inputText);
 
     }else if (e->key() == Qt::Key_Backspace){
         if (textCursor().position() <= lockPosition){
@@ -64,6 +85,16 @@ void IOConsole::enableEditing(bool ro){
 
 void IOConsole::getInput(){
     setReadOnly(true);
+}
+
+void IOConsole::clearConsole(){
+    clear();
+    lockPosition = 0;
+}
+
+void IOConsole::copyAll(){
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(toPlainText());
 }
 
 void IOConsole::onCursorChanged(){
@@ -91,3 +122,5 @@ void IOConsole::onSelectionChanged(){
         selectionLocker = false;
     }
 }
+
+\

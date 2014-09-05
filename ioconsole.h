@@ -12,9 +12,16 @@ public:
     void addText(QString, bool ro);
     int getLockPosition();
     void setLockAtEnd();
+    QString getInputAt(int index);
+    void clearInputAt(int index);
+    void reprint();
 private:
     int lockPosition;
     bool selectionLocker;
+    QStringList inputTrace;
+    QAction *clearAction;
+    QAction *copyAction;
+    QAction *exportAction;
 protected:
     bool eventFilter(QObject *, QEvent *);
     void keyPressEvent(QKeyEvent *);
@@ -25,6 +32,9 @@ signals:
 public slots:
     void enableEditing(bool);
     void getInput();
+    void clearConsole();
+    void copyAll();
+
 
 private slots:
     void onCursorChanged();
