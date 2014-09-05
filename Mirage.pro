@@ -47,7 +47,10 @@ SOURCES += main.cpp\
     filenamedialog.cpp \
     deletefiledialog.cpp \
     completerlist.cpp \
-    ioconsole.cpp
+    ioconsole.cpp \
+    memorydump.cpp \
+    savememorythread.cpp \
+    gpumemorydump.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -85,7 +88,10 @@ HEADERS  += mainwindow.h \
     filenamedialog.h \
     deletefiledialog.h \
     completerlist.h \
-    ioconsole.h
+    ioconsole.h \
+    memorydump.h \
+    savememorythread.h \
+    gpumemorydump.h
 
 
 FORMS    += \
@@ -100,7 +106,9 @@ FORMS    += \
     startupdialog.ui \
     projectcreator.ui \
     filenamedialog.ui \
-    deletefiledialog.ui
+    deletefiledialog.ui \
+    memorydump.ui \
+    gpumemorydump.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \

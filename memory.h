@@ -74,6 +74,7 @@ public:
 signals:
     void raiseException(int);
     void loadingNumberChanged(int);
+    void savingNumberChanged(int);
     void renderNow();
 
 public slots:

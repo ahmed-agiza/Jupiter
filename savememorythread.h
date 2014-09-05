@@ -1,5 +1,5 @@
-#ifndef LOADMEMORYTHREAD_H
-#define LOADMEMORYTHREAD_H
+#ifndef SAVEMEMORYTHREAD_H
+#define SAVEMEMORYTHREAD_H
 
 #include <QThread>
 #include <QtCore>
@@ -7,21 +7,21 @@
 #include <QMutex>
 #include "memory.h"
 
-class LoadMemoryThread : public QThread
+class SaveMemoryThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit LoadMemoryThread(QObject *parent, QVector<bool>);
+    explicit SaveMemoryThread(QObject *parent, QVector<bool>);
     void run();
     Memory* memory;
     QString filePath;
 private:
     QVector<bool> segmentsToLoad;
 signals:
-    void loadComplete();
+    void saveComplete();
 
 public slots:
 
 };
 
-#endif // LOADMEMORYTHREAD_H
+#endif // SAVEMEMORYTHREAD_H

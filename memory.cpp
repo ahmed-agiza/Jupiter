@@ -404,54 +404,63 @@ void Memory::saveMemory(QString fileName, QVector<bool> segmentsToLoad)
     if(segmentsToLoad[0]){
         for(int i=0; i<textSegmentPhysicalSize; i++){
             out.put(loadByte(textSegmentBaseAddress + i));
+            if(count %1024 == 0)
+                emit savingNumberChanged(count / 1024);
             count++;
         }
     }
     if(segmentsToLoad[1]){
         for(int i=0; i<dataSegmentPhysicalSize; i++){
             out.put(loadByte(dataSegmentBaseAddress + i));
+            if(count %1024 == 0)
+                emit savingNumberChanged(count / 1024);
             count++;
         }
     }
     if(segmentsToLoad[2]){
         for(int i=0; i<backgroundTileSetPhysicalSize; i++){
             out.put(loadByte(backgroundTileSetBaseAddress + i));
+            if(count %1024 == 0)
+                emit savingNumberChanged(count / 1024);
             count++;
         }
     }
     if(segmentsToLoad[3]){
         for(int i=0; i<spritesTileSetPhysicalSize; i++){
             out.put(loadByte(spritesTileSetBaseAddress + i));
+            if(count %1024 == 0)
+                emit savingNumberChanged(count / 1024);
             count++;
         }
     }
     if(segmentsToLoad[4]){
         for(int i=0; i<tileMapPhysicalSize; i++){
             out.put(loadByte(tileMapBaseAddress + i));
+            if(count %1024 == 0)
+                emit savingNumberChanged(count / 1024);
             count++;
         }
     }
     if(segmentsToLoad[5]){
         for(int i=0; i<spriteRamPhysicalSize; i++){
             out.put(loadByte(spriteRamBaseAddress + i));
+            if(count %1024 == 0)
+                emit savingNumberChanged(count / 1024);
             count++;
         }
     }
     if(segmentsToLoad[6]){
         for(int i=0; i<palettePhysicalSize; i++){
             out.put(loadByte(paletteBaseAddress + i));
-            count++;
-        }
-    }
-    if(segmentsToLoad[7]){
-        for(int i=0; i<heapSegmentPhysicalSize; i++){
-            out.put(loadByte(heapSegmentBaseAddress + i));
+            if(count %1024 == 0)
+                emit savingNumberChanged(count / 1024);
             count++;
         }
     }
 
 
     qDebug() << "saved: "<<count<<" bytes\n";
+    emit savingNumberChanged((claculateLoadSize(segmentsToLoad) + 1024 - 1)/1024);
     out.close();
 }
 
@@ -472,8 +481,6 @@ int Memory::claculateLoadSize(const QVector<bool>& segments)
         totalSize += spriteRamPhysicalSize;
     if(segments[6])
         totalSize += palettePhysicalSize;
-    if(segments[7])
-        totalSize += heapSegmentPhysicalSize;
     return totalSize;
 }
 
@@ -553,16 +560,6 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
             count++;
         }
     }
-    if(segmentsToLoad[7]){
-        for(int i=0; i<heapSegmentPhysicalSize; i++){
-            in.getChar(byte);
-            storeByte(heapSegmentBaseAddress + i, *byte);
-            if(count %1024 == 0)
-                emit loadingNumberChanged(count / 1024);
-            count++;
-        }
-    }
-
 
     qDebug() << "loaded: "<<count<<" bytes\n";
     in.close();
