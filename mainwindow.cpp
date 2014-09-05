@@ -1694,3 +1694,15 @@ void MainWindow::assemblyComplete(){
 void MainWindow::on_btnClearLog_clicked(){
     ui->textLog->clear();
 }
+
+void MainWindow::on_actionMemory_Dump_triggered()
+{
+    memoryDump = new MemoryDump(this, memory);
+    memoryDump->show();
+}
+
+void MainWindow::on_actionGPU_Memory_Dump_triggered()
+{
+    gpuMemoryDump = new GpuMemoryDump(this, memory);
+    gpuMemoryDump->show();
+}

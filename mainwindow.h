@@ -22,6 +22,8 @@
 #include "inputmanager.h"
 #include "codeeditorwindow.h"
 #include "ioconsole.h"
+#include "memorydump.h"
+#include "gpumemorydump.h"
 
 namespace Ui {
 class MainWindow;
@@ -156,6 +158,10 @@ private slots:
 
     void on_btnClearLog_clicked();
 
+    void on_actionMemory_Dump_triggered();
+
+    void on_actionGPU_Memory_Dump_triggered();
+
 public slots:
 
     void setMainProjectFile(QString);
@@ -188,6 +194,8 @@ private:
     SpriteViewer *spriteViewer;
     QVector<int> mainProcessorRegisters;
     Assembler *assem;
+    MemoryDump *memoryDump;
+    GpuMemoryDump *gpuMemoryDump;
     RegistersModel *regModel;
     MemoryModel *textModel, *dataModel, *stackModel, *heapModel;
     bool assemblerInitialized;

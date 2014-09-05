@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>334</height>
+    <height>305</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>0</x>
      <y>0</y>
      <width>411</width>
-     <height>311</height>
+     <height>291</height>
     </rect>
    </property>
    <property name="tabPosition">
@@ -71,7 +71,7 @@
       <string>Save to file</string>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>110</x>
@@ -138,15 +138,41 @@
     <attribute name="title">
      <string>Palette</string>
     </attribute>
+    <widget class="QPushButton" name="dumpstdpalette">
+     <property name="geometry">
+      <rect>
+       <x>214</x>
+       <y>20</y>
+       <width>131</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dump standard palette</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>214</x>
+       <y>50</y>
+       <width>131</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Open Palette Viewer</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QProgressBar" name="progressBar">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>310</y>
-     <width>371</width>
-     <height>23</height>
+     <y>290</y>
+     <width>381</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="value">

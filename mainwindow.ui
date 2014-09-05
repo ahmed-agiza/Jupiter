@@ -191,6 +191,9 @@
     <addaction name="actionPalette_Viewer"/>
     <addaction name="actionTile_loader"/>
     <addaction name="separator"/>
+    <addaction name="actionMemory_Dump"/>
+    <addaction name="actionGPU_Memory_Dump"/>
+    <addaction name="separator"/>
     <addaction name="actionConfigure"/>
    </widget>
    <addaction name="menuFile"/>
@@ -1318,6 +1321,16 @@
   <action name="actionDeleteSelection">
    <property name="text">
     <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionMemory_Dump">
+   <property name="text">
+    <string>Memory Dump</string>
+   </property>
+  </action>
+  <action name="actionGPU_Memory_Dump">
+   <property name="text">
+    <string>GPU Memory Dump</string>
    </property>
   </action>
  </widget>
