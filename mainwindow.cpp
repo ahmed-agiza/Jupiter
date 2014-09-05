@@ -435,7 +435,7 @@ void MainWindow::assemblingProgress(int value){
 
 void MainWindow::simulationProgress(){
     static int simProg = 0;
-    statusBar()->showMessage("Simulating " + QString(".").repeated(simProg++%3 + 1));
+    statusBar()->showMessage("Simulating" + QString(".").repeated(simProg++%3 + 1));
 }
 
 
