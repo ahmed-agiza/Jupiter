@@ -22,14 +22,18 @@ private:
     QAction *clearAction;
     QAction *copyAction;
     QAction *exportAction;
+    int requestNumber;
 protected:
     bool eventFilter(QObject *, QEvent *);
     void keyPressEvent(QKeyEvent *);
 
 signals:
-    void dataInput(QString);
+    void sendInt(int);
+    void sendString(QString);
+    void sendChar(QString);
 
 public slots:
+    void inputRequest(int);
     void enableEditing(bool);
     void getInput();
     void clearConsole();

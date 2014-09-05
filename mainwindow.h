@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QThread>
 #include <QProgressBar>
+#include <QTimer>
 
 #include "syntaxhl.h"
 #include "assembler.h"
@@ -170,6 +171,7 @@ private slots:
     void on_btnClearConsole_clicked();
 
 public slots:
+    void printToConsole(QString);
 
     void setMainProjectFile(QString);
     void unsetMainProjectFile();
@@ -208,6 +210,7 @@ private:
     bool assemblerInitialized;
     QFont editorFont;
     IOConsole *console;
+    QTimer *timer;
 
     QTreeWidget *treeWidget;
 

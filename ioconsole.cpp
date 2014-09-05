@@ -4,6 +4,22 @@
 #include <QClipboard>
 #include <QApplication>
 
+#ifndef SYSCALL_FUNCTIONS
+#define SYSCALL_FUNCTIONS
+#define PRINT_INTEGER 1
+#define PRINT_FLOAT	2
+#define PRINT_DOUBLE 3
+#define PRINT_STRING 4
+#define READ_INTEGER 5
+#define READ_FLOAT 6
+#define READ_DOUBLE 7
+#define READ_STRING 8
+#define MEMORY_ALLOCATION 9
+#define EXIT 10
+#define PRINT_CHARACTER	11
+#define READ_CHARACTER 12
+#endif
+
 IOConsole::IOConsole(QWidget *parent) :
     QTextEdit(parent){
     installEventFilter(this);
@@ -12,6 +28,8 @@ IOConsole::IOConsole(QWidget *parent) :
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(onSelectionChanged()));
     selectionLocker = false;
     setContextMenuPolicy(Qt::CustomContextMenu);
+    requestNumber = 0;
+    setReadOnly(true);
 }
 
 void IOConsole::setLock(int pos){
@@ -64,11 +82,27 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
         cursor.movePosition(QTextCursor::EndOfBlock);
         cursor.setPosition(lockPosition, QTextCursor::KeepAnchor);
         QString inputText = cursor.selectedText();
-        emit dataInput(inputText);
         qDebug() << inputText;
         setReadOnly(true);
         setLock(lockPosition + inputText.length());
         inputTrace.append(inputText);
+        switch (requestNumber) {
+        case READ_INTEGER:
+            emit sendInt(inputText.toInt());
+            break;
+        case READ_STRING:
+            emit sendString(inputText);
+            break;
+        case READ_CHARACTER:
+            qDebug() << "Sending char" << ((inputText.length() > 0)?inputText.mid(0, 1):"Null");
+            if (inputText.length() >= 1)
+                emit sendChar(inputText.mid(0, 1));
+            else
+                emit sendChar("");
+                    break;
+        default:
+            break;
+        }
 
     }else if (e->key() == Qt::Key_Backspace){
         if (textCursor().position() <= lockPosition){
@@ -77,6 +111,17 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
         }
     }
     QTextEdit::keyPressEvent(e);
+}
+
+void IOConsole::inputRequest(int val){
+    qDebug() << "Requesting " << val;
+    requestNumber = val;
+    setReadOnly(false);
+    setFocus();
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::EndOfBlock);
+    setTextCursor(cursor);
+
 }
 
 void IOConsole::enableEditing(bool ro){
@@ -123,4 +168,4 @@ void IOConsole::onSelectionChanged(){
     }
 }
 
-\
+

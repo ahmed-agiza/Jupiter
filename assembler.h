@@ -46,6 +46,9 @@ private:
     Memory *mem;
     MainWindow *mainW;
     TileEngine *engine;
+
+    bool waiting;
+
     int address;
     int lineNumber;
     int PC;
@@ -85,12 +88,17 @@ public slots:
     void exceptionHandler(int);
     void assemble(QStringList dataFileStringList, QStringList textFileStringList);
     void simulate();
+    void readInt(int);
+    void readString(QString);
+    void readCharacter(QString);
 signals:
     void buttonPressed(int, int, bool);
     void simulationComplete();
     void assemblyComplete();
     void progressUpdate(int);
     void simulationActive();
+    void inputRequired(int func);
+    void printToConsole(QString);
     void logStringSignal(QString);
     void logDataSignal(QStringList); //For testing.
 };

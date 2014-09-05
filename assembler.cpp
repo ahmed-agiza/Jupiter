@@ -2,7 +2,24 @@
 #include "mainwindow.h"
 #include <QDebug>
 #include <iostream>
+#include <QByteArray>
 #include <math.h>
+
+#ifndef SYSCALL_FUNCTIONS
+#define SYSCALL_FUNCTIONS
+#define PRINT_INTEGER 1
+#define PRINT_FLOAT	2
+#define PRINT_DOUBLE 3
+#define PRINT_STRING 4
+#define READ_INTEGER 5
+#define READ_FLOAT 6
+#define READ_DOUBLE 7
+#define READ_STRING 8
+#define MEMORY_ALLOCATION 9
+#define EXIT 10
+#define PRINT_CHARACTER	11
+#define READ_CHARACTER 12
+#endif
 
 
 // matches valid register names
@@ -1025,7 +1042,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
     }
 
 
-    for (int i = 0; i < instructions.size(); i++)
+   /* for (int i = 0; i < instructions.size(); i++)
     {
         qDebug() << "********* instruction " + QString::number(i) + " ********";
         qDebug() << "Name: " << instructions[i].getName();
@@ -1036,7 +1053,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         qDebug() << "Shamt: " << instructions[i].getShamt();
         qDebug() << "**********************************************";
 
-    }
+    }*/
 
 
     for (int i = 0; i<errorList.size(); i++)
@@ -1827,7 +1844,8 @@ void Assembler::simulate()
     PC = 0;
     int i = 0;
     int activePC = PC/4;
-    while (PC != -1 && ((PC/4) < instructions.size() && i < 150))
+    bool exitExec = false;
+    while ((PC != -1 && ((PC/4) < instructions.size() && !exitExec /*&& i < 150*/)) /*|| waiting*/)
     {
 
         if(mainW->isGFXEnabled()){
@@ -1856,7 +1874,7 @@ void Assembler::simulate()
                         emit Assembler::buttonPressed(B_KEY_INDEX,0, true);
                         break;
                     case Keyboard::D:
-                         Assembler::buttonPressed(R_KEY_INDEX,0, true);
+                        Assembler::buttonPressed(R_KEY_INDEX,0, true);
                         break;
                     case Keyboard::A:
                         emit Assembler::buttonPressed(L_KEY_INDEX,0, true);
@@ -1913,36 +1931,165 @@ void Assembler::simulate()
                 }
             }
         }
-        emit simulationActive();
-        activePC = PC/4;
-        QString logText = QString::number(i) + ": PC: " + QString::number(PC)
-                + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
-                + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
-                + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
-                + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "  "
-                + " Im" + QString::number(instructions[activePC].getImm());
-        instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
-        instructions[activePC].execute(PC);
-        (*registers)[0] = 0;
-        logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
-        logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
-        + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
-        + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "\n\n\n");
-        logData.append(logText);
-        emit logStringSignal(logText); //For testing.
-        i++;
-    }
-    emit simulationComplete();
-    emit logDataSignal(logData);
+        //qDebug() << "Running " << PC;
+        if (!waiting){
+            //emit simulationActive();
+            activePC = PC/4;
+            QString logText = QString::number(i) + ": PC: " + QString::number(PC)
+                    + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
+                    + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+                    + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+                    + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "  "
+                    + " Im" + QString::number(instructions[activePC].getImm());
 
+            if (instructions[activePC].getName() == "syscall"){
+                int functionNumber = (*registers)[2];
+                QString msg;
+                QString charac;
+                QString previousChar;
+                QByteArray strArray;
+                QByteArray strByte(1, ' ');
+                int offset;
+                int baseAddress;
+                switch(functionNumber){
+                case 0:
+                    qDebug() << "Invalid function value in $v0 for the syscall";
+                    PC += 4;
+                    break;
+                case PRINT_INTEGER:
+                    msg = QString::number((*registers)[4]);
+                    emit printToConsole(msg);
+                    PC += 4;
+                    break;
+                case PRINT_FLOAT:
+                    qDebug() << "FPU instructions are not implemented";
+                    PC += 4;
+                    break;
+                case PRINT_DOUBLE:
+                    qDebug() << "FPU instructions are not implemented";
+                    PC += 4;
+                    break;
+                case PRINT_STRING:
+                    //Printing String.
+                    qDebug() << "Printing string";
+                    msg = "";
+                    offset = 1;
+                    baseAddress = (*registers)[4];
+                    qDebug() << baseAddress;
+                    strArray.resize(1);
+                    strArray[0] = (char) mem->loadByte(baseAddress);
+                    charac = QString::fromLatin1(strArray);
+                    qDebug() << charac;
+                    while (!(charac == "0" && previousChar == "\\") && offset < 100){
+                            msg.append(charac);
+                            strArray [0] = (char) mem->loadByte(baseAddress + offset++);
+                            previousChar = charac;
+                            charac = QString::fromLatin1(strArray);
+                            qDebug() << charac;
+                    }
+                    msg.remove(msg.length() - 1, 1);
+                    emit printToConsole(msg);
+                    PC += 4;
+                    break;
+                case READ_INTEGER:
+                    waiting = true;
+                    emit inputRequired(functionNumber);
+                    PC += 4;
+                    break;
+                case READ_FLOAT:
+                    qDebug() << "FPU instructions are not implemented";
+                    PC += 4;
+                    break;
+                case READ_DOUBLE:
+                    qDebug() << "FPU instructions are not implemented";
+                    PC += 4;
+                    break;
+                case READ_STRING:
+                    waiting = true;
+                    emit inputRequired(functionNumber);
+                    PC += 4;
+                    break;
+                case MEMORY_ALLOCATION:
+                    qDebug() << "Allocate heap memory";
+                    //Allocate Heap Memory
+                    PC += 4;
+                    break;
+                case EXIT:
+                    exitExec = true;
+                    break;
+                case PRINT_CHARACTER:
+                    qDebug() << "Print character";
+                    //Print character
+
+                    strByte[0] = (char) mem->loadByte((*registers)[4]);
+                    msg = QString::fromLatin1(strByte);
+                    emit printToConsole(msg);
+                    PC += 4;
+                    break;
+                case READ_CHARACTER:
+                    qDebug() << "Read character";
+                    //Read character
+                    emit inputRequired(functionNumber);
+                    waiting = true;
+                    PC += 4;
+                    break;
+                default:
+                    qDebug() << "Unhandled syscall function number " << (*registers)[1];
+                    PC += 4;
+                    break;
+                }
+
+            }
+            instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
+            instructions[activePC].execute(PC);
+            (*registers)[0] = 0;
+            logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
+            logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+                           + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+                           + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "\n\n\n");
+            logData.append(logText);
+            emit logStringSignal(logText); //For testing.
+            i++;
+        }
+    }
+    if (!waiting){
+        emit simulationComplete();
+        emit logDataSignal(logData);
+    }
+
+}
+
+void Assembler::readInt(int value){
+    (*registers)[2] = value;
+    waiting = false;
+}
+
+void Assembler::readString(QString input){
+    int baseAdress = (*registers)[4];
+    for (int i = 0; i < input.length(); i++){
+        mem->storeByte(baseAdress + i, input.at(i).toLatin1());
+    }
+    mem->storeByte(input.length(), '\0');
+    waiting = false;
+
+}
+
+void Assembler::readCharacter(QString charc){
+    qDebug() << "Got char" << charc;
+    if (charc.length() >= 1)
+        (*registers)[2] = (int) charc.at(0).toLatin1();
+    else
+        (*registers)[2] = 0;
+    waiting = false;
 }
 
 
 
 
 
-int Assembler::getNumber(QString s)
-{
+
+
+int Assembler::getNumber(QString s){
     bool f;
     s = s.toLower();
     if(s.startsWith("0x"))
@@ -2048,9 +2195,9 @@ void Assembler::initializeRegisters()
     opcode["sc"] = 56;
 
     for (int i = 0; i < registers->size(); i++)
-            (*registers)[i] = 0;
-        (*registers)[28] = 0x10008000;
-        (*registers)[29] = 0x7FFFEFFC;
+        (*registers)[i] = 0;
+    (*registers)[28] = 0x10008000;
+    (*registers)[29] = 0x7FFFEFFC;
 
     //registers = new QVector<int>(32,0);
 
@@ -2112,6 +2259,7 @@ void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStr
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
     totalCount = dataFileStringList.size() + textFileStringList.size();
     currentProgress = 0;
+    waiting = false;
     parseDataSegment(&dataFileStringList);
     parseTextSegment(&textFileStringList);
 }

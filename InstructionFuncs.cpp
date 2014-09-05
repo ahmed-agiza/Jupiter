@@ -473,7 +473,7 @@ int jal(fParam2)
 }
 int syscall(fParam2)
 {
-    switch((*base)[2])
+   /* switch((*base)[2])
     {
         case 0:
 
@@ -523,7 +523,7 @@ int syscall(fParam2)
             return UnknownSyscall;
             break;
     }
-    incPC;
+    incPC;*/
     return SyscallExNo;
 
 }

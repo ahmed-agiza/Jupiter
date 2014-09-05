@@ -80,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent) :
     console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->consoleHLayout->addWidget(console);
     QObject::connect(console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(consoleMenuRequested(QPoint)));
-    console->addText("This is some locked text\nInput:", false);
+    //console->addText("This is some locked text\nInput:", false);
 
     treeWidget = ui->treeFiles;
 
@@ -166,6 +166,12 @@ MainWindow::MainWindow(QWidget *parent) :
     assembling = false;
     simulateAfterAssembling = false;
     ui->tabsProject->setCurrentIndex(0);
+    timer = new QTimer(this);
+    timer->setSingleShot(false);
+    timer->setInterval(300);
+    timer->stop();
+    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(simulationProgress()));
+
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *e){
@@ -771,11 +777,19 @@ void MainWindow::on_actionSimulate_triggered(){
 
         assemblerInitialized = false;
         QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
-        QObject::connect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
+        //QObject::connect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
         QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
         QObject::connect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
+        QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
+        QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
+        QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
+        QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
+        QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
         simulating = true;
         simulationThread.start();
+        timer->start();
+        if (console->toPlainText().trimmed() != "")
+            console->addText("\n", true);
         emit simulateSignal();
         statusBar()->showMessage("Simulating");
         appendErrorMessage("--Showing simulation log for testing--");
@@ -839,9 +853,15 @@ void MainWindow::on_actionAssemble_triggered(){
             QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
             QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
             QObject::disconnect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
-            QObject::disconnect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
+            //QObject::disconnect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
             QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
             QObject::disconnect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
+            QObject::disconnect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
+            QObject::disconnect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
+            QObject::disconnect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
+            QObject::disconnect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
+            QObject::disconnect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
+
             simulationThread.quit();
             simulationThread.wait();
             delete assem;
@@ -1664,6 +1684,7 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
 
 void MainWindow::simulationComplete(){
     simulating = false;
+    timer->stop();
     refreshActions();
 
     simulationThread.quit();
@@ -1754,4 +1775,8 @@ void MainWindow::on_btnCopyConsole_clicked(){
 
 void MainWindow::on_btnClearConsole_clicked(){
     console->clearConsole();
+}
+
+void MainWindow::printToConsole(QString msg){
+    console->addText(msg, true);
 }
