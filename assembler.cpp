@@ -1824,7 +1824,7 @@ void Assembler::simulate()
     PC = 0;
     int i = 0;
     int activePC = PC/4;
-    while (PC != -1 && ((PC/4) < instructions.size() && i < 15))
+    while (PC != -1 && ((PC/4) < instructions.size() && i < 150))
     {
 
         if(mainW->isGFXEnabled()){

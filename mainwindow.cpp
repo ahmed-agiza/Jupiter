@@ -76,6 +76,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
+    console = new IOConsole(ui->tabConsole);
+    console->addText("This is some locked text\nInput:");
+
     treeWidget = ui->treeFiles;
 
     memory = new Memory(this);
@@ -159,7 +162,7 @@ MainWindow::MainWindow(QWidget *parent) :
     simulationBar = NULL;
     assembling = false;
     simulateAfterAssembling = false;
-
+    ui->tabsProject->setCurrentIndex(0);
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *e){
@@ -1247,8 +1250,8 @@ void MainWindow::renameFileWindow(QString fileName, QString newName){
 }
 
 void MainWindow::appendErrorMessage(QString msg){
-    QString currentText = ui->textConsole->toPlainText();
-    ui->textConsole->setText((currentText.trimmed() == "")? msg : ui->textConsole->toPlainText() + QString("\n") + msg);
+    QString currentText = ui->textLog->toPlainText();
+    ui->textLog->setText((currentText.trimmed() == "")? msg : ui->textLog->toPlainText() + QString("\n") + msg);
 }
 
 void MainWindow::on_actionInput_triggered()
@@ -1637,9 +1640,7 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
     rebuildProjectFile();
 }
 
-void MainWindow::on_btnClearConsole_clicked(){
-    ui->textConsole->clear();
-}
+
 
 void MainWindow::simulationComplete(){
     simulating = false;
@@ -1688,4 +1689,8 @@ void MainWindow::assemblyComplete(){
     if (simulateAfterAssembling)
         ui->actionSimulate->trigger();
     simulateAfterAssembling = false;
+}
+
+void MainWindow::on_btnClearLog_clicked(){
+    ui->textLog->clear();
 }

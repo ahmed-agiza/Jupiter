@@ -46,7 +46,8 @@ SOURCES += main.cpp\
     keyboardmanager.cpp \
     filenamedialog.cpp \
     deletefiledialog.cpp \
-    completerlist.cpp
+    completerlist.cpp \
+    ioconsole.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -83,7 +84,8 @@ HEADERS  += mainwindow.h \
     keyboardmanager.h \
     filenamedialog.h \
     deletefiledialog.h \
-    completerlist.h
+    completerlist.h \
+    ioconsole.h
 
 
 FORMS    += \

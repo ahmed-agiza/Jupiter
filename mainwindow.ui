@@ -214,7 +214,7 @@
      <item>
       <widget class="QTabWidget" name="tabsProject">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabProjectFiles">
         <attribute name="title">
@@ -239,11 +239,16 @@
         <attribute name="title">
          <string>Console</string>
         </attribute>
+       </widget>
+       <widget class="QWidget" name="tabLog">
+        <attribute name="title">
+         <string>Log</string>
+        </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item alignment="Qt::AlignRight">
-          <widget class="QToolButton" name="btnClearConsole">
+          <widget class="QToolButton" name="btnClearLog">
            <property name="toolTip">
-            <string>Clear Console</string>
+            <string>Clear Log</string>
            </property>
            <property name="text">
             <string>Clear</string>
@@ -255,7 +260,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QTextEdit" name="textConsole">
+          <widget class="QTextEdit" name="textLog">
            <property name="readOnly">
             <bool>true</bool>
            </property>

@@ -21,6 +21,7 @@
 #include "spriteviewer.h"
 #include "inputmanager.h"
 #include "codeeditorwindow.h"
+#include "ioconsole.h"
 
 namespace Ui {
 class MainWindow;
@@ -149,10 +150,11 @@ private slots:
 
     void on_actionSave_triggered();
     void on_actionEnable_Graphics_Engine_triggered();
-    void on_btnClearConsole_clicked();
 
     void simulationComplete();
     void assemblyComplete();
+
+    void on_btnClearLog_clicked();
 
 public slots:
 
@@ -190,6 +192,7 @@ private:
     MemoryModel *textModel, *dataModel, *stackModel, *heapModel;
     bool assemblerInitialized;
     QFont editorFont;
+    IOConsole *console;
 
     QTreeWidget *treeWidget;
 
