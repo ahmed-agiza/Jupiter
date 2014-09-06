@@ -48,6 +48,7 @@ public:
 
     void loadMemory(QString, QVector<bool>);
     void saveMemory(QString, QVector<bool>);
+    void resizeTileMap();
 //    bool isValidWordL(int, int) const;
 //    bool isValidWordR(int, int) const;
 //    void storeWordL(int, int, int);

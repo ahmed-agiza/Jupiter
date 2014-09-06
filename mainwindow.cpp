@@ -983,6 +983,8 @@ void MainWindow::on_actionOpen_Project_triggered()
     if (projectFile.isOpen())
         closeProject();
     openProjectFile(tempProjectFileName);
+
+    memory->resizeTileMap();
 }
 
 

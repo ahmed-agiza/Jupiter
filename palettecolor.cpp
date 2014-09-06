@@ -49,6 +49,9 @@ sf::Color PaletteColor::getColor() const
 void PaletteColor::setColor(sf::Color clr)
 {
     color = clr;
+    for(int i=0; i<myTiles.size(); i++){
+        myTiles[i]->update();
+    }
 }
 
 void PaletteColor::addTile(Tile * tile)

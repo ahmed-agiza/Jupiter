@@ -45,7 +45,7 @@ void MemoryLoading::on_pushButton_pressed()
 {
     connect(mem, SIGNAL(loadingNumberChanged(int)), this, SLOT(onLoadingNumberChanged(int)));
     ui->pushButton->setEnabled(false);
-    QVector<bool> segmentsToLoad(8);
+    QVector<bool> segmentsToLoad(7);
     segmentsToLoad.fill(0);
     segmentsToLoad[2] = 1;
     segmentsToLoad[3] = 1;

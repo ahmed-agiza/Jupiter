@@ -7,6 +7,12 @@
 #include "loadmemorythread.h"
 #include "savememorythread.h"
 #include "loadtilesetsthread.h"
+#include "savetilesetthread.h"
+#include "paletteloadingthread.h"
+#include "palettesavingthread.h"
+#include "tilemaploadingthread.h"
+#include "tilemapsavingthread.h"
+
 
 namespace Ui {
 class GpuMemoryDump;
@@ -52,12 +58,18 @@ public:
     explicit GpuMemoryDump(QWidget *parent, Memory *memory, MainWindow *);
     ~GpuMemoryDump();
     void fillStdPalette();
+    void disableButtons();
 private:
     Ui::GpuMemoryDump *ui;
     Memory *mem;
     LoadMemoryThread *loadingThread;
     SaveMemoryThread *savingThread;
     LoadTilesetsThread *loadTilesetsThread;
+    SaveTilesetThread *saveTilesetThread;
+    PaletteLoadingThread *paletteLoadingThread;
+    PaletteSavingThread *paletteSavingThread;
+    TilemapLoadingThread *tilemapLoadingThread;
+    TilemapSavingThread *tilemapSavingThread;
     MainWindow *mainW;
     QStringList nameList;
     int claculateMemorySize(const QVector<bool>&);

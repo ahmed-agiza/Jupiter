@@ -51,7 +51,12 @@ SOURCES += main.cpp\
     memorydump.cpp \
     savememorythread.cpp \
     gpumemorydump.cpp \
-    loadtilesetsthread.cpp
+    loadtilesetsthread.cpp \
+    savetilesetthread.cpp \
+    paletteloadingthread.cpp \
+    palettesavingthread.cpp \
+    tilemaploadingthread.cpp \
+    tilemapsavingthread.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -93,7 +98,12 @@ HEADERS  += mainwindow.h \
     memorydump.h \
     savememorythread.h \
     gpumemorydump.h \
-    loadtilesetsthread.h
+    loadtilesetsthread.h \
+    savetilesetthread.h \
+    paletteloadingthread.h \
+    palettesavingthread.h \
+    tilemaploadingthread.h \
+    tilemapsavingthread.h
 
 
 FORMS    += \

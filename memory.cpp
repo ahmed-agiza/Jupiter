@@ -107,6 +107,7 @@ Memory::Memory(QObject *parent): QObject(parent),
     backgroundTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
 
     tileMapPhysicalSize = screenHeight/TILE_SIZE * getScreensHeightCount() * screenWidth/TILE_SIZE * getScreensWidthCount();
+    qDebug() << getScreensHeightCount() << " " << getScreensWidthCount();
     backgroundTileSet.resize(256);
     spritesTileSet.resize(256);
     tileMap.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
@@ -138,6 +139,14 @@ Memory::Memory(QObject *parent): QObject(parent),
     for(int i=0; i<spriteRam.size(); i++)
         spriteRam[i].setTileSet(&spritesTileSet);
 
+}
+
+void Memory::resizeTileMap()
+{
+    tileMapPhysicalSize = screenHeight/TILE_SIZE * getScreensHeightCount() * screenWidth/TILE_SIZE * getScreensWidthCount();
+    tileMap.clear();
+    tileMap.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
+    tileMap.fill( QVector<char>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
 }
 
 Memory::~Memory()
@@ -501,6 +510,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
             count++;
         }
     }
+    qDebug() << count;
     if(segmentsToLoad[1]){
         for(int i=0; i<dataSegmentPhysicalSize; i++){
             in.getChar(byte);
@@ -510,6 +520,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
             count++;
         }
     }
+    qDebug() << count;
 
     if(segmentsToLoad[2]){
         for(int i=0; i<backgroundTileSetPhysicalSize; i++){
@@ -520,6 +531,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
             count++;
         }
     }
+    qDebug() << count;
 
     if(segmentsToLoad[3]){
         for(int i=0; i<spritesTileSetPhysicalSize; i++){
@@ -530,6 +542,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
             count++;
         }
     }
+    qDebug() << count;
 
     if(segmentsToLoad[4]){
         for(int i=0; i<tileMapPhysicalSize; i++){
@@ -540,6 +553,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
             count++;
         }
     }
+    qDebug() << count;
 
     if(segmentsToLoad[5]){
         for(int i=0; i<spriteRamPhysicalSize; i++){
@@ -550,6 +564,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
             count++;
         }
     }
+    qDebug() << count;
 
     if(segmentsToLoad[6]){
         for(int i=0; i<palettePhysicalSize; i++){
