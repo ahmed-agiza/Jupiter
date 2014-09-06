@@ -1985,7 +1985,7 @@ void Assembler::simulate()
                     strArray.resize(1);
                     strArray[0] = (char) mem->loadByte(baseAddress);
                     //charac = QString::fromLatin1(strArray);
-                    while (strArray[0] != 0 && offset < 100){
+                    while (strArray[0] != '\0' && offset < 100){
                             charac = QString::fromLatin1(strArray);
                             strArray [0] = (char) mem->loadByte(baseAddress + offset++);
                             msg.append(charac);

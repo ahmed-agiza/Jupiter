@@ -178,7 +178,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                 }else{
                     QByteArray strByte(1, ' ');
                     strByte[0] = (char) value;
-                    if (strByte[0] == 0)
+                    if (strByte[0] == '\0')
                         return "\\0";
                     else
                         return "'" + QString::fromLatin1(strByte) + "'";

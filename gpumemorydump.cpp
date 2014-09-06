@@ -253,7 +253,7 @@ void GpuMemoryDump::on_loadPaletteImage_clicked()
 void GpuMemoryDump::on_loadTilemap_clicked()
 {
     QString filePath = "";
-    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("Mirage tile map(*.mtmap);;Flare map file(*.txt)"));
+    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("Tiled map file(*.tmx)"));
     if(filePath.size()){
         tilemapLoadingThread = new TilemapLoadingThread(this,mem,filePath);
         QObject::connect(tilemapLoadingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
@@ -267,7 +267,7 @@ void GpuMemoryDump::on_loadTilemap_clicked()
 void GpuMemoryDump::on_saveTilemap_clicked()
 {
     QString filePath = "";
-    filePath = QFileDialog::getSaveFileName(this, tr("Save File"),filePath,tr("Mirage tile map(*.mtmap);;Flare map file(*.txt)"));
+    filePath = QFileDialog::getSaveFileName(this, tr("Save File"),filePath,tr("Tiled map file(*.tmx)"));
     if(filePath.size()){
         tilemapSavingThread = new TilemapSavingThread(this,mem,filePath);
         QObject::connect(tilemapSavingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
