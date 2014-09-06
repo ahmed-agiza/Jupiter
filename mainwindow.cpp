@@ -778,6 +778,11 @@ void MainWindow::on_actionSimulate_triggered(){
         assemblerInitialized = false;
         QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
         //QObject::connect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
+        QObject::connect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
+        QObject::connect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
+        QObject::connect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
+        QObject::connect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
+        QObject::connect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
         QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
         QObject::connect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
         QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
@@ -786,7 +791,7 @@ void MainWindow::on_actionSimulate_triggered(){
         QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
         QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
         simulating = true;
-        simulationThread.start();
+        simulationThread.start(QThread::LowPriority);
         timer->start();
         if (console->toPlainText().trimmed() != "")
             console->addText("\n", true);
@@ -854,6 +859,7 @@ void MainWindow::on_actionAssemble_triggered(){
             QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
             QObject::disconnect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
             //QObject::disconnect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
+            QObject::disconnect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
             QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
             QObject::disconnect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
             QObject::disconnect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
@@ -861,6 +867,10 @@ void MainWindow::on_actionAssemble_triggered(){
             QObject::disconnect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
             QObject::disconnect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
             QObject::disconnect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
+            QObject::disconnect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
+            QObject::disconnect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
+            QObject::disconnect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
+            QObject::disconnect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
 
             simulationThread.quit();
             simulationThread.wait();
@@ -1775,6 +1785,16 @@ void MainWindow::on_btnCopyConsole_clicked(){
 
 void MainWindow::on_btnClearConsole_clicked(){
     console->clearConsole();
+}
+
+void MainWindow::waitingInput(){
+    timer->stop();
+    statusBar()->showMessage("Waiting for input");
+}
+
+void MainWindow::inputReceived(){
+    statusBar()->clearMessage();
+    timer->start();
 }
 
 void MainWindow::printToConsole(QString msg){

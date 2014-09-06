@@ -51,7 +51,7 @@ private:
 
     int address;
     int lineNumber;
-    int PC;
+
 
     int currentProgress;
     int totalCount;
@@ -61,6 +61,14 @@ private:
 
     int stringDistance(std::string, std::string);
     int minimum4(int, int, int, int);
+
+
+    QStringList logData;
+
+    int PC;
+    int activePC;
+    bool exitExec;
+    bool resumeFlag;
 public:
     Assembler(Memory *memory, QVector<int> *mRegisters, MainWindow*);
     void parseTextSegment(QStringList*);
@@ -97,7 +105,8 @@ signals:
     void assemblyComplete();
     void progressUpdate(int);
     void simulationActive();
-    void inputRequired(int func);
+    void inputRequired(int);
+    void setReadingLimit(int);
     void printToConsole(QString);
     void logStringSignal(QString);
     void logDataSignal(QStringList); //For testing.

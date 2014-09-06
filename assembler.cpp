@@ -350,10 +350,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                             mem->storeByte(i + mem->dataSegmentBaseAddress , actualString[i]);
                         }
                         if(labelName.size()){
+
                             if(dataLabels.contains(labelName)){
-                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                                errorList.append(Error("Label \"" + labelName + "\" is already defined.", lineNumber));
                             }
                             dataLabels[labelName] = address;
+
                         }
                         address = i;
                         if(directiveName.endsWith("z")) mem->storeByte(address++ + mem->dataSegmentBaseAddress , NULL);
@@ -1840,12 +1842,13 @@ void Assembler::simulate()
 {
 
     QStringList logData;
-
-    PC = 0;
+    if (!resumeFlag){
+        PC = 0;
+        activePC = 0;
+        exitExec = false;
+    }
     int i = 0;
-    int activePC = PC/4;
-    bool exitExec = false;
-    while ((PC != -1 && ((PC/4) < instructions.size() && !exitExec /*&& i < 150*/)) /*|| waiting*/)
+    while (PC != -1 && ((PC/4) < instructions.size() && !exitExec /*&& i < 150*/))
     {
 
         if(mainW->isGFXEnabled()){
@@ -1932,7 +1935,8 @@ void Assembler::simulate()
             }
         }
         //qDebug() << "Running " << PC;
-        if (!waiting){
+        if (waiting)
+            break;
             //emit simulationActive();
             activePC = PC/4;
             QString logText = QString::number(i) + ": PC: " + QString::number(PC)
@@ -1971,21 +1975,17 @@ void Assembler::simulate()
                     break;
                 case PRINT_STRING:
                     //Printing String.
-                    qDebug() << "Printing string";
                     msg = "";
                     offset = 1;
                     baseAddress = (*registers)[4];
-                    qDebug() << baseAddress;
                     strArray.resize(1);
                     strArray[0] = (char) mem->loadByte(baseAddress);
                     charac = QString::fromLatin1(strArray);
-                    qDebug() << charac;
                     while (!(charac == "0" && previousChar == "\\") && offset < 100){
                             msg.append(charac);
                             strArray [0] = (char) mem->loadByte(baseAddress + offset++);
                             previousChar = charac;
                             charac = QString::fromLatin1(strArray);
-                            qDebug() << charac;
                     }
                     msg.remove(msg.length() - 1, 1);
                     emit printToConsole(msg);
@@ -2006,6 +2006,7 @@ void Assembler::simulate()
                     break;
                 case READ_STRING:
                     waiting = true;
+                    emit setReadingLimit((*registers)[5]);
                     emit inputRequired(functionNumber);
                     PC += 4;
                     break;
@@ -2050,7 +2051,8 @@ void Assembler::simulate()
             logData.append(logText);
             emit logStringSignal(logText); //For testing.
             i++;
-        }
+            qDebug() << "Sim loop";
+
     }
     if (!waiting){
         emit simulationComplete();
@@ -2060,8 +2062,11 @@ void Assembler::simulate()
 }
 
 void Assembler::readInt(int value){
+    qDebug() << "Received " << value;
     (*registers)[2] = value;
     waiting = false;
+    resumeFlag = true;
+    simulate();
 }
 
 void Assembler::readString(QString input){
@@ -2071,6 +2076,8 @@ void Assembler::readString(QString input){
     }
     mem->storeByte(input.length(), '\0');
     waiting = false;
+    resumeFlag = true;
+    simulate();
 
 }
 
@@ -2081,6 +2088,8 @@ void Assembler::readCharacter(QString charc){
     else
         (*registers)[2] = 0;
     waiting = false;
+    resumeFlag = true;
+    simulate();
 }
 
 
@@ -2259,7 +2268,11 @@ void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStr
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
     totalCount = dataFileStringList.size() + textFileStringList.size();
     currentProgress = 0;
+    PC = 0;
+    activePC = 0;
+
     waiting = false;
+    resumeFlag = false;
     parseDataSegment(&dataFileStringList);
     parseTextSegment(&textFileStringList);
 }

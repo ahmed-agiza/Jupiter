@@ -15,6 +15,7 @@ public:
     QString getInputAt(int index);
     void clearInputAt(int index);
     void reprint();
+
 private:
     int lockPosition;
     bool selectionLocker;
@@ -23,8 +24,8 @@ private:
     QAction *copyAction;
     QAction *exportAction;
     int requestNumber;
+    int readingLimt;
 protected:
-    bool eventFilter(QObject *, QEvent *);
     void keyPressEvent(QKeyEvent *);
 
 signals:
@@ -35,6 +36,7 @@ signals:
 public slots:
     void inputRequest(int);
     void enableEditing(bool);
+    void setReadingLimit(int);
     void getInput();
     void clearConsole();
     void copyAll();

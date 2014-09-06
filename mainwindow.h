@@ -170,6 +170,9 @@ private slots:
 
     void on_btnClearConsole_clicked();
 
+    void waitingInput();
+    void inputReceived();
+
 public slots:
     void printToConsole(QString);
 

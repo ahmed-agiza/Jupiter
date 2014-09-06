@@ -22,13 +22,14 @@
 
 IOConsole::IOConsole(QWidget *parent) :
     QTextEdit(parent){
-    installEventFilter(this);
+    //installEventFilter(this);
     lockPosition = 0;
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorChanged()));
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(onSelectionChanged()));
     selectionLocker = false;
     setContextMenuPolicy(Qt::CustomContextMenu);
     requestNumber = 0;
+    readingLimt = -1;
     setReadOnly(true);
 }
 
@@ -71,35 +72,44 @@ void IOConsole::reprint(){
         append(line + QString("\n"));
 }
 
-bool IOConsole::eventFilter(QObject *o, QEvent *e){
-    return QTextEdit::eventFilter(o, e);
+void IOConsole::setReadingLimit(int val = -1){
+    readingLimt = val;
 }
 
-void IOConsole::keyPressEvent(QKeyEvent *e){
 
-    if (e->key() == Qt::Key_Return){
+
+void IOConsole::keyPressEvent(QKeyEvent *e){
+    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter){
         QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::EndOfBlock);
-        cursor.setPosition(lockPosition, QTextCursor::KeepAnchor);
+        if (lockPosition != 0)
+            cursor.setPosition(lockPosition - 1);
+        else
+            cursor.setPosition(0);
+        cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
         QString inputText = cursor.selectedText();
         qDebug() << inputText;
         setReadOnly(true);
         setLock(lockPosition + inputText.length());
-        inputTrace.append(inputText);
+        inputTrace.append(inputText);        
         switch (requestNumber) {
         case READ_INTEGER:
-            emit sendInt(inputText.toInt());
+            //qDebug() << "Sending number: " << inputText.trimmed().toInt();
+            emit sendInt(inputText.trimmed().toInt());
             break;
         case READ_STRING:
-            emit sendString(inputText);
+            //qDebug() << "Sending text: " << inputText;
+            if (readingLimt == -1 || inputText.length() < readingLimt)
+                emit sendString(inputText + "\\0");
+            else
+                emit sendString(inputText.mid(0, readingLimt) + "\\0");
             break;
         case READ_CHARACTER:
-            qDebug() << "Sending char" << ((inputText.length() > 0)?inputText.mid(0, 1):"Null");
+            //qDebug() << "Sending char" << ((inputText.length() > 0)?inputText.mid(0, 1):"Null");
             if (inputText.length() >= 1)
                 emit sendChar(inputText.mid(0, 1));
             else
                 emit sendChar("");
-                    break;
+            break;
         default:
             break;
         }
