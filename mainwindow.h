@@ -86,7 +86,8 @@ public:
     void renameFileWindow(QString, QString);
 
 
-
+    void openTilesetViewer();
+    void openPaletteViewer();
 
 
     ~MainWindow();

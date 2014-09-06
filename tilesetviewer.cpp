@@ -2,6 +2,7 @@
 #include "ui_tilesetviewer.h"
 #include <QGridLayout>
 #include <fstream>
+#include "mainwindow.h"
 
 TileSetViewer::TileSetViewer(QWidget *parent, Memory * memory) :
     QDialog(parent),
@@ -70,18 +71,13 @@ void TileSetViewer::on_verticalSlider_valueChanged(int value)
     emit renderScreen();
 }
 
-bool isLitEndian()
-{
-    return true;
-}
-
 sf::Uint32 TileSetViewer::colorToInt(sf::Color color)
 {
     sf::Uint32 red = color.r;
     sf::Uint32 green = color.g;
     sf::Uint32 blue = color.b;
     sf::Uint32 alpha = color.a;
-    if(isLitEndian())
+    if(MainWindow::isLittleEndian())
         return ((alpha<<24)|(blue<<16)|(green<<8)|red);
     else
         return ((red<<24)|(green<<16)|(blue<<8)|alpha);

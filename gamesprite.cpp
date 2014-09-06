@@ -1,11 +1,8 @@
 #include "gamesprite.h"
 #include <QDebug>
+#include "mainwindow.h"
 
 #define TILE_SIZE 16
-bool isLilEndian()
-{
-    return true;
-}
 
 GameSprite::GameSprite()
 {
@@ -45,7 +42,7 @@ void GameSprite::storeByte(unsigned int address, char byte)
     case 3:
     case 4:
     case 5:
-        if (isLilEndian())
+        if (MainWindow::isLittleEndian())
             sprite.setPosition(((unsigned int)memoryBytes[3]<<8)|memoryBytes[2], ((unsigned int)memoryBytes[5]<<8)|memoryBytes[4]);
         else
             sprite.setPosition(((unsigned int)memoryBytes[2]<<8)|memoryBytes[3], ((unsigned int)memoryBytes[4]<<8)|memoryBytes[5]);
@@ -333,7 +330,7 @@ void GameSprite::setScaleY(bool value)
 
 void GameSprite::setPositionX(int position)
 {
-    if(isLilEndian()){
+    if(MainWindow::isLittleEndian()){
         memoryBytes[2] = position&0xff;
         memoryBytes[3] = (position>>8)&0xff;
         sprite.setPosition(((unsigned int)memoryBytes[3]<<8)|memoryBytes[2], ((unsigned int)memoryBytes[5]<<8)|memoryBytes[4]);
@@ -346,7 +343,7 @@ void GameSprite::setPositionX(int position)
 
 void GameSprite::setPositionY(int position)
 {
-    if(isLilEndian()){
+    if(MainWindow::isLittleEndian()){
         memoryBytes[4] = position&0xff;
         memoryBytes[5] = (position>>8)&0xff;
         sprite.setPosition(((unsigned int)memoryBytes[3]<<8)|memoryBytes[2], ((unsigned int)memoryBytes[5]<<8)|memoryBytes[4]);
@@ -359,7 +356,7 @@ void GameSprite::setPositionY(int position)
 
 int GameSprite::getPositionX()
 {
-    if (isLilEndian())
+    if (MainWindow::isLittleEndian())
         return (((unsigned int)memoryBytes[3]<<8)|memoryBytes[2]);
     else
         return (((unsigned int)memoryBytes[2]<<8)|memoryBytes[3]);
@@ -367,7 +364,7 @@ int GameSprite::getPositionX()
 
 int GameSprite::getPositionY()
 {
-    if (isLilEndian())
+    if (MainWindow::isLittleEndian())
         return (((unsigned int)memoryBytes[5]<<8)|memoryBytes[4]);
     else
         return (((unsigned int)memoryBytes[4]<<8)|memoryBytes[5]);

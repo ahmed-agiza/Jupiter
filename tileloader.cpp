@@ -3,11 +3,7 @@
 #include <QFileDialog>
 #include <QString>
 #include <QMessageBox>
-
-bool isLittlEndian()
-{
-    return true;
-}
+#include "mainwindow.h"
 
 TileLoader::TileLoader(QWidget *parent, Memory *memory) :
     QDialog(parent),
@@ -68,7 +64,7 @@ sf::Uint32 TileLoader::colorToInt(sf::Color color)
     sf::Uint32 green = color.g;
     sf::Uint32 blue = color.b;
     sf::Uint32 alpha = color.a;
-    if(isLittlEndian())
+    if(MainWindow::isLittleEndian())
         return ((alpha<<24)|(blue<<16)|(green<<8)|red);
     else
         return ((red<<24)|(green<<16)|(blue<<8)|alpha);

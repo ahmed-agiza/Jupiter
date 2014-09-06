@@ -1,19 +1,15 @@
 #include "palettecolor.h"
 #include "tile.h"
+#include "mainwindow.h"
 
 PaletteColor::PaletteColor()
 {
     color = Color(0,0,0,0);
 }
 
-bool isLitlEndian()
-{
-    return true;
-}
-
 void PaletteColor::storeByte(unsigned int index, char byte)
 {
-    if(isLitlEndian()){
+    if(MainWindow::isLittleEndian()){
         if(index == 0)  color.r = byte;
         else if(index == 1)  color.g = byte;
         else if(index == 2)  color.b = byte;
@@ -32,7 +28,7 @@ void PaletteColor::storeByte(unsigned int index, char byte)
 
 char PaletteColor::loadByte(unsigned int index) const
 {
-    if(isLitlEndian()){
+    if(MainWindow::isLittleEndian()){
         if(index == 0)  return color.r;
         else if(index == 1)  return color.g;
         else if(index == 2)  return color.b;

@@ -29,12 +29,12 @@ bool isLittleEndian(){
 
 unsigned int getScreensHeightCount()
 {
-    return 2;
+    return MainWindow::getTileMapHeight();
 }
 
 unsigned int getScreensWidthCount()
 {
-    return 2;
+    return MainWindow::getTileMapWidth();
 }
 
 unsigned int Memory::getByteSegment(unsigned int addr) const

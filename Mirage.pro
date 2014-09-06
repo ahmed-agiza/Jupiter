@@ -50,7 +50,8 @@ SOURCES += main.cpp\
     ioconsole.cpp \
     memorydump.cpp \
     savememorythread.cpp \
-    gpumemorydump.cpp
+    gpumemorydump.cpp \
+    loadtilesetsthread.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -91,7 +92,8 @@ HEADERS  += mainwindow.h \
     ioconsole.h \
     memorydump.h \
     savememorythread.h \
-    gpumemorydump.h
+    gpumemorydump.h \
+    loadtilesetsthread.h
 
 
 FORMS    += \

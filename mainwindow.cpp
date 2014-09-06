@@ -1754,7 +1754,7 @@ void MainWindow::on_actionMemory_Dump_triggered()
 
 void MainWindow::on_actionGPU_Memory_Dump_triggered()
 {
-    gpuMemoryDump = new GpuMemoryDump(this, memory);
+    gpuMemoryDump = new GpuMemoryDump(this, memory, this);
     gpuMemoryDump->show();
 }
 
@@ -1799,4 +1799,14 @@ void MainWindow::inputReceived(){
 
 void MainWindow::printToConsole(QString msg){
     console->addText(msg, true);
+}
+
+void MainWindow::openTilesetViewer()
+{
+    on_actionTileset_viewer_triggered();
+}
+
+void MainWindow::openPaletteViewer()
+{
+    on_actionPalette_Viewer_triggered();
 }

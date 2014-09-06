@@ -39,7 +39,7 @@ QString dataSegmentDirectives = "\\.(align|asciiz?|byte|double|float|half|space|
 QString invalidDirectivesRegex = "\\.(?!align|asciiz?|byte|data|double|float|globl|half|include|kdata|ktext|space|text|word)";
 // Matches strings
 QString cstringsRegex = "^\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\""; // "\".*[^\\\\]\"$";
-QRegExp characterRegex ("^'((?:[^'\\\\\\n\\r]|(?:\\\\['nrtb])))'$"); //
+QRegExp characterRegex ("^'((?:[^'\\\\\\n\\r]|(?:\\\\['nrtb0])))'$"); //
 // Matches strings
 QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 
@@ -344,6 +344,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         parameters.replace("\\n","\n");
                         parameters.replace("\\r","\r");
                         parameters.replace("\\b","\b");
+                        parameters.replace("\\0","\0");
                         std::string actualString = parameters.mid(1,parameters.length()-2).toStdString();
                         int i;
                         for(i=address; i<actualString.size() + address; i++){
@@ -439,6 +440,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                                 matchedChar.replace("\\n","\n");
                                 matchedChar.replace("\\r","\r");
                                 matchedChar.replace("\\b","\b");
+                                matchedChar.replace("\\0","\0");
                                 mem->storeByte(mem->dataSegmentBaseAddress + address, matchedChar.toStdString()[0]);
                             }else if(numberRegExp.indexIn(immediateNumber) == 0)
                                 mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
@@ -461,6 +463,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         parameters.replace("\\n","\n");
                         parameters.replace("\\r","\r");
                         parameters.replace("\\b","\b");
+                        parameters.replace("\\0","\0");
                         mem->storeByte(mem->dataSegmentBaseAddress + address, parameters.toStdString()[1]);
                         address++;
                     }else{
