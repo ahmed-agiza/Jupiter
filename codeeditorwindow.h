@@ -30,7 +30,9 @@ public:
     void setDestryoed(bool);
     bool isDestroyed();
     QString getContent();
+    QString getUncommentedContent();
     QStringList getContentList();
+    QStringList getUncommentedContentList();
 
     QString getTitle();
     void setTitle(QString newTitle);

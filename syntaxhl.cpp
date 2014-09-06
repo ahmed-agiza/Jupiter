@@ -76,7 +76,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    commentFormat.setForeground(Qt::green);
    stringFormat.setForeground(Qt::green);
    labelFormat.setForeground(Qt::darkBlue);
-   macroFormat.setForeground(Qt::magenta);
+   macroFormat.setForeground(QColor(Qt::magenta).lighter(200));
    pseudoFormat.setForeground(QColor(Qt::blue).lighter(150));
    pseudoFormat.setFontItalic(true);
    immFormat.setForeground(QColor(Qt::white).darker(110));
@@ -168,8 +168,16 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
        syntaxes.append(tempSyn);
    }
 
+   macrosList << ".align" << ".asciiz" << ".byte" << ".double" <<".float" << ".half" << ".space" << ".word" << ".text" << ".data" << ".include";
+
+   foreach(QString pattern, macrosList)
+   {
+       tempSyn.pattern = QRegExp(pattern, Qt::CaseInsensitive); tempSyn.format = macroFormat;
+       syntaxes.append(tempSyn);
+   }
+
    //Comment's syntax.
-   tempSyn.pattern = QRegExp("#.*"); tempSyn.format = commentFormat;
+   tempSyn.pattern = QRegExp("#[^\n]*"); tempSyn.format = commentFormat;
    syntaxes.append(tempSyn);
 
 

@@ -19,6 +19,8 @@
 #include <QTreeWidgetItemIterator>
 #include <QInputDialog>
 #include <QStatusBar>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 
 #include "projectcreator.h"
 #include "codeeditor.h"
@@ -166,6 +168,8 @@ MainWindow::MainWindow(QWidget *parent) :
     simulationBar = NULL;
     assembling = false;
     simulateAfterAssembling = false;
+
+
     ui->tabsProject->setCurrentIndex(0);
     timer = new QTimer(this);
     timer->setSingleShot(false);
@@ -785,7 +789,7 @@ void MainWindow::on_actionSimulate_triggered(){
         QObject::connect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
         QObject::connect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
         QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
-        QObject::connect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
+        //QObject::connect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
         QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
         QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
         QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
@@ -798,7 +802,7 @@ void MainWindow::on_actionSimulate_triggered(){
             console->addText("\n", true);
         emit simulateSignal();
         statusBar()->showMessage("Simulating");
-        appendErrorMessage("--Showing simulation log for testing--");
+        //appendErrorMessage("--Showing simulation log for testing--");
     }
 
 
@@ -830,7 +834,7 @@ void MainWindow::on_actionAssemble_triggered(){
     QStringList dataInstrs;
     CodeEditorWindow *currentWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
     if (currentWindow){
-        textInstrs = currentWindow->getContentList();
+        textInstrs = currentWindow->getContentList();//->getUncommentedContentList();
     }
 
     if (MainWindow::projectDataFile.trimmed() != ""){
@@ -845,7 +849,7 @@ void MainWindow::on_actionAssemble_triggered(){
         CodeEditorWindow *currentDataWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
 
         if (currentDataWindow){
-            dataInstrs = currentDataWindow->getContentList();
+            dataInstrs = currentDataWindow->getContentList();//->getUncommentedContentList();
         }
     }
 
@@ -853,6 +857,7 @@ void MainWindow::on_actionAssemble_triggered(){
     ui->actionSimulate->setEnabled(false);
     ui->actionAssemble_and_Simulate->setEnabled(false);
     if(assemblerInitialized || assem){
+        ui->tableLog->clearContents();
         if (assem){
             qDebug() << "Disconnecting";
             QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
@@ -862,7 +867,7 @@ void MainWindow::on_actionAssemble_triggered(){
             //QObject::disconnect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
             QObject::disconnect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
             QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
-            QObject::disconnect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
+            //QObject::disconnect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
             QObject::disconnect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
             QObject::disconnect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
             QObject::disconnect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
@@ -872,6 +877,7 @@ void MainWindow::on_actionAssemble_triggered(){
             QObject::disconnect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
             QObject::disconnect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
             QObject::disconnect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
+            QObject::disconnect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
 
             simulationThread.quit();
             simulationThread.wait();
@@ -884,6 +890,7 @@ void MainWindow::on_actionAssemble_triggered(){
 
     }
     ui->tabsProject->setCurrentIndex(1);
+
     assem = new Assembler(memory, &mainProcessorRegisters, this);
 
     //assemblerInitialized = true;
@@ -899,6 +906,7 @@ void MainWindow::on_actionAssemble_triggered(){
     QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
     QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
+    QObject::connect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
     simulationThread.start();
     assembling = true;
     //QStringList *dataPtr = &dataInstrs;
@@ -1302,19 +1310,31 @@ void MainWindow::renameFileWindow(QString fileName, QString newName){
 
 }
 
-void MainWindow::appendErrorMessage(QString msg){
-    QString currentText = ui->textLog->toPlainText();
-    ui->textLog->setText((currentText.trimmed() == "")? msg : ui->textLog->toPlainText() + QString("\n") + msg);
+void MainWindow::appendErrorMessage(int lineNumber, QString msg){
+    qDebug() << "Err " << lineNumber << msg;
+    QTableWidgetItem *numItm = new QTableWidgetItem(QString::number(lineNumber));
+    QTableWidgetItem *errorItm = new QTableWidgetItem(msg);
+
+    ui->tableLog->setSortingEnabled(false);
+    int itemPosition = ui->tableLog->rowCount();
+    ui->tableLog->insertRow(itemPosition);
+    ui->tableLog->setItem(itemPosition,0 , numItm);
+    ui->tableLog->setItem(itemPosition, 1, errorItm);
+
+    ui->tableLog->setSortingEnabled(true);
+    ui->tableLog->resizeColumnsToContents();
+    ui->tableLog->resizeRowsToContents();
+    ui->tabsProject->setCurrentIndex(2);
+    //qDebug() << ui->tableLog->itemAt(0, 1)->text();
+
 }
 
-void MainWindow::on_actionInput_triggered()
-{
+void MainWindow::on_actionInput_triggered(){
     inputManager = new InputManager(this, memory);
     inputManager->show();
 }
 
-void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int column)
-{
+void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int column){
     Q_UNUSED(column);
     if(item->parent()){
         QString parentItemText = item->parent()->text(0).trimmed();
@@ -1746,7 +1766,7 @@ void MainWindow::assemblyComplete(){
 }
 
 void MainWindow::on_btnClearLog_clicked(){
-    ui->textLog->clear();
+    ui->tableLog->clearContents();
 }
 
 void MainWindow::on_actionMemory_Dump_triggered()
@@ -1812,4 +1832,8 @@ void MainWindow::openTilesetViewer()
 void MainWindow::openPaletteViewer()
 {
     on_actionPalette_Viewer_triggered();
+}
+
+void MainWindow::on_actionPause_Simulation_triggered(){
+
 }

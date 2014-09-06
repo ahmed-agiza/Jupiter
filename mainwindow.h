@@ -174,6 +174,8 @@ private slots:
     void waitingInput();
     void inputReceived();
 
+    void on_actionPause_Simulation_triggered();
+
 public slots:
     void printToConsole(QString);
 
@@ -193,7 +195,7 @@ public slots:
     void assemblingProgress(int);
     void simulationProgress();
 
-    void appendErrorMessage(QString);
+    void appendErrorMessage(int, QString);
 
 private:
     Ui::MainWindow *ui;

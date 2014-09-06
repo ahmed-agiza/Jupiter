@@ -163,12 +163,16 @@
     <addaction name="actionAssemble"/>
     <addaction name="actionSimulate"/>
     <addaction name="actionAssemble_and_Simulate"/>
+    <addaction name="actionPause_Simulation"/>
+    <addaction name="actionStopSimulation"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
      <string>Debug</string>
     </property>
     <addaction name="actionInsert_Breakpoint"/>
+    <addaction name="actionStepForwared"/>
+    <addaction name="actionStepBackward"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -215,7 +219,7 @@
      <item>
       <widget class="QTabWidget" name="tabsProject">
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tabProjectFiles">
         <attribute name="title">
@@ -329,10 +333,26 @@
           </widget>
          </item>
          <item>
-          <widget class="QTextEdit" name="textLog">
-           <property name="readOnly">
+          <widget class="QTableWidget" name="tableLog">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="sortingEnabled">
             <bool>true</bool>
            </property>
+           <property name="columnCount">
+            <number>2</number>
+           </property>
+           <column>
+            <property name="text">
+             <string>Line</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Error</string>
+            </property>
+           </column>
           </widget>
          </item>
         </layout>
@@ -1397,6 +1417,45 @@
   <action name="actionGPU_Memory_Dump">
    <property name="text">
     <string>GPU Memory Dump</string>
+   </property>
+  </action>
+  <action name="actionPause_Simulation">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/icons/toolbar/debuggingicons/pause.png</normaloff>:/icons/icons/toolbar/debuggingicons/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pause Simulation</string>
+   </property>
+  </action>
+  <action name="actionStepForwared">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/icons/toolbar/debuggingicons/moveStep2.png</normaloff>
+     <normalon>:/icons/icons/toolbar/debuggingicons/moveStep2.png</normalon>:/icons/icons/toolbar/debuggingicons/moveStep2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Step Forwared</string>
+   </property>
+  </action>
+  <action name="actionStepBackward">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/icons/toolbar/debuggingicons/moveBack2.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Step Backward</string>
+   </property>
+  </action>
+  <action name="actionStopSimulation">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/icons/toolbar/debuggingicons/stop.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Stop Simulation</string>
    </property>
   </action>
  </widget>

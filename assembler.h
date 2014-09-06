@@ -110,6 +110,7 @@ signals:
     void printToConsole(QString);
     void logStringSignal(QString);
     void logDataSignal(QStringList); //For testing.
+    void sendErrorMessage(int, QString);
 };
 
 

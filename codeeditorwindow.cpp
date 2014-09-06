@@ -147,8 +147,18 @@ QString CodeEditorWindow::getContent(){
     return editor->toPlainText();
 }
 
+QString CodeEditorWindow::getUncommentedContent(){
+    QRegExp commentsRegEx("#[^\n]*");
+    return editor->toPlainText().remove(commentsRegEx);
+}
+
 QStringList CodeEditorWindow::getContentList(){
     return editor->toPlainText().split("\n");
+}
+
+QStringList CodeEditorWindow::getUncommentedContentList(){
+    QRegExp commentsRegEx("#[^\n]*");
+    return editor->toPlainText().remove(commentsRegEx).split("\n");
 }
 
 QString CodeEditorWindow::getTitle(){

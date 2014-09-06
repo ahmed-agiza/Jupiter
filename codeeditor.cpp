@@ -146,7 +146,9 @@ CodeEditor::CodeEditor(QWidget *parent) :
                                           <<  "rem"
                                            <<  "clear"
                                             <<  "subi"
-                                             <<  "la";
+                                             <<  "la"
+                                              << ".align" << ".asciiz" << ".byte" << ".double" <<".float" << ".half" << ".space" << ".word";
+
 
 
     QStringListModel *model = new QStringListModel(compList, this);
@@ -200,9 +202,13 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         moveLineDown();
     }else if (e->key() == Qt::Key_Space &&(e->modifiers() & Qt::ControlModifier)){
         popupSuggestions();
+
     }else if (e->key() == Qt::Key_3 && (e->modifiers() & Qt::ControlModifier)){
         commentLine();
-    } else
+    }else if(e->key() == Qt::Key_Period){
+         popupSuggestions();
+         QTextEdit::keyPressEvent(e);
+    }else
         QTextEdit::keyPressEvent(e);
 
 
