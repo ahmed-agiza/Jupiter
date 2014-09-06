@@ -162,17 +162,26 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                     return "0b" + getPaddedBinary(value, 8);
             }else if (memoryBase->currentText() == BAS){
                 if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
-                    QByteArray strByte(4, ' ');
-                    strByte[3] = ((value >> 24) & 0xff);
-                    strByte[2] = ((value >> 16) & 0xff);
-                    strByte[1] = ((value >> 8) & 0xff);
-                    strByte[0] = (value & 0xff);
-                    QString mText = QString::fromLatin1(strByte);
+                    //QByteArray strByte(4, ' ');
+                    char value3 = ((value >> 24) & 0xff);
+                    char value2 = ((value >> 16) & 0xff);
+                    char value1 = ((value >> 8) & 0xff);
+                    char value0 = (value & 0xff);
+                    QString charac3 = (value3 == 0)? "\\0":QString(value3);
+                    QString charac2 = (value2 == 0)? "\\0":QString(value2);
+                    QString charac1 = (value1 == 0)? "\\0":QString(value1);
+                    QString charac0 = (value0 == 0)? "\\0":QString(value0);
+
+                    QString mText = charac3 + charac2 + charac1 + charac0;
+
                     return "\"" + mText + "\"";
                 }else{
                     QByteArray strByte(1, ' ');
                     strByte[0] = (char) value;
-                    return "'" + QString::fromLatin1(strByte) + "'";
+                    if (strByte[0] == 0)
+                        return "\\0";
+                    else
+                        return "'" + QString::fromLatin1(strByte) + "'";
                 }
             }else
                 return value;

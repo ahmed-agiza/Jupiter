@@ -76,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
+
     console = new IOConsole(ui->tabConsole);
     console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->consoleHLayout->addWidget(console);

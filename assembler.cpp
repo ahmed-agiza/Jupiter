@@ -1849,6 +1849,7 @@ void Assembler::simulate()
         PC = 0;
         activePC = 0;
         exitExec = false;
+        emit setReadingLimit(-1);
     }
     int i = 0;
     while (PC != -1 && ((PC/4) < instructions.size() && !exitExec /*&& i < 150*/))
@@ -1953,7 +1954,7 @@ void Assembler::simulate()
                 int functionNumber = (*registers)[2];
                 QString msg;
                 QString charac;
-                QString previousChar;
+                //QString previousChar;
                 QByteArray strArray;
                 QByteArray strByte(1, ' ');
                 int offset;
@@ -1983,14 +1984,13 @@ void Assembler::simulate()
                     baseAddress = (*registers)[4];
                     strArray.resize(1);
                     strArray[0] = (char) mem->loadByte(baseAddress);
-                    charac = QString::fromLatin1(strArray);
-                    while (!(charac == "0" && previousChar == "\\") && offset < 100){
-                            msg.append(charac);
-                            strArray [0] = (char) mem->loadByte(baseAddress + offset++);
-                            previousChar = charac;
+                    //charac = QString::fromLatin1(strArray);
+                    while (strArray[0] != 0 && offset < 100){
                             charac = QString::fromLatin1(strArray);
+                            strArray [0] = (char) mem->loadByte(baseAddress + offset++);
+                            msg.append(charac);
                     }
-                    msg.remove(msg.length() - 1, 1);
+                    //msg.remove(msg.length() - 1, 1);
                     emit printToConsole(msg);
                     PC += 4;
                     break;
