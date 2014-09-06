@@ -13,6 +13,7 @@ MemoryDump::MemoryDump(QWidget *parent, Memory *mem) :
     ui->textSegmentCheckBox->setEnabled(1);
     ui->dataSegmentCheckBox->setEnabled(1);
     ui->progressBar->setVisible(0);
+    this->setWindowTitle("Memory Dump");
 }
 
 MemoryDump::~MemoryDump()

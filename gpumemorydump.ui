@@ -26,7 +26,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="generalTab">
     <attribute name="title">
@@ -536,7 +536,7 @@
    </widget>
    <widget class="QWidget" name="tilemapsTab">
     <attribute name="title">
-     <string>TMX files</string>
+     <string>Tiled Files</string>
     </attribute>
     <widget class="QPushButton" name="loadTilemap">
      <property name="geometry">

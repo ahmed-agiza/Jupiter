@@ -22,7 +22,7 @@ void GpuMemoryDump::fillStdPalette()
 {
     paletteLoadingThread = new PaletteLoadingThread(this,mem,"",true);
     QObject::connect(paletteLoadingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
-    QObject::connect(paletteLoadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
+    QObject::connect(paletteLoadingThread, SIGNAL(loadingComplete()), this, SLOT(complete()));
     disableButtons();
     paletteLoadingThread->start();
 }
@@ -244,7 +244,7 @@ void GpuMemoryDump::on_loadPaletteImage_clicked()
     if(filePath.size()){
         paletteLoadingThread = new PaletteLoadingThread(this,mem,filePath,false);
         QObject::connect(paletteLoadingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
-        QObject::connect(paletteLoadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
+        QObject::connect(paletteLoadingThread, SIGNAL(loadingComplete()), this, SLOT(complete()));
         disableButtons();
         paletteLoadingThread->start();
     }
