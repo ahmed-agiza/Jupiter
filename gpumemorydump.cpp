@@ -20,27 +20,13 @@ GpuMemoryDump::~GpuMemoryDump()
 
 void GpuMemoryDump::fillStdPalette()
 {
-    mem->palette[0].setColor(sf::Color(0,0,0,0));
-    int index = 1;
-    for(int r=0; r<=256; r+=64)
-        for(int g=0; g<=256; g+=64)
-            for(int b=0; b<=256; b+=64)
-                mem->palette[index++].setColor(sf::Color((r<256)?r:255,(g<256)?g:255,(b<256)?b:255,255));
-
-    mem->palette[126].setColor(sf::Color(32,32,32,255));
-    mem->palette[127].setColor(sf::Color(200,200,200,255));
-
-    mem->palette[128].setColor(sf::Color(255,255,255,32));
-    index = 129;
-    for(int r=0; r<=256; r+=64)
-        for(int g=0; g<=256; g+=64)
-            for(int b=0; b<=256; b+=64)
-                mem->palette[index++].setColor(sf::Color((r<256)?r:255,(g<256)?g:255,(b<256)?b:255,128));
-
-    mem->palette[254].setColor(sf::Color(255,255,255,64));
-    mem->palette[255].setColor(sf::Color(255,255,255,192));
-
+    paletteLoadingThread = new PaletteLoadingThread(this,mem,"",true);
+    QObject::connect(paletteLoadingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
+    QObject::connect(paletteLoadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
+    disableButtons();
+    paletteLoadingThread->start();
 }
+
 
 
 int GpuMemoryDump::claculateMemorySize(const QVector<bool>& segments)
@@ -272,6 +258,7 @@ void GpuMemoryDump::on_loadTilemap_clicked()
         tilemapLoadingThread = new TilemapLoadingThread(this,mem,filePath);
         QObject::connect(tilemapLoadingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
         QObject::connect(tilemapLoadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
+        ui->progressBar->setMaximum(mem->tileMapPhysicalSize);
         disableButtons();
         tilemapLoadingThread->start();
     }
@@ -285,6 +272,7 @@ void GpuMemoryDump::on_saveTilemap_clicked()
         tilemapSavingThread = new TilemapSavingThread(this,mem,filePath);
         QObject::connect(tilemapSavingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
         QObject::connect(tilemapSavingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
+        ui->progressBar->setMaximum(mem->tileMapPhysicalSize);
         disableButtons();
         tilemapSavingThread->start();
     }

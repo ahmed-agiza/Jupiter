@@ -107,7 +107,6 @@ Memory::Memory(QObject *parent): QObject(parent),
     backgroundTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
 
     tileMapPhysicalSize = screenHeight/TILE_SIZE * getScreensHeightCount() * screenWidth/TILE_SIZE * getScreensWidthCount();
-    qDebug() << getScreensHeightCount() << " " << getScreensWidthCount();
     backgroundTileSet.resize(256);
     spritesTileSet.resize(256);
     tileMap.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
