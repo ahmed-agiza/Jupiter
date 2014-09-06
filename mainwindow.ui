@@ -185,11 +185,9 @@
     <addaction name="actionBase_Converter"/>
     <addaction name="separator"/>
     <addaction name="actionEnable_Graphics_Engine"/>
-    <addaction name="actionReload_Tiles_Memory"/>
     <addaction name="actionSprite_Editor"/>
     <addaction name="actionTileset_viewer"/>
     <addaction name="actionPalette_Viewer"/>
-    <addaction name="actionTile_loader"/>
     <addaction name="separator"/>
     <addaction name="actionMemory_Dump"/>
     <addaction name="actionGPU_Memory_Dump"/>
