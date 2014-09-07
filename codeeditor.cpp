@@ -147,7 +147,7 @@ CodeEditor::CodeEditor(QWidget *parent) :
                                            <<  "clear"
                                             <<  "subi"
                                              <<  "la"
-                                              << ".align" << ".asciiz" << ".byte" << ".double" <<".float" << ".half" << ".space" << ".word";
+                                              << ".align" << ".ascii" << ".asciiz" << ".byte" << ".double" <<".float" << ".half" << ".space" << ".word";
 
 
 
@@ -179,7 +179,7 @@ void CodeEditor::focusInEvent(QFocusEvent *e)
 
 void CodeEditor::keyPressEvent(QKeyEvent *e)
 {
-    if ((codeCompleter) && codeCompleter->popup()->isVisible() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Tab))
+    if ((codeCompleter) && codeCompleter->popup()->isVisible() && (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Backtab || e->key() == Qt::Key_Escape|| e->key() == Qt::Key_Return || e->key() == Qt::Key_Tab))
     {
         e->ignore();
         return;
@@ -364,10 +364,21 @@ void CodeEditor::completerPop()
     sel2.select(QTextCursor::LineUnderCursor);
 
     bool regS = (sel2.selectedText().mid(sel2.selectedText().lastIndexOf(QRegExp("( |,)+")) + 1, 1) == "$");
+
     if (regS)
         codeCompleter->setCompletionPrefix("$" + sel.selectedText());
-    else
+    else{
+        if (sel.selectionStart() != 0){
+            QTextCursor tempCursor(sel);
+            tempCursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+            if (tempCursor.selectedText().length() > 0)
+                if(tempCursor.selectedText().at(0) == '.')
+                    sel.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+
+        }
+
         codeCompleter->setCompletionPrefix(sel.selectedText());
+    }
 
     QString currenCom = codeCompleter->completionModel()->data(codeCompleter->model()->index(0, 0)).toString();
 
@@ -381,6 +392,7 @@ void CodeEditor::completerPop()
             codeCompleter->complete(popRect);
             codeCompleter->setCurrentRow(3);
             codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));
+
         }
         else
             codeCompleter->popup()->hide();

@@ -834,7 +834,7 @@ void MainWindow::on_actionAssemble_triggered(){
     QStringList dataInstrs;
     CodeEditorWindow *currentWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
     if (currentWindow){
-        textInstrs = currentWindow->getContentList();//->getUncommentedContentList();
+        textInstrs = currentWindow->getStrippedContentList();//->getUncommentedContentList();
     }
 
     if (MainWindow::projectDataFile.trimmed() != ""){
@@ -849,7 +849,7 @@ void MainWindow::on_actionAssemble_triggered(){
         CodeEditorWindow *currentDataWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
 
         if (currentDataWindow){
-            dataInstrs = currentDataWindow->getContentList();//->getUncommentedContentList();
+            dataInstrs = currentDataWindow->getStrippedContentList();//->getUncommentedContentList();
         }
     }
 
@@ -858,6 +858,7 @@ void MainWindow::on_actionAssemble_triggered(){
     ui->actionAssemble_and_Simulate->setEnabled(false);
     if(assemblerInitialized || assem){
         ui->tableLog->clearContents();
+        ui->tableLog->setRowCount(0);
         if (assem){
             qDebug() << "Disconnecting";
             QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
@@ -1767,6 +1768,7 @@ void MainWindow::assemblyComplete(){
 
 void MainWindow::on_btnClearLog_clicked(){
     ui->tableLog->clearContents();
+    ui->tableLog->setRowCount(0);
 }
 
 void MainWindow::on_actionMemory_Dump_triggered()

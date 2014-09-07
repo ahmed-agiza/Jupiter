@@ -74,9 +74,10 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    registerFormat.setForeground(Qt::yellow);
    registerFormat.setFontWeight(QFont::Bold);
    commentFormat.setForeground(Qt::green);
-   stringFormat.setForeground(Qt::green);
+   stringFormat.setForeground(QColor(Qt::darkGreen).lighter(190));
    labelFormat.setForeground(Qt::darkBlue);
-   macroFormat.setForeground(QColor(Qt::magenta).lighter(200));
+   macroFormat.setForeground(QColor(Qt::cyan).lighter(80));
+   macroFormat.setFontItalic(true);
    pseudoFormat.setForeground(QColor(Qt::blue).lighter(150));
    pseudoFormat.setFontItalic(true);
    immFormat.setForeground(QColor(Qt::white).darker(110));
@@ -168,13 +169,17 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
        syntaxes.append(tempSyn);
    }
 
-   macrosList << ".align" << ".asciiz" << ".byte" << ".double" <<".float" << ".half" << ".space" << ".word" << ".text" << ".data" << ".include";
+   macrosList << "\\.align" << "\\.ascii" << "\\.asciiz" << "\\.byte" << "\\.double" <<"\\.float" << "\\.half" << "\\.space" << "\\.word" << "\\.text" << "\\.data" << "\\.include";
 
    foreach(QString pattern, macrosList)
    {
        tempSyn.pattern = QRegExp(pattern, Qt::CaseInsensitive); tempSyn.format = macroFormat;
        syntaxes.append(tempSyn);
    }
+
+   tempSyn.pattern = QRegExp("\\\".*\\\"", Qt::CaseInsensitive);
+   tempSyn.format = stringFormat;
+   syntaxes.append(tempSyn);
 
    //Comment's syntax.
    tempSyn.pattern = QRegExp("#[^\n]*"); tempSyn.format = commentFormat;
@@ -192,7 +197,7 @@ void SyntaxHL::highlightBlock(const QString &text)
              while (index >= 0) {
                  int length = formatRegEx.matchedLength();
                  setFormat(index, length, tempSyn.format);
-                 index = formatRegEx.indexIn(text, index + length);
+                 index = formatRegEx.indexIn(text, index + length);                
              }
    }
 }
