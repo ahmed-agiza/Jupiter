@@ -219,7 +219,7 @@
      <item>
       <widget class="QTabWidget" name="tabsProject">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabProjectFiles">
         <attribute name="title">
