@@ -33,6 +33,7 @@ public:
     QString getUncommentedContent();
     QStringList getContentList();
     QStringList getUncommentedContentList();
+    QStringList getStrippedContentList();
 
     QString getTitle();
     void setTitle(QString newTitle);

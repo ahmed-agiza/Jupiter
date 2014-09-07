@@ -161,6 +161,15 @@ QStringList CodeEditorWindow::getUncommentedContentList(){
     return editor->toPlainText().remove(commentsRegEx).split("\n");
 }
 
+QStringList CodeEditorWindow::getStrippedContentList(){
+    QRegExp commentsRegEx("#[^\n]*");
+    QStringList lines = editor->toPlainText().remove(commentsRegEx).split("\n");
+    for (int i = 0; i < lines.length(); i++)
+        lines[i] = lines[i].trimmed();
+    lines.removeAll("");
+    return lines;
+}
+
 QString CodeEditorWindow::getTitle(){
       return title;
 }
