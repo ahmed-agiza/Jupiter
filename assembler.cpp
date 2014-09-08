@@ -498,7 +498,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
     {
         emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description);
         //mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
-        qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
+        //qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
 
 }
@@ -2048,6 +2048,7 @@ void Assembler::simulate()
             instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
             instructions[activePC].execute(PC);
             (*registers)[0] = 0;
+            (*registers)[34] = PC;
             logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
             logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
                            + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
@@ -2055,7 +2056,6 @@ void Assembler::simulate()
             logData.append(logText);
             emit logStringSignal(logText); //For testing.
             i++;
-            qDebug() << "Sim loop";
 
     }
     if (!waiting){
@@ -2180,6 +2180,7 @@ void Assembler::initializeRegisters()
     registerIndex["29"] = 29;
     registerIndex["30"] = 30;
     registerIndex["31"] = 31;
+
     opcode["j"] = 2;
     opcode["jal"] = 3;
     opcode["beq"] = 4;

@@ -138,7 +138,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
                        <<  "move"
                        <<  "abs"
                        <<  "mul"
-                       <<  "div"
+                      // <<  "div"
                        <<  "rem"
                        <<  "clear"
                        <<  "subi"

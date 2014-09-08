@@ -191,6 +191,9 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e){
 void MainWindow::closeEvent(QCloseEvent *e){
     if (closeAllWindows()){
         e->accept();
+        simulationThread.wait();
+        simulationThread.quit();
+
     }else{
         e->ignore();
     }
@@ -1820,7 +1823,7 @@ void MainWindow::initMemoryModels(bool checkGFX = false){
 }
 
 void MainWindow::initRegs(){
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < 35; i++){
         mainProcessorRegisters.append(0);
     }
     mainProcessorRegisters[28] = 0x10008000;

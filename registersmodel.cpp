@@ -10,6 +10,7 @@ const QString STR("Names");
 const QString BTH("Both");
 
 QString getPaddedBinary(int number, int padding);
+QString getPaddedHex(int number, int padding);
 
 RegistersModel::RegistersModel(QObject *parent) :
     QAbstractTableModel(parent){
@@ -68,6 +69,9 @@ void RegistersModel::constructMap()
     registersMap[29] = "$sp";
     registersMap[30] = "$fp";
     registersMap[31] = "$ra";
+    registersMap[32] = "HI";
+    registersMap[33] = "LO";
+    registersMap[34] = "PC";
 
 }
 
@@ -117,6 +121,8 @@ QVariant RegistersModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole){
         if (index.column() == 0){
+            if (index.row() > 31 && index.row() < 35)
+                return registersMap[index.row()];
             if (nameMode->currentText() == NUM){
                 return "$" + QString::number(index.row());
             }else if (nameMode->currentText() == STR){
@@ -126,9 +132,10 @@ QVariant RegistersModel::data(const QModelIndex &index, int role) const
             }
 
         }else if (index.column() == 1){
-            int value = regs->at(index.row());
+            int value = (__int32)regs->at(index.row());
+            value = value & 0xFFFFFFFF;
             if (displayBase->currentText() == B16){
-                return "0x" + QString::number(value, 16);
+                return "0x" + getPaddedHex(value, 32).toUpper();
             }else if (displayBase->currentText() == B02){
                 return "0b" + getPaddedBinary(value, 32);
             }else{
@@ -237,9 +244,15 @@ QList<QPair<QString, int> > RegistersModel::getAllData()
     return tableData;
 }
 
+QString getPaddedHex(int number, int padding){
+    QString hexNum = QString::number(number, 16);
+    return hexNum.rightJustified(padding/4, '0', true).toUpper();
+}
+
 QString getPaddedBinary(int number, int padding){
-    QString binary = QString::number(number, 2);
-    if (padding == 4){
+    QString binary;
+    binary.setNum((int)number, 2); //= QString::number(number, 2,);
+    /*if (padding == 4){
         if (binary.size() < 4)
             while(binary.size() < 4)
                 binary.prepend("0");
@@ -258,9 +271,10 @@ QString getPaddedBinary(int number, int padding){
     }else if (padding == 32){
         if (binary.size() < 32)
             while(binary.size() < 32)
-                binary.prepend("0");
-    }else
-        return binary;
+                binary.prepend("0");*/
+        binary = binary.rightJustified(padding, '0', true);
+    //}else
+      //  return binary;
 
 
     if(binary.size() > 4)

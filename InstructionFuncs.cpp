@@ -12,10 +12,12 @@ int add(fParam2)
     UNUSE_R
     Q_UNUSED(shamt);
 
-    __int32 res = Rtr + Rsr;
+    __int32 res = Rsr + Rtr;
 
-    if ((Rtr > 0 && Rsr > 0 && res <0) || (Rtr < 0 && Rsr < 0 && res > 0))
+    if ((Rtr > 0 && Rsr > 0 && res <0) || (Rtr < 0 && Rsr < 0 && res > 0)){
+        incPC;
         return OVExNo; //PC to be checked.
+    }
 
     Rdr = res;
     incPC;
@@ -27,7 +29,7 @@ int addu(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr + Rsr;
+    Rdr = Rsr + Rtr;
     incPC;
     return 0;
 
@@ -38,11 +40,13 @@ int sub(fParam2)
     UNUSE_R
     Q_UNUSED(shamt);
 
-    __int32 res = Rtr - Rsr;
+    __int32 res = Rsr - Rtr;
 
 
-    if ((Rtr > 0 && Rsr < 0 && res <0) || (Rtr < 0 && Rsr > 0 && res > 0))
+    if ((Rtr > 0 && Rsr < 0 && res <0) || (Rtr < 0 && Rsr > 0 && res > 0)){
+        incPC;
         return OVExNo; //PC to be checked.
+    }
 
     Rdr = res;
     incPC;
@@ -53,7 +57,7 @@ int subu(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr - Rsr;
+    Rdr = Rsr - Rtr;
     incPC;
     return 0;
 }
@@ -62,7 +66,7 @@ int and_(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr & Rsr;
+    Rdr = Rsr & Rtr;
     incPC;
     return 0;
 }
@@ -70,7 +74,7 @@ int or_(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr | Rsr;
+    Rdr = Rsr | Rtr;
     incPC;
     return 0;
 }
@@ -79,7 +83,7 @@ int xor_(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr ^ Rsr;
+    Rdr = Rsr ^ Rtr;
     incPC;
     return 0;
 }
@@ -88,7 +92,7 @@ int nor_(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = ~(Rtr | Rsr);
+    Rdr = ~(Rsr | Rtr);
     incPC;
     return 0;
 }
@@ -97,8 +101,8 @@ int srlv(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr >> Rsr;
-    if (Rtr < 0)
+    Rdr = Rsr >> Rtr;
+    if (Rsr < 0)
         Rdr = Rdr * -1;
     incPC;
     return 0;
@@ -108,7 +112,7 @@ int sllv(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr << Rsr;
+    Rdr = Rsr << Rtr;
     incPC;
     return 0;
 }
@@ -117,7 +121,7 @@ int srav(fParam2)
 {
     UNUSE_R
     Q_UNUSED(shamt);
-    Rdr = Rtr >> Rsr;
+    Rdr = Rsr >> Rtr;
     incPC;
     return 0;
 }
@@ -429,17 +433,41 @@ int mtlo(fParam2)
 }
 int mult(fParam2)
 {
-    long res = Rsr * Rtr;
-    RLO = res & 0xFFFFFFFF;
-    RHI = res >> 32;
+    __int64 Rsr64 = Rsr;
+    __int64 Rtr64 = Rtr;
+    __int64 res = Rsr64 * Rtr64;
+    __int64 hi = ((res & 0xFFFFFFFF00000000) >> 32);
+    __int64 lo = res & 0xFFFFFFFF;
+    //qDebug() << res;
+   // qDebug() << Rsr;
+    //qDebug() << Rtr;
+
+   // RLO = (unsigned int) res & 0xFFFFFFFF;
+   // RHI = (int) ((res & 0xFFFFFFFF00000000) >> 32);
+    RLO = static_cast<__int32> (lo);
+    RHI = static_cast<__int32> (hi);
+    //qDebug() << RHI;
+    //qDebug() << RLO;
     incPC;
     return 0;
 }
 int multu(fParam2)
 {
-    long res = ((unsigned int)Rsr) * ((unsigned int)Rtr);
-    RLO = res & 0xFFFFFFFF;
-    RHI = res >> 32;
+   Uint64  Rsr64 = Rsr;
+   Uint64 Rtr64 = Rtr;
+   Uint64 res = Rsr64 * Rtr64;
+   Uint64 hi = ((res & 0xFFFFFFFF00000000) >> 32);
+   Uint64 lo = res & 0xFFFFFFFF;
+    //qDebug() << res;
+   // qDebug() << Rsr;
+    //qDebug() << Rtr;
+
+   // RLO = (unsigned int) res & 0xFFFFFFFF;
+   // RHI = (int) ((res & 0xFFFFFFFF00000000) >> 32);
+    RLO = static_cast<Uint32> (lo);
+    RHI = static_cast<Uint32> (hi);
+    //qDebug() << RHI;
+    //qDebug() << RLO;
     incPC;
     return 0;
 }

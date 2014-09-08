@@ -10,6 +10,7 @@ const QString B02("Binary");
 const QString BAS("Ascii");
 
 QString getPaddedBinary(int number, int padding);
+QString getPaddedHex(int number, int padding);
 
 
 
@@ -166,7 +167,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                         return "0x" + QString::number(uvalue, 16).toUpper();
                     }else{
                         QString untrimmed = QString::number(uvalue, 16);
-                        return "0x" + untrimmed.mid(untrimmed.size() -8).toUpper();
+                        return "0x" + untrimmed.mid(untrimmed.size() - 8).toUpper();
                     }
                 }
             }else{
@@ -174,10 +175,10 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
             }
             if (memoryBase->currentText() == B16){
                 if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
-                    return "0x" + QString::number(value, 16).toUpper();
+                    return "0x" + getPaddedHex(value, 32);
                 }else{
-                    QString untrimmed = QString::number(value, 16);
-                    return "0x" + untrimmed.mid(untrimmed.size() - 8).toUpper();
+                    //QString untrimmed = QString::number(value, 16);
+                    return "0x" + getPaddedHex(value, 8); //+ untrimmed.mid(untrimmed.size() - 8).toUpper();
                 }
             }else if (memoryBase->currentText() == B02){
                 if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD)
