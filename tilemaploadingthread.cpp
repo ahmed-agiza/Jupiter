@@ -3,12 +3,14 @@
 #include <QRegExp>
 #include "mainwindow.h"
 #include <QDomComment>
+#include <QMessageBox>
 
 TilemapLoadingThread::TilemapLoadingThread(QObject *parent, Memory *memory, QString fileName) :
     QThread(parent)
 {
     this->fileName = fileName;
     this->memory = memory;
+
 }
 
 void TilemapLoadingThread::run()
@@ -19,13 +21,13 @@ void TilemapLoadingThread::run()
         qDebug() << fileName;
         QFile data(fileName);
         if(!data.open( QIODevice::ReadOnly | QIODevice::Text ) ){
-            QMessageBox::critical(this, "Error", QString("Failed to open tmx file") + QString("\n ") + data.errorString());
+            QMessageBox::critical((QWidget *)this->parent(), "Error", QString("Failed to open tmx file") + QString("\n ") + data.errorString());
             qDebug() << "Failed to open!";
         }else{
 
             QDomDocument domDocument;
             if(!domDocument.setContent(&data)){
-                QMessageBox::critical(this, "Error", "Invalid file");
+                QMessageBox::critical((QWidget *)this->parent(), "Error", "Invalid file");
                 qDebug() << "Cannot set content";
                 return;
             }
