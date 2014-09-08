@@ -299,7 +299,7 @@ void MainWindow::addEditorWindow(QString file, QString title, MirageFileType typ
         QObject::connect(editorWindow->codeEditor(), SIGNAL(undoAvailable(bool)), this, SLOT(enableUndo(bool)));
         QObject::connect(editorWindow->codeEditor(), SIGNAL(redoAvailable(bool)), this, SLOT(enableRedo(bool)));
     }else{
-        delete editorWindow;
+        editorWindow->hide();
         QMessageBox::critical(this, "Error", "Failed to open the file " + file);
     }
 
@@ -574,10 +574,10 @@ MainWindow::~MainWindow(){
     //delete memory;
     if (projectFile.isOpen())
         projectFile.close();
-    if(assemblerInitialized)
+    /*if(assemblerInitialized)
         delete assem;
     if (engine)
-        delete engine;
+        delete engine;*/
     delete ui;
     simulationThread.quit();
     simulationThread.wait();
@@ -765,7 +765,7 @@ void MainWindow::on_actionSimulate_triggered(){
         if(engine){
             if(engine->isVisible())
                 engine->hide();
-            delete engine;
+            //delete engine;
         }
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
@@ -882,11 +882,11 @@ void MainWindow::on_actionAssemble_triggered(){
 
             simulationThread.quit();
             simulationThread.wait();
-            delete assem;
+            //delete assem;
         }if (memory){
-            Memory *tempMemory = memory;
+            //Memory *tempMemory = memory;
             memory = new Memory(this);
-            delete tempMemory;
+            //delete tempMemory;
         }
 
     }
@@ -957,7 +957,7 @@ void MainWindow::on_actionReload_Tiles_Memory_triggered()
             memoryLoading->show();
             return;
         }
-        delete memoryLoading;
+       // delete memoryLoading;
     }
 
     memoryLoading = new MemoryLoading(0, this->memory);
@@ -1835,8 +1835,8 @@ void MainWindow::openPaletteViewer(){
 }
 
 void MainWindow::on_actionPause_Simulation_triggered(){
-    //QString fileName = QFileDialog::getOpenFileName(this, "Load tmx", MainWindow::getProjectPath(), "TMX File(*.tmx)");
-    QString fileName = "C:/Users/Ahmed/Downloads/test.tmx";
+    QString fileName = QFileDialog::getOpenFileName(this, "Load tmx", MainWindow::getProjectPath(), "TMX File(*.tmx)");
+    //QString fileName = "C:/Users/Ahmed/Downloads/test.tmx";
     if (fileName.trimmed() == "")
         return;
     qDebug() << fileName;

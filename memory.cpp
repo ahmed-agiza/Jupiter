@@ -102,7 +102,6 @@ Memory::Memory(QObject *parent): QObject(parent),
                     screenWidth(512),
                     screenHeight(384)
 {
-
     spritesTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
     backgroundTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
 
@@ -148,9 +147,7 @@ void Memory::resizeTileMap()
     tileMap.fill( QVector<char>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
 }
 
-Memory::~Memory()
-{
-
+Memory::~Memory(){
 }
 
 int Memory::getTextSegmentSize()
