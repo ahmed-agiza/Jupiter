@@ -509,7 +509,6 @@ void Assembler::parseTextSegment(QStringList* stringList)
     foreach (QString line, *stringList)
     {
         emit progressUpdate(((float)currentProgress++/totalCount)*100);
-        thread()->msleep(250);
         if((R.indexIn(line, 0)) != -1)
         {
             instructions.push_back(Instruction(R.cap(2),registers,opcode[R.cap(2)],registerIndex[R.cap(4)],registerIndex[R.cap(5)],registerIndex[R.cap(3)],0,0,RFormat));
@@ -1857,7 +1856,6 @@ void Assembler::simulate()
     int i = 0;
     while (PC != -1 && ((PC/4) < instructions.size() && !exitExec /*&& i < 150*/))
     {
-        thread()->msleep(250);
         if(mainW->isGFXEnabled()){
             sf::Event event;
             while(mem->getTileEngine()->pollEvent(event))
