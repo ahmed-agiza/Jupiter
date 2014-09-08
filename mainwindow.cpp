@@ -860,7 +860,7 @@ void MainWindow::on_actionAssemble_triggered(){
         ui->tableLog->clearContents();
         ui->tableLog->setRowCount(0);
         if (assem){
-            qDebug() << "Disconnecting";
+            //qDebug() << "Disconnecting";
             QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
             QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
             QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
