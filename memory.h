@@ -69,6 +69,12 @@ public:
     int getDataSegmentSize();
     int getHeapSegmentSize();
     int getStackSegmentSize();
+    int getTilemapSegmentSize();
+    int getBGTilesetSegmentSize();
+    int getSPTilesetSegmentSize();
+    int getSPRAMSegmentSize();
+    int getPaletteSegmentSize();
+    int getInputSegmentSize();
 
     void setTileEngine(TileEngine *);
     TileEngine *getTileEngine() const;

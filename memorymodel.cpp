@@ -57,6 +57,30 @@ int MemoryModel::initMemorySegment()
         totalSize = memory->getHeapSegmentSize();
         baseAddress = memory->heapSegmentBaseAddress;
         break;
+    case TMSegment:
+        totalSize = memory->getTilemapSegmentSize();
+        baseAddress = memory->tileMapBaseAddress;
+        break;
+    case BGTSSegment:
+        totalSize = memory->getBGTilesetSegmentSize();
+        baseAddress = memory->backgroundTileSetBaseAddress;
+        break;
+    case SPTSSegment:
+        totalSize = memory->getSPTilesetSegmentSize();
+        baseAddress = memory->spritesTileSetBaseAddress;
+        break;
+    case SPRamSegment:
+        totalSize = memory->getSPRAMSegmentSize();
+        baseAddress = memory->spriteRamBaseAddress;
+        break;
+    case PaletteSegment:
+        totalSize = memory->getPaletteSegmentSize();
+        baseAddress = memory->paletteBaseAddress;
+        break;
+    case InputSegment:
+        totalSize = memory->getInputSegmentSize();
+        baseAddress = memory->inputMemoryBaseAddress;
+        break;
     case StackSegment:
     default:
         baseAddress = memory->heapSegmentBaseAddress;;

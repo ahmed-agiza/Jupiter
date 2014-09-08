@@ -9,7 +9,8 @@ GpuMemoryDump::GpuMemoryDump(QWidget *parent, Memory *mem, MainWindow *mainW) :
     ui->setupUi(this);
     this->mem = mem;
     this->mainW = mainW;
-    this->setWindowTitle("GPU Memory Dump");
+    setWindowTitle("GPU Memory Dump");
+    setModal(true);
     complete();
 }
 

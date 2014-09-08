@@ -170,6 +170,30 @@ int Memory::getStackSegmentSize()
     return heapSegment.size();
 }
 
+int Memory::getTilemapSegmentSize(){
+    return tileMap.size();
+}
+
+int Memory::getBGTilesetSegmentSize(){
+    return backgroundTileSet.size();
+}
+
+int Memory::getSPTilesetSegmentSize(){
+    return spritesTileSet.size();
+}
+
+int Memory::getSPRAMSegmentSize(){
+    return spriteRam.size();
+}
+
+int Memory::getPaletteSegmentSize(){
+    return palette.size();
+}
+
+int Memory::getInputSegmentSize(){
+    return inputMemory.size();
+}
+
 
 void Memory::storeByte(unsigned int addr, char data)
 {

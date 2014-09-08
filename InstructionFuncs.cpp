@@ -14,7 +14,6 @@ int add(fParam2)
 
     __int32 res = Rtr + Rsr;
 
-
     if ((Rtr > 0 && Rsr > 0 && res <0) || (Rtr < 0 && Rsr < 0 && res > 0))
         return OVExNo; //PC to be checked.
 

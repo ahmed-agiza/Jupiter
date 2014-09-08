@@ -6,7 +6,7 @@
 #include <QAbstractTableModel>
 #include <QComboBox>
 
-enum MemorySegment {TextSegment, DataSegment, StackSegment, HeapSegment};
+enum MemorySegment {TextSegment, DataSegment, StackSegment, HeapSegment, TMSegment, BGTSSegment, SPTSSegment, SPRamSegment, PaletteSegment, InputSegment};
 enum DisplayMode {Word, UnsignedWord, Byte, UnsignedByte};
 enum MemoryBase {IntegerBase, HexBase, BinaryBase, AsciiBase};
 

@@ -373,8 +373,11 @@
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QTabWidget" name="tableMemory">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>5</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -843,6 +846,746 @@
          <string>Labels</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_14"/>
+       </widget>
+       <widget class="QWidget" name="tabGFX">
+        <attribute name="title">
+         <string>Graphics Engine</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <item>
+          <widget class="QTabWidget" name="TabsGfxEngine">
+           <property name="currentIndex">
+            <number>5</number>
+           </property>
+           <widget class="QWidget" name="tabTileset">
+            <attribute name="title">
+             <string>Tile Map</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <layout class="QFormLayout" name="dataAddressLayout_3">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblTMAddressMode">
+                 <property name="text">
+                  <string>Address Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="tmAddressMode">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryBaseLayout_3">
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblTMMemoryBase">
+                 <property name="text">
+                  <string>Memory Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="tmMemoryBase">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ascii</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryModeLayout_3">
+               <item row="0" column="1">
+                <widget class="QComboBox" name="tmMemoryMode">
+                 <item>
+                  <property name="text">
+                   <string>Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Byte</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Byte</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblTMMemoryMode">
+                 <property name="text">
+                  <string>Memory Mode:</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableView" name="tmTable">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabBackgroundTileset">
+            <attribute name="title">
+             <string>Background Tileset</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_11">
+             <item>
+              <layout class="QFormLayout" name="dataAddressLayout_4">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblBGTSAddressMode">
+                 <property name="text">
+                  <string>Address Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="BGTSAddressMode">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryBaseLayout_4">
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblBGTSMemoryBase">
+                 <property name="text">
+                  <string>Memory Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="BGTSMemoryBase">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ascii</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryModeLayout_4">
+               <item row="0" column="1">
+                <widget class="QComboBox" name="BGTSMemoryMode">
+                 <item>
+                  <property name="text">
+                   <string>Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Byte</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Byte</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblBGTSDataMemoryMode">
+                 <property name="text">
+                  <string>Memory Mode:</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableView" name="bgtsTable">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabSPTileset">
+            <attribute name="title">
+             <string>Sprite Tileset</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_12">
+             <item>
+              <layout class="QFormLayout" name="dataAddressLayout_5">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblSPTSAddressMode">
+                 <property name="text">
+                  <string>Address Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="SPTSAddressMode">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryBaseLayout_5">
+               <item row="0" column="0">
+                <widget class="QLabel" name="lbSPTSlMemoryBase">
+                 <property name="text">
+                  <string>Memory Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="SPTSMemoryBase">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ascii</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryModeLayout_5">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblSPTSMemoryMode">
+                 <property name="text">
+                  <string>Memory Mode:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="SPTSMemoryMode">
+                 <item>
+                  <property name="text">
+                   <string>Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Byte</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Byte</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableView" name="sptsTable">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabSPRam">
+            <attribute name="title">
+             <string>Sprite RAM</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_13">
+             <item>
+              <layout class="QFormLayout" name="dataAddressLayout_11">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblSPRAMAddressMode">
+                 <property name="text">
+                  <string>Address Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="SPRAMAddressMode">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryBaseLayout_9">
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblSPRAMMemoryBase">
+                 <property name="text">
+                  <string>Memory Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="SPRAMMemoryBase">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ascii</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryModeLayout_9">
+               <item row="0" column="1">
+                <widget class="QComboBox" name="SPRAMMemoryMode">
+                 <item>
+                  <property name="text">
+                   <string>Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Byte</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Byte</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblSPRAMMemoryMode">
+                 <property name="text">
+                  <string>Memory Mode:</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableView" name="spRamTable">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabPalette">
+            <attribute name="title">
+             <string>Palette</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_14">
+             <item>
+              <layout class="QFormLayout" name="dataAddressLayout_12">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblPaletteAddressMode">
+                 <property name="text">
+                  <string>Address Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="paletteAddressMode">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryBaseLayout_10">
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblPaletteMemoryBase">
+                 <property name="text">
+                  <string>Memory Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="paletteMemoryBase">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ascii</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryModeLayout_10">
+               <item row="0" column="1">
+                <widget class="QComboBox" name="paletteMemoryMode">
+                 <item>
+                  <property name="text">
+                   <string>Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Byte</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Byte</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblPaletteMemoryMode">
+                 <property name="text">
+                  <string>Memory Mode:</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableView" name="paletteTable">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabInput">
+            <attribute name="title">
+             <string>Input</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <item>
+              <layout class="QFormLayout" name="dataAddressLayout_13">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblInputAddressMode">
+                 <property name="text">
+                  <string>Address Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="inputAddressMode">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryBaseLayout_11">
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblInputMemoryBase_2">
+                 <property name="text">
+                  <string>Memory Base: </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="inputMemoryBase">
+                 <item>
+                  <property name="text">
+                   <string>Hexadecimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Decimal</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Binary</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ascii</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="memoryModeLayout_11">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="lblInputMemoryMode">
+                 <property name="text">
+                  <string>Memory Mode:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="inputMemoryMode">
+                 <item>
+                  <property name="text">
+                   <string>Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Word</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Byte</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Unsigned Byte</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableView" name="inputTable">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
      </item>

@@ -90,6 +90,8 @@ public:
     void openPaletteViewer();
 
 
+
+
     ~MainWindow();
 
 private slots:
@@ -212,13 +214,20 @@ private:
     MemoryDump *memoryDump;
     GpuMemoryDump *gpuMemoryDump;
     RegistersModel *regModel;
-    MemoryModel *textModel, *dataModel, *stackModel, *heapModel;
+    MemoryModel *textModel, *dataModel, *stackModel, *heapModel, *tmModel, *bgtsModel, *sptsModel, *spRamModel, *paletteModel, *inputModel;
     bool assemblerInitialized;
     QFont editorFont;
     IOConsole *console;
     QTimer *timer;
-
     QTreeWidget *treeWidget;
+
+    void addDefaultFont();
+    void initMemoryModels(bool);
+    void initRegs();
+    void connectActions();
+    void setupColumnsResize();
+
+
 
     QThread simulationThread;
     //QThread simulationThread;

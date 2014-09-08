@@ -64,17 +64,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setCentralWidget(ui->dockCode);
     installEventFilter(this);
+    setMouseTracking(true);
+    setAcceptDrops(true);
+
+    addDefaultFont();
+
     ui->actionTileset_viewer->setEnabled(false);
-    //ui->actionBitmap_Display->setEnabled(false);
     ui->actionPalette_Viewer->setEnabled(false);
     ui->actionReload_Tiles_Memory->setEnabled(false);
     ui->actionTile_loader->setEnabled(false);
     ui->actionSprite_Editor->setEnabled(false);
-    QFontDatabase fontsDB;
-    fontsDB.addApplicationFont(":/font/consolas.ttf");
-    if(fontsDB.families().contains("Consolas")){
-        editorFont = fontsDB.font("Consolas", "Normal", 10);
-    }
 
     ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
 
@@ -83,98 +82,41 @@ MainWindow::MainWindow(QWidget *parent) :
     console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->consoleHLayout->addWidget(console);
     QObject::connect(console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(consoleMenuRequested(QPoint)));
-    //console->addText("This is some locked text\nInput:", false);
 
     treeWidget = ui->treeFiles;
+    treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
     memory = new Memory(this);
 
-    memoryLoading = NULL;
-    ui->tableMemory->setCurrentIndex(1);
-
-    for (int i = 0; i < 32; i++){
-        mainProcessorRegisters.append(0);
-    }
-    mainProcessorRegisters[28] = 0x10008000;
-    mainProcessorRegisters[29] = 0x7FFFFFFC;
-
-    regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
-    ui->tableMainRegisters->setModel(regModel);
-
-    assem = NULL;
-    assemblerInitialized = false;
-    this->setMouseTracking(true);
-    engine = NULL;
-
-
-    textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
-    dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
-    stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
-    heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
-
-    ui->textTable->setModel(textModel);
-    ui->dataTable->setModel(dataModel);
-    ui->stackTable->setModel(stackModel);
-    ui->heapTable->setModel(heapModel);
-
-    ui->treeFiles->setContextMenuPolicy(Qt::CustomContextMenu);
-    refreshActions();
-    refreshEditActions();
-    QObject::connect(ui->actionEnable_Graphics_Engine, SIGNAL(toggled(bool)), this,SLOT(refreshGraphicsAction()));
-    QObject::connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
-    QObject::connect(ui->mdiAreaCode,SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(refreshEditActions()));
-    QObject::connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(activeWindowCopy()));
-    QObject::connect(ui->actionCut, SIGNAL(triggered()), this, SLOT(activeWindowCut()));
-    QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(activeWindowPaste()));
-    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(activeWindowUndo()));
-    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(activeWindowRedo()));
-    QObject::connect(ui->actionSelect_All, SIGNAL(triggered()), this, SLOT(activeWindowSelectAll()));
-    QObject::connect(ui->actionQuickFind, SIGNAL(triggered()), this, SLOT(activeWindowQuickFind()));
-    QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
-    QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
-
-
-    minDataTableWidth0 = ui->dataTable->columnWidth(0);
-    minDataTableWidth1 = ui->dataTable->columnWidth(1);
-    minTextTableWidth0 = ui->textTable->columnWidth(0);
-    minTextTableWidth1 = ui->textTable->columnWidth(1);
-    minHeapTableWidth0 = ui->heapTable->columnWidth(0);
-    minHeapTableWidth1 = ui->heapTable->columnWidth(1);
-    minStackTableWidth0 = ui->stackTable->columnWidth(0);
-    minStackTableWidth1 = ui->stackTable->columnWidth(1);
-    minRegsTableWidth0 = ui->tableMainRegisters->columnWidth(0);
-    minRegsTableWidth1 = ui->tableMainRegisters->columnWidth(1);
-
-    QObject::connect(ui->dataAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
-    QObject::connect(ui->dataMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
-    QObject::connect(ui->dataMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
-
-    QObject::connect(ui->textAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
-    QObject::connect(ui->textMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
-    QObject::connect(ui->textMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
-
-    QObject::connect(ui->heapAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
-    QObject::connect(ui->heapMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
-    QObject::connect(ui->heapMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
-
-    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
-    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
-    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
-
-    QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
-    QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
-    ui->toolBar->setAccessibleName("Toolbar");
-    setAcceptDrops(true);
-    simulationBar = NULL;
-    assembling = false;
-    simulateAfterAssembling = false;
-
-
-    ui->tabsProject->setCurrentIndex(0);
     timer = new QTimer(this);
     timer->setSingleShot(false);
     timer->setInterval(300);
     timer->stop();
+
+    memoryLoading = NULL;
+    assem = NULL;
+    engine = NULL;
+    simulationBar = NULL;
+
+    assemblerInitialized = false;
+    assembling = false;
+    simulateAfterAssembling = false;
+
+    initRegs();
+    initMemoryModels(false);
+
+    refreshActions();
+    refreshEditActions();
+    connectActions();
+
+    setupColumnsResize();
+
+
+    ui->toolBar->setAccessibleName("Toolbar");
+
+    ui->tabsProject->setCurrentIndex(0);
+    ui->tableMemory->setCurrentIndex(1);
+
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(simulationProgress()));
 
 }
@@ -1330,6 +1272,14 @@ void MainWindow::appendErrorMessage(int lineNumber, QString msg){
 
 }
 
+void MainWindow::addDefaultFont(){
+    QFontDatabase fontsDB;
+    fontsDB.addApplicationFont(":/font/consolas.ttf");
+    if(fontsDB.families().contains("Consolas")){
+        editorFont = fontsDB.font("Consolas", "Normal", 10);
+    }
+}
+
 void MainWindow::on_actionInput_triggered(){
     inputManager = new InputManager(this, memory);
     inputManager->show();
@@ -1530,6 +1480,7 @@ void MainWindow::refreshGraphicsAction(){
     ui->actionReload_Tiles_Memory->setEnabled(value);
     ui->actionTile_loader->setEnabled(false);
     ui->actionSprite_Editor->setEnabled(value);
+    ui->tabGFX->setEnabled(value);
 }
 
 
@@ -1726,7 +1677,7 @@ void MainWindow::simulationComplete(){
 
     mainProcessorRegisters = *assem->registers;
 
-    regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
+    /*regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
     ui->tableMainRegisters->setModel(regModel);
 
     textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
@@ -1737,7 +1688,8 @@ void MainWindow::simulationComplete(){
     ui->textTable->setModel(textModel);
     ui->dataTable->setModel(dataModel);
     ui->stackTable->setModel(stackModel);
-    ui->heapTable->setModel(heapModel);
+    ui->heapTable->setModel(heapModel);*/
+    initMemoryModels(true);
 
     resizeColumns();
 
@@ -1832,6 +1784,95 @@ void MainWindow::openTilesetViewer(){
 
 void MainWindow::openPaletteViewer(){
     on_actionPalette_Viewer_triggered();
+}
+
+void MainWindow::initMemoryModels(bool checkGFX = false){
+
+    regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
+    ui->tableMainRegisters->setModel(regModel);
+
+    textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
+    dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
+    stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
+    heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
+
+    ui->textTable->setModel(textModel);
+    ui->dataTable->setModel(dataModel);
+    ui->stackTable->setModel(stackModel);
+    ui->heapTable->setModel(heapModel);
+
+    if (checkGFX)
+        if(!ui->actionEnable_Graphics_Engine->isChecked())
+            return;
+    tmModel = new MemoryModel(memory, this, TMSegment, ui->tmAddressMode, ui->tmMemoryMode, ui->tmMemoryBase);
+    bgtsModel = new MemoryModel(memory, this, BGTSSegment, ui->BGTSAddressMode, ui->BGTSMemoryMode, ui->BGTSMemoryBase);
+    sptsModel = new MemoryModel(memory, this, SPTSSegment, ui->SPTSAddressMode, ui->SPRAMMemoryMode, ui->SPTSMemoryBase);
+    spRamModel = new MemoryModel(memory, this, SPRamSegment, ui->SPRAMAddressMode, ui->SPRAMMemoryMode, ui->SPRAMMemoryBase);
+    paletteModel = new MemoryModel(memory, this, PaletteSegment, ui->paletteAddressMode, ui->paletteMemoryMode, ui->paletteMemoryBase);
+    inputModel = new MemoryModel(memory, this, InputSegment, ui->inputAddressMode, ui->inputMemoryMode, ui->inputMemoryBase);
+
+    ui->tmTable->setModel(tmModel);
+    ui->bgtsTable->setModel(bgtsModel);
+    ui->sptsTable->setModel(sptsModel);
+    ui->spRamTable->setModel(spRamModel);
+    ui->paletteTable->setModel(paletteModel);
+    ui->inputTable->setModel(inputModel);
+}
+
+void MainWindow::initRegs(){
+    for (int i = 0; i < 32; i++){
+        mainProcessorRegisters.append(0);
+    }
+    mainProcessorRegisters[28] = 0x10008000;
+    mainProcessorRegisters[29] = 0x7FFFFFFC;
+}
+
+void MainWindow::connectActions(){
+    QObject::connect(ui->actionEnable_Graphics_Engine, SIGNAL(toggled(bool)), this,SLOT(refreshGraphicsAction()));
+    QObject::connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
+    QObject::connect(ui->mdiAreaCode,SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(refreshEditActions()));
+    QObject::connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(activeWindowCopy()));
+    QObject::connect(ui->actionCut, SIGNAL(triggered()), this, SLOT(activeWindowCut()));
+    QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(activeWindowPaste()));
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(activeWindowUndo()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(activeWindowRedo()));
+    QObject::connect(ui->actionSelect_All, SIGNAL(triggered()), this, SLOT(activeWindowSelectAll()));
+    QObject::connect(ui->actionQuickFind, SIGNAL(triggered()), this, SLOT(activeWindowQuickFind()));
+    QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
+    QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
+}
+
+void MainWindow::setupColumnsResize(){
+    minDataTableWidth0 = ui->dataTable->columnWidth(0);
+    minDataTableWidth1 = ui->dataTable->columnWidth(1) + 10;
+    minTextTableWidth0 = ui->textTable->columnWidth(0);
+    minTextTableWidth1 = ui->textTable->columnWidth(1) + 10;
+    minHeapTableWidth0 = ui->heapTable->columnWidth(0);
+    minHeapTableWidth1 = ui->heapTable->columnWidth(1) + 10;
+    minStackTableWidth0 = ui->stackTable->columnWidth(0);
+    minStackTableWidth1 = ui->stackTable->columnWidth(1) + 10;
+    minRegsTableWidth0 = ui->tableMainRegisters->columnWidth(0);
+    minRegsTableWidth1 = ui->tableMainRegisters->columnWidth(1) + 10;
+    resizeColumns();
+
+    QObject::connect(ui->dataAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
+    QObject::connect(ui->dataMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
+    QObject::connect(ui->dataMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
+
+    QObject::connect(ui->textAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
+    QObject::connect(ui->textMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
+    QObject::connect(ui->textMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
+
+    QObject::connect(ui->heapAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
+    QObject::connect(ui->heapMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
+    QObject::connect(ui->heapMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
+
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
+
+    QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
+    QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
 }
 
 void MainWindow::on_actionPause_Simulation_triggered(){

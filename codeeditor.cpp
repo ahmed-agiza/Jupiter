@@ -255,25 +255,31 @@ void CodeEditor::deleteLine(){
 }
 
 void CodeEditor::moveLineUp(){
-    QString line = getCurrentLine();
+    /*QString line = getCurrentLine();
     QTextCursor currentPos = deleteCurrentLine();
     currentPos.movePosition(QTextCursor::StartOfLine);
     currentPos.insertText(line + '\n');
     currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
     currentPos.endEditBlock();
-    setTextCursor(currentPos);
+    setTextCursor(currentPos);*/
+    QString line = getCurrentLine();
+    QTextCursor curs = deleteCurrentLine();
+    curs.movePosition(QTextCursor::StartOfLine);
+    curs.insertText(line + "\n" );
+    curs.movePosition(QTextCursor::PreviousCharacter);
+    curs.endEditBlock();
+    setTextCursor(curs);
 }
 
 void CodeEditor::moveLineDown(){
     QString line = getCurrentLine();
-    QTextCursor cursCopy = textCursor();
-    QTextCursor currentPos = deleteCurrentLine();
-    currentPos.movePosition(QTextCursor::EndOfLine);
-    if (!cursCopy.selectionStart() == 0)
-        currentPos.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, line.length() + 1);
-    currentPos.insertText('\n' + line);
-    currentPos.endEditBlock();
-    setTextCursor(currentPos);
+    QTextCursor curs = deleteCurrentLine();
+    curs.movePosition(QTextCursor::NextCharacter);
+    curs.movePosition(QTextCursor::EndOfLine);
+    curs.insertText("\n" + line);
+    curs.endEditBlock();
+    setTextCursor(curs);
+
 }
 
 void CodeEditor::copyLineUp(){
