@@ -17,10 +17,10 @@ LoadTilesetsThread::LoadTilesetsThread(QObject *parent, Memory* memory, bool til
 
 void LoadTilesetsThread::run()
 {
-   if(indImages){
+    if(indImages){
         OpenMultiple();
     }else{
-       OpenSingle();
+        OpenSingle();
     }
 }
 
@@ -55,13 +55,18 @@ void LoadTilesetsThread::OpenMultiple()
                                 }
                                 if(palettePointer == 256){
                                     qDebug() << "Error! Color palette is full";
-                                }else{
-                                    memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
-                                    paletteSet[color] = palettePointer;
-                                    imageMatrix[i][j] = palettePointer;
+                                    palettePointer = 0;
                                 }
+                                memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
+                                paletteSet[color] = palettePointer;
+                                imageMatrix[i][j] = palettePointer;
+
                             }else{
                                 qDebug() << "Error! Color palette is full";
+                                palettePointer = 0;
+                                memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
+                                paletteSet[color] = palettePointer;
+                                imageMatrix[i][j] = palettePointer;
                             }
                         }
                     }
@@ -141,6 +146,7 @@ sf::Uint32 LoadTilesetsThread::colorToInt(sf::Color color)
 void LoadTilesetsThread::OpenSingle()
 {
     sf::Image imageToLoad;
+    int palettePointer = 0;
     if(imageToLoad.loadFromFile(fileName.toStdString())){
         if(imageToLoad.getSize().x % 16 != 0 || imageToLoad.getSize().y%16 != 0 || (imageToLoad.getSize().x/16)*(imageToLoad.getSize().y/16) != 256){
             qDebug() << "Failed to load tileset \""+ fileName + "\"";
@@ -149,9 +155,47 @@ void LoadTilesetsThread::OpenSingle()
                 for(int j=0; j<imageToLoad.getSize().x; j+=16){
                     sf::Image img;
                     img.copy(imageToLoad,0,0,IntRect(j,i,16,16));
-                    QString filePath = "D://"+QString::number((i/16 * imageToLoad.getSize().x / 16) + (j/16))+".png";   // Project folder
-                    img.saveToFile(filePath.toStdString());
-                    nameList->append(filePath);
+
+                    //*****************************************************************
+
+                    int tileBaseAddress = (!tileSetIndex)? memory->backgroundTileSetBaseAddress:memory->spritesTileSetBaseAddress;
+                    for(int i=0; i<16; i++){
+                        for(int j=0; j<16; j++){
+                            Uint32 color = colorToInt(img.getPixel(j,i));
+                            if(paletteSet.contains(color)){
+                                imageMatrix[i][j] = paletteSet[color];
+                            }else{
+                                if(palettePointer<256){
+                                    while(palettePointer<256 && memory->palette[palettePointer].getColor() != sf::Color(0,0,0,0)){
+                                        palettePointer++;
+                                    }
+                                    if(palettePointer == 256){
+                                        qDebug() << "Error! Color palette is full";
+                                        palettePointer = 0;
+                                    }
+                                    memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
+                                    paletteSet[color] = palettePointer;
+                                    imageMatrix[i][j] = palettePointer;
+
+                                }else{
+                                    qDebug() << "Error! Color palette is full";
+                                    palettePointer = 0;
+                                    memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
+                                    paletteSet[color] = palettePointer;
+                                    imageMatrix[i][j] = palettePointer;
+                                }
+                            }
+                        }
+                    }
+                    for(int i=0; i<16; i++){
+                        for(int j=0; j<16; j++){
+                            memory->storeByte((tileBaseAddress | (tileIndex << 8) | (i<<4) | j), imageMatrix[i][j]);
+                        }
+                    }
+                    //*****************************************************************
+                    //QString filePath = "D://"+QString::number((i/16 * imageToLoad.getSize().x / 16) + (j/16))+".png";   // Project folder
+                    //img.saveToFile(filePath.toStdString());
+                    //nameList->append(filePath);
                 }
             }
             OpenMultiple();

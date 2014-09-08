@@ -12,9 +12,9 @@ TilemapLoadingThread::TilemapLoadingThread(QObject *parent, Memory *memory, QStr
 
 void TilemapLoadingThread::run()
 {
-    if(fileName.endsWith(".mtmap")){
+    if(fileName.endsWith(".tmx")){
 
-    }else{
+    }else if(fileName.endsWith(".txt")){
         QFile myFile(fileName);
         if (!myFile.open(QIODevice::ReadOnly | QIODevice::Text)){
             qDebug() << "cannot open file";
