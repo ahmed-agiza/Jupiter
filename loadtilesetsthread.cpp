@@ -158,25 +158,21 @@ void LoadTilesetsThread::OpenSingle()
     sf::Image imageToLoad;
     QVector< QVector< sf::Uint8 > > imageMatrix(16,QVector<sf::Uint8>(16, 0));
     int palettePointer = 0;
-    bool firstBlack=false;
-    while(palettePointer<256 && (memory->palette[palettePointer].getColor() != sf::Color(0,0,0,0) || !firstBlack)){
-        if(memory->palette[palettePointer].getColor() == sf::Color(0,0,0,0))
-            firstBlack = true;
-        palettePointer++;
-    }
     if(imageToLoad.loadFromFile(fileName.toStdString())){
         if(imageToLoad.getSize().x % 16 != 0 || imageToLoad.getSize().y%16 != 0 || (imageToLoad.getSize().x/16)*(imageToLoad.getSize().y/16) != 256){
             qDebug() << "Failed to load tileset \""+ fileName + "\"";
         }else{
-
             for(int i=0; i<imageToLoad.getSize().y; i+=16){
                 for(int j=0; j<imageToLoad.getSize().x; j+=16){
-                    qDebug() << "yes";
                     sf::Image img;
-                    img.copy(imageToLoad,0,0,IntRect(j,i,16,16));
+                    img.create(16,16);
+                    for(int r=0; r<16; r++){
+                        for(int c=0; c<16; c++){
+                            img.setPixel(c,r,imageToLoad.getPixel(j+c,i+r));
+                        }
+                    }
                     //*****************************************************************
-                    int tileIndex = ((i/16)*32+(j/16));
-                    qDebug() << tileIndex;
+                    int tileIndex = ((i/16)*16+(j/16));
 
                     int tileBaseAddress = (!tileSetIndex)? memory->backgroundTileSetBaseAddress:memory->spritesTileSetBaseAddress;
                     for(int r=0; r<16; r++){
@@ -185,42 +181,21 @@ void LoadTilesetsThread::OpenSingle()
                             if(paletteSet.contains(color)){
                                 imageMatrix[r][c] = paletteSet[color];
                             }else{
-                                if(palettePointer<256){
-                                    while(palettePointer<256 && memory->palette[palettePointer].getColor() != sf::Color(0,0,0,0)){
-                                        palettePointer++;
-                                    }
-                                    if(palettePointer == 256){
-                                        qDebug() << "Error! Color palette is full";
-                                        palettePointer = 0;
-                                    }
-                                    memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
-                                    paletteSet[color] = palettePointer;
-                                    imageMatrix[r][c] = palettePointer;
-
-                                }else{
-                                    qDebug() << "Error! Color palette is full";
-                                    palettePointer = 0;
-                                    memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
-                                    paletteSet[color] = palettePointer;
-                                    imageMatrix[r][c] = palettePointer;
-                                }
+                                memory->storeWord(memory->paletteBaseAddress + (palettePointer*4), color);
+                                paletteSet[color] = palettePointer;
+                                imageMatrix[r][c] = palettePointer++;
                             }
                         }
                     }
-
                     for(int r=0; r<16; r++){
                         for(int c=0; c<16; c++){
                             memory->storeByte((tileBaseAddress | (tileIndex << 8) | (r<<4) | c), imageMatrix[r][c]);
                         }
                     }
                     //*****************************************************************
-                    //QString filePath = "D://"+QString::number((i/16 * imageToLoad.getSize().x / 16) + (j/16))+".png";   // Project folder
-                    //img.saveToFile(filePath.toStdString());
-                    //nameList->append(filePath);
                     emit loadingNumberChanged(tileIndex);
                 }
             }
-            //OpenMultiple();
         }
     }else{
         qDebug() << "Failed to load tileset \""+ fileName + "\"";
