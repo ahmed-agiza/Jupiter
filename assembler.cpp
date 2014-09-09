@@ -292,6 +292,7 @@ Assembler::Assembler(Memory *memory, QVector<int> * mRegisters, MainWindow * mai
     this->registers = mRegisters;
     totalCount = 0;
     currentProgress = 0;
+    simulationSpeed = 0;
 
 }
 
@@ -1829,8 +1830,7 @@ void Assembler::handlePSR(QRegExp m, QString line)
     }
 }
 
-void Assembler::handlePI(QRegExp m, QString line)
-{
+void Assembler::handlePI(QRegExp m, QString line){
     if(m.cap(2) == "subi")
     {
         instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,-getNumber(m.cap(5)),getNumber(m.cap(5)),IFormat));
@@ -1838,9 +1838,129 @@ void Assembler::handlePI(QRegExp m, QString line)
     }
 }
 
+void Assembler::setSimulationSpeed(int speed){
+    simulationSpeed = speed;
+}
+
+void Assembler::setLineMapping(QMap<int, int> mapping){
+    lineMapping = mapping;
+}
+
 
 Assembler::Assembler(){
 
+}
+
+inline void Assembler::executeFunction()
+{
+    if (waiting)
+        return;
+
+    activePC = PC/4;
+    emit executingInstruction(activePC);
+    if (lineMapping.contains(activePC))
+        emit executingLine(lineMapping[activePC]);
+    if (instructions[activePC].getName() == "syscall"){
+        int functionNumber = (*registers)[2];
+        QString msg;
+        QString charac;
+        //QString previousChar;
+        QByteArray strArray;
+        QByteArray strByte(1, ' ');
+        int offset;
+        int baseAddress;
+        switch(functionNumber){
+        case 0:
+            qDebug() << "Invalid function value in $v0 for the syscall";
+            PC += 4;
+            break;
+        case PRINT_INTEGER:
+            msg = QString::number((*registers)[4]);
+            emit printToConsole(msg);
+            PC += 4;
+            break;
+        case PRINT_FLOAT:
+            qDebug() << "FPU instructions are not implemented";
+            PC += 4;
+            break;
+        case PRINT_DOUBLE:
+            qDebug() << "FPU instructions are not implemented";
+            PC += 4;
+            break;
+        case PRINT_STRING:
+            //Printing String.
+            msg = "";
+            offset = 1;
+            baseAddress = (*registers)[4];
+            strArray.resize(1);
+            strArray[0] = (char) mem->loadByte(baseAddress);
+            //charac = QString::fromLatin1(strArray);
+            while (strArray[0] != '\0' && offset < 100){
+                charac = QString::fromLatin1(strArray);
+                strArray [0] = (char) mem->loadByte(baseAddress + offset++);
+                msg.append(charac);
+            }
+            //msg.remove(msg.length() - 1, 1);
+            emit printToConsole(msg);
+            PC += 4;
+            break;
+        case READ_INTEGER:
+            waiting = true;
+            emit inputRequired(functionNumber);
+            PC += 4;
+            break;
+        case READ_FLOAT:
+            qDebug() << "FPU instructions are not implemented";
+            PC += 4;
+            break;
+        case READ_DOUBLE:
+            qDebug() << "FPU instructions are not implemented";
+            PC += 4;
+            break;
+        case READ_STRING:
+            waiting = true;
+            emit setReadingLimit((*registers)[5]);
+            emit inputRequired(functionNumber);
+            PC += 4;
+            break;
+        case MEMORY_ALLOCATION:
+            qDebug() << "Allocate heap memory";
+            //Allocate Heap Memory
+            PC += 4;
+            break;
+        case EXIT:
+            exitExec = true;
+            break;
+        case PRINT_CHARACTER:
+            qDebug() << "Print character";
+            //Print character
+
+            strByte[0] = (char) mem->loadByte((*registers)[4]);
+            msg = QString::fromLatin1(strByte);
+            emit printToConsole(msg);
+            PC += 4;
+            break;
+        case READ_CHARACTER:
+            qDebug() << "Read character";
+            //Read character
+            emit inputRequired(functionNumber);
+            waiting = true;
+            PC += 4;
+            break;
+        default:
+            qDebug() << "Unhandled syscall function number " << (*registers)[1];
+            PC += 4;
+            break;
+        }
+
+    }
+    instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
+    instructions[activePC].execute(PC);
+    (*registers)[0] = 0;
+    (*registers)[34] = PC;
+    emit instructionExecuted();
+    if (simulationSpeed > 0)
+        thread()->msleep(simulationSpeed);
 }
 
 void Assembler::simulate()
@@ -1939,123 +2059,24 @@ void Assembler::simulate()
                 }
             }
         }
-        //qDebug() << "Running " << PC;
-        if (waiting)
+        /*QString logText = QString::number(i) + ": PC: " + QString::number(PC)
+                + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
+                + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+                + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+                + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "  "
+                + " Im" + QString::number(instructions[activePC].getImm());*/
+
+        if (waiting || mainW->isSimulationPaused())
             break;
-            //emit simulationActive();
-            activePC = PC/4;
-            QString logText = QString::number(i) + ": PC: " + QString::number(PC)
-                    + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
-                    + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
-                    + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
-                    + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "  "
-                    + " Im" + QString::number(instructions[activePC].getImm());
 
-            if (instructions[activePC].getName() == "syscall"){
-                int functionNumber = (*registers)[2];
-                QString msg;
-                QString charac;
-                //QString previousChar;
-                QByteArray strArray;
-                QByteArray strByte(1, ' ');
-                int offset;
-                int baseAddress;
-                switch(functionNumber){
-                case 0:
-                    qDebug() << "Invalid function value in $v0 for the syscall";
-                    PC += 4;
-                    break;
-                case PRINT_INTEGER:
-                    msg = QString::number((*registers)[4]);
-                    emit printToConsole(msg);
-                    PC += 4;
-                    break;
-                case PRINT_FLOAT:
-                    qDebug() << "FPU instructions are not implemented";
-                    PC += 4;
-                    break;
-                case PRINT_DOUBLE:
-                    qDebug() << "FPU instructions are not implemented";
-                    PC += 4;
-                    break;
-                case PRINT_STRING:
-                    //Printing String.
-                    msg = "";
-                    offset = 1;
-                    baseAddress = (*registers)[4];
-                    strArray.resize(1);
-                    strArray[0] = (char) mem->loadByte(baseAddress);
-                    //charac = QString::fromLatin1(strArray);
-                    while (strArray[0] != '\0' && offset < 100){
-                            charac = QString::fromLatin1(strArray);
-                            strArray [0] = (char) mem->loadByte(baseAddress + offset++);
-                            msg.append(charac);
-                    }
-                    //msg.remove(msg.length() - 1, 1);
-                    emit printToConsole(msg);
-                    PC += 4;
-                    break;
-                case READ_INTEGER:
-                    waiting = true;
-                    emit inputRequired(functionNumber);
-                    PC += 4;
-                    break;
-                case READ_FLOAT:
-                    qDebug() << "FPU instructions are not implemented";
-                    PC += 4;
-                    break;
-                case READ_DOUBLE:
-                    qDebug() << "FPU instructions are not implemented";
-                    PC += 4;
-                    break;
-                case READ_STRING:
-                    waiting = true;
-                    emit setReadingLimit((*registers)[5]);
-                    emit inputRequired(functionNumber);
-                    PC += 4;
-                    break;
-                case MEMORY_ALLOCATION:
-                    qDebug() << "Allocate heap memory";
-                    //Allocate Heap Memory
-                    PC += 4;
-                    break;
-                case EXIT:
-                    exitExec = true;
-                    break;
-                case PRINT_CHARACTER:
-                    qDebug() << "Print character";
-                    //Print character
-
-                    strByte[0] = (char) mem->loadByte((*registers)[4]);
-                    msg = QString::fromLatin1(strByte);
-                    emit printToConsole(msg);
-                    PC += 4;
-                    break;
-                case READ_CHARACTER:
-                    qDebug() << "Read character";
-                    //Read character
-                    emit inputRequired(functionNumber);
-                    waiting = true;
-                    PC += 4;
-                    break;
-                default:
-                    qDebug() << "Unhandled syscall function number " << (*registers)[1];
-                    PC += 4;
-                    break;
-                }
-
-            }
-            instructions[activePC].setFunc(functionsMap[instructions[activePC].getName().trimmed()]);
-            instructions[activePC].execute(PC);
-            (*registers)[0] = 0;
-            (*registers)[34] = PC;
-            logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
-            logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
-                           + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
-                           + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "\n\n\n");
-            logData.append(logText);
-            emit logStringSignal(logText); //For testing.
-            i++;
+        executeFunction();
+        //logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
+        //logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
+                       //+ " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
+                      // + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "\n\n\n");
+        //logData.append(logText);
+        //emit logStringSignal(logText); //For testing.
+        i++;
 
     }
     if (!waiting){
@@ -2063,6 +2084,11 @@ void Assembler::simulate()
         emit logDataSignal(logData);
     }
 
+}
+
+void Assembler::resumeSimulation(){
+    resumeFlag = true;
+    simulate();
 }
 
 void Assembler::readInt(int value){

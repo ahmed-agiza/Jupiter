@@ -56,6 +56,8 @@ private:
     int currentProgress;
     int totalCount;
 
+    int simulationSpeed;
+
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
 
@@ -69,6 +71,8 @@ private:
     int activePC;
     bool exitExec;
     bool resumeFlag;
+
+    QMap<int, int> lineMapping;
 public:
     Assembler(Memory *memory, QVector<int> *mRegisters, MainWindow*);
     void parseTextSegment(QStringList*);
@@ -85,6 +89,9 @@ public:
     void handlePSR(QRegExp m, QString line);
     void handlePI(QRegExp m, QString line);
 
+    void setSimulationSpeed(int);
+
+    void setLineMapping(QMap<int, int>);
 
     QVector<int> *registers;
     ~Assembler();
@@ -92,10 +99,13 @@ public:
 
      Trie instructionSet;
      QVector<QString> instructionList;
+     void handleInstruction();
+     inline void executeFunction();
 public slots:
     void exceptionHandler(int);
     void assemble(QStringList dataFileStringList, QStringList textFileStringList);
     void simulate();
+    void resumeSimulation();
     void readInt(int);
     void readString(QString);
     void readCharacter(QString);
@@ -111,6 +121,9 @@ signals:
     void logStringSignal(QString);
     void logDataSignal(QStringList); //For testing.
     void sendErrorMessage(int, QString);
+    void executingInstruction(int);
+    void executingLine(int);
+    void instructionExecuted();
 };
 
 

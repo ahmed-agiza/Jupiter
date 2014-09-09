@@ -162,11 +162,26 @@ QStringList CodeEditorWindow::getUncommentedContentList(){
 }
 
 QStringList CodeEditorWindow::getStrippedContentList(){
+    QStringList rawLines = editor->toPlainText().split("\n");
+    int rawIterator = 0;
+    if (rawLines.size() == 0)
+        return QStringList();
     QRegExp commentsRegEx("#[^\n]*");
     QStringList lines = editor->toPlainText().remove(commentsRegEx).split("\n");
     for (int i = 0; i < lines.length(); i++)
         lines[i] = lines[i].trimmed();
     lines.removeAll("");
+    linesMapping.clear();
+    for (int i = 0; i < lines.length(); i++){
+        for(int j = rawIterator; j < rawLines.size(); j++){
+            if(lines.at(i) == rawLines.at(j).trimmed()){
+                linesMapping[i] = j;
+                rawIterator = j + 1;
+                break;
+            }
+        }
+    }
+
     return lines;
 }
 
@@ -220,6 +235,10 @@ void CodeEditorWindow::undo(){
 
 void CodeEditorWindow::redo(){
     editor->redo();
+}
+
+QMap<int, int> CodeEditorWindow::getLineMapping(){
+    return linesMapping;
 }
 
 CodeEditorWindow::~CodeEditorWindow(){

@@ -244,6 +244,10 @@ QList<QPair<QString, int> > RegistersModel::getAllData()
     return tableData;
 }
 
+void RegistersModel::emitDataChanged(){
+    emit dataChanged(QModelIndex(), QModelIndex());
+}
+
 QString getPaddedHex(int number, int padding){
     QString hexNum = QString::number(number, 16);
     return hexNum.rightJustified(padding/4, '0', true).toUpper();

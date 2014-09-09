@@ -100,7 +100,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     assemblerInitialized = false;
     assembling = false;
+    simulating = false;
     simulateAfterAssembling = false;
+    simulationPaused = true;
 
     initRegs();
     initMemoryModels(false);
@@ -118,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableMemory->setCurrentIndex(1);
 
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(simulationProgress()));
+
 
 }
 
@@ -189,14 +192,11 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e){
 }
 
 void MainWindow::closeEvent(QCloseEvent *e){
-    if (closeAllWindows()){
+    if (closeAllWindows())
         e->accept();
-        simulationThread.wait();
-        simulationThread.quit();
-
-    }else{
+    else
         e->ignore();
-    }
+
 }
 
 
@@ -401,7 +401,7 @@ void MainWindow::simulationProgress(){
 }
 
 
-bool MainWindow::containsTextFile(QString textFileName){
+bool MainWindow::containsTextFile(QString textFileName) const{
     return MainWindow::projectTextFiles.contains(textFileName);
 }
 
@@ -444,6 +444,7 @@ QString MainWindow::getProjectTitle(){
     return MainWindow::projectTitle;
 }
 
+
 QString MainWindow::getProjectMainFile(){
     return MainWindow::projectMainFile;
 }
@@ -477,6 +478,8 @@ bool MainWindow::isGFXEnabled(){
     return false;
 }
 
+
+
 int MainWindow::getTileMapWidth(){
     if (MainWindow::projectConf.contains("TileMapWidth")){
         if (MainWindow::projectConf["TileMapWidth"].trimmed() == "3")
@@ -509,7 +512,7 @@ void MainWindow::resizeColumns(){
     resizeRegsColumns();
 }
 
-bool MainWindow::hasOpenProject(){
+bool MainWindow::hasOpenProject() const{
     return projectFile.isOpen();
 }
 
@@ -702,6 +705,73 @@ void MainWindow::consoleMenuRequested(QPoint loc){
     menu->popup(console->viewport()->mapToGlobal(loc));
 }
 
+void MainWindow::resumeSimulation(bool resume = true)
+{
+    QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
+    QObject::connect(this, SIGNAL(resumeSimulationSignal()), assem, SLOT(resumeSimulation()));
+    QObject::connect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
+    QObject::connect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
+    QObject::connect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
+    QObject::connect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
+    QObject::connect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
+    QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
+    QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
+    QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
+    QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
+    QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
+    QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
+    QObject::connect(assem, SIGNAL(instructionExecuted()), this, SLOT(refreshModels()));
+    simulating = true;
+    simulationPaused = false;
+    refreshActions();
+    if (!simulationThread.isRunning());
+        simulationThread.start();
+    timer->start();
+    if (console->toPlainText().trimmed() != "")
+        console->addText("\n", true);
+    if (resume)
+        emit resumeSimulationSignal();
+    else
+        emit simulateSignal();
+
+    statusBar()->showMessage("Simulating");
+}
+
+void MainWindow::refreshModels(){
+    regModel->emitDataChanged();
+
+}
+
+void MainWindow::refreshMemoryModels(){
+    regModel->emitDataChanged();
+    textModel->emitDataChanged();
+    dataModel->emitDataChanged();
+    stackModel->emitDataChanged();
+    heapModel->emitDataChanged();
+    if (isGFXEnabled()){
+        tmModel->emitDataChanged();
+        bgtsModel->emitDataChanged();
+        sptsModel->emitDataChanged();
+        spRamModel->emitDataChanged();
+        paletteModel->emitDataChanged();
+        inputModel->emitDataChanged();
+    }
+
+}
+
+void MainWindow::selectLine(int lineNumber){
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    if (activeWindow){
+        QTextCursor curs = activeWindow->codeEditor()->textCursor();
+        curs.clearSelection();
+        curs.setPosition(0);
+        curs.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, lineNumber);
+        activeWindow->codeEditor()->setTextCursor(curs);
+    }
+}
+
+
+
 void MainWindow::on_actionSimulate_triggered(){
 
 
@@ -726,28 +796,7 @@ void MainWindow::on_actionSimulate_triggered(){
 
 
         assemblerInitialized = false;
-        QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
-        //QObject::connect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
-        QObject::connect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
-        QObject::connect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
-        QObject::connect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
-        QObject::connect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
-        QObject::connect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
-        QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
-        //QObject::connect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
-        QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
-        QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
-        QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
-        QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
-        QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
-        simulating = true;
-        simulationThread.start(QThread::LowPriority);
-        timer->start();
-        if (console->toPlainText().trimmed() != "")
-            console->addText("\n", true);
-        emit simulateSignal();
-        statusBar()->showMessage("Simulating");
-        //appendErrorMessage("--Showing simulation log for testing--");
+        resumeSimulation(false);
     }
 
 
@@ -778,8 +827,10 @@ void MainWindow::on_actionAssemble_triggered(){
     QStringList textInstrs;
     QStringList dataInstrs;
     CodeEditorWindow *currentWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
+    QMap<int, int> lineMapping;
     if (currentWindow){
         textInstrs = currentWindow->getStrippedContentList();//->getUncommentedContentList();
+        lineMapping = currentWindow->getLineMapping();
     }
 
     if (MainWindow::projectDataFile.trimmed() != ""){
@@ -805,39 +856,18 @@ void MainWindow::on_actionAssemble_triggered(){
         ui->tableLog->clearContents();
         ui->tableLog->setRowCount(0);
         if (assem){
-            //qDebug() << "Disconnecting";
-            QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
-            QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
-            QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-            QObject::disconnect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
-            //QObject::disconnect(assem, SIGNAL(simulationActive()), this, SLOT(simulationProgress()));
-            QObject::disconnect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
-            QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
-            //QObject::disconnect(assem, SIGNAL(logStringSignal(QString)), this, SLOT(appendErrorMessage(QString))); //For testing.
-            QObject::disconnect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
-            QObject::disconnect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
-            QObject::disconnect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
-            QObject::disconnect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
-            QObject::disconnect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
-            QObject::disconnect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
-            QObject::disconnect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
-            QObject::disconnect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
-            QObject::disconnect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
-            QObject::disconnect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
-
             simulationThread.quit();
             simulationThread.wait();
-            //delete assem;
-        }if (memory){
-            //Memory *tempMemory = memory;
-            memory = new Memory(this);
-            //delete tempMemory;
+            pauseSimulation();
         }
 
     }
     ui->tabsProject->setCurrentIndex(1);
-
+    memory = new Memory(this);
     assem = new Assembler(memory, &mainProcessorRegisters, this);
+    assem->setSimulationSpeed(1000);
+    assem->setLineMapping(lineMapping);
+
 
     //assemblerInitialized = true;
     //refreshActions();
@@ -853,6 +883,7 @@ void MainWindow::on_actionAssemble_triggered(){
     QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
     QObject::connect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
+    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
     simulationThread.start();
     assembling = true;
     //QStringList *dataPtr = &dataInstrs;
@@ -1208,7 +1239,7 @@ void MainWindow::applyProjectSettings(){
 
 }
 
-bool MainWindow::hasDataFile(){
+bool MainWindow::hasDataFile() const{
     return projectDataFile.trimmed() != "";
 
 }
@@ -1274,6 +1305,52 @@ void MainWindow::appendErrorMessage(int lineNumber, QString msg){
     //qDebug() << ui->tableLog->itemAt(0, 1)->text();
 
 }
+
+void MainWindow::pauseSimulation(){
+
+    QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
+    QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
+    QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
+    QObject::disconnect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
+    QObject::disconnect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
+    QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
+    QObject::disconnect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
+    QObject::disconnect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
+    QObject::disconnect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
+    QObject::disconnect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
+    QObject::disconnect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
+    QObject::disconnect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
+    QObject::disconnect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
+    QObject::disconnect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
+    QObject::disconnect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
+    QObject::disconnect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
+    QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
+    //delete assem;
+
+    console->enableEditing(false);
+    //simulating = false;
+    //simulationThread.wait();
+    timer->stop();
+
+
+
+    //mainProcessorRegisters = *assem->registers;
+
+    //initMemoryModels(true);
+    refreshModels();
+
+    resizeColumns();
+
+    statusBar()->clearMessage();
+    statusBar()->showMessage("Paused", 2000);
+    qDebug() << "Paused";
+
+
+    simulationPaused = true;
+    refreshActions();
+}
+
+
 
 void MainWindow::addDefaultFont(){
     QFontDatabase fontsDB;
@@ -1439,11 +1516,22 @@ void MainWindow::activeWindowDelete(){
 void MainWindow::refreshActions(){
     bool value = projectFile.isOpen();
     //setAcceptDrops(value);
-    if (!(assembling || simulating)){
+    if (!(assembling || simulating) && !(simulating && simulationPaused)){
         ui->actionAssemble->setEnabled(value);
         ui->actionAssemble_and_Simulate->setEnabled(value);
         ui->actionSimulate->setEnabled(value);
+    }else{
+        qDebug() << assembling;
+        qDebug() << simulating;
+        qDebug() << simulationPaused;
     }
+
+    ui->actionPause_Simulation->setEnabled(simulating && !simulationPaused);
+    ui->actionResumeSimulation->setEnabled(simulationPaused);
+    ui->actionStepForwared->setEnabled(simulationPaused);
+    ui->actionStepBackward->setEnabled(simulationPaused);
+    ui->actionStopSimulation->setEnabled(simulating);
+
     ui->actionClose->setEnabled(value);
     ui->actionEnable_Graphics_Engine->setEnabled(value);
     ui->actionInput->setEnabled(value);
@@ -1672,13 +1760,14 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
 
 void MainWindow::simulationComplete(){
     simulating = false;
+    simulationPaused = false;
     timer->stop();
     refreshActions();
 
     simulationThread.quit();
     simulationThread.wait();
 
-    mainProcessorRegisters = *assem->registers;
+    //mainProcessorRegisters = *assem->registers;
 
     /*regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
     ui->tableMainRegisters->setModel(regModel);
@@ -1692,7 +1781,8 @@ void MainWindow::simulationComplete(){
     ui->dataTable->setModel(dataModel);
     ui->stackTable->setModel(stackModel);
     ui->heapTable->setModel(heapModel);*/
-    initMemoryModels(true);
+    //initMemoryModels(true);
+    refreshModels();
 
     resizeColumns();
 
@@ -1707,6 +1797,7 @@ void MainWindow::assemblyComplete(){
     assembling = false;
     refreshActions();
     assemblerInitialized = true;
+    refreshModels();
 
     simulationThread.quit();
     simulationThread.wait();
@@ -1789,6 +1880,10 @@ void MainWindow::openPaletteViewer(){
     on_actionPalette_Viewer_triggered();
 }
 
+bool MainWindow::isSimulationPaused() const{
+    return simulationPaused;
+}
+
 void MainWindow::initMemoryModels(bool checkGFX = false){
 
     regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
@@ -1843,6 +1938,8 @@ void MainWindow::connectActions(){
     QObject::connect(ui->actionQuickFind, SIGNAL(triggered()), this, SLOT(activeWindowQuickFind()));
     QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
     QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
+    QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()));
+    //QObject::connect(ui->actionResumeSimulation, SIGNAL(triggered()), this, SLOT(resumeSimulation(bool)));
 }
 
 void MainWindow::setupColumnsResize(){
@@ -1878,102 +1975,14 @@ void MainWindow::setupColumnsResize(){
     QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
 }
 
-void MainWindow::on_actionPause_Simulation_triggered(){
-    QString fileName = QFileDialog::getOpenFileName(this, "Load tmx", MainWindow::getProjectPath(), "TMX File(*.tmx)");
-    //QString fileName = "C:/Users/Ahmed/Downloads/test.tmx";
-    if (fileName.trimmed() == "")
-        return;
-    qDebug() << fileName;
-    QFile data(fileName);
-    if(!data.open( QIODevice::ReadOnly | QIODevice::Text ) ){
-        QMessageBox::critical(this, "Error", QString("Failed to open project file") + QString("\n ") + data.errorString());
-        qDebug() << "Failed to open!";
-    }else{
-
-        QDomDocument domDocument;
-        if(!domDocument.setContent(&data)){
-            QMessageBox::critical(this, "Error", "Invalid file");
-            qDebug() << "Cannot set content";
-            return;
-        }
-
-        data.close();
 
 
-        QDomNodeList mapNodes = domDocument.elementsByTagName("map");
+void MainWindow::on_actionResumeSimulation_triggered(){
+    resumeSimulation(true);
+}
 
-        if (!mapNodes.isEmpty()){
-            qDebug() << "\nMap:";
-            QDomElement mapElement = mapNodes.at(0).toElement();
-            QDomAttr verNode = mapElement.attributeNode("version");
-            QDomAttr oriNode = mapElement.attributeNode("orientation");
-            QDomAttr widthNode = mapElement.attributeNode("width");
-            QDomAttr heightNode = mapElement.attributeNode("height");
-            QDomAttr tileWNode = mapElement.attributeNode("tilewidth");
-            QDomAttr tileHNode = mapElement.attributeNode("tileheight");
-            qDebug() << "version: " << verNode.value();
-            qDebug() << "orientation: "  << oriNode.value();
-            qDebug() << "width: "  << widthNode.value();
-            qDebug() << "height: "  << heightNode.value();
-            qDebug() << "tilewidth: "  << tileWNode.value();
-            qDebug() << "tileheight: "  << tileHNode.value();
-            QDomNodeList tilesetNodes = mapElement.elementsByTagName("tileset");
-            if (!tilesetNodes.isEmpty()){
-                qDebug() << "\nTileset";
-                QDomElement tilesetElement = tilesetNodes.at(0).toElement();
-                QDomAttr firstgidNode = tilesetElement.attributeNode("firstgid");
-                QDomAttr nameNode = tilesetElement.attributeNode("name");
-                QDomAttr tilewidthNode = tilesetElement.attributeNode("tilewidth");
-                QDomAttr tileheightNode = tilesetElement.attributeNode("tileheight");
-                qDebug() << "firstgid: " << firstgidNode.value();
-                qDebug() << "name: " << nameNode.value();
-                qDebug() << "tilewidth: " << tilewidthNode.value();
-                qDebug() << "tileheight: "  << tileheightNode.value();
-                QDomNodeList imageNodes = tilesetElement.elementsByTagName("image");
-                if (!imageNodes.isEmpty()){
-                    qDebug() << "\nImage:";
-                    QDomElement imageElement = imageNodes.at(0).toElement();
-                    QDomAttr sourceNode = imageElement.attributeNode("source");
-                    QDomAttr widthNode = imageElement.attributeNode("width");
-                    QDomAttr heightNode = imageElement.attributeNode("height");
-                    qDebug() << "source: " << sourceNode.value();
-                    qDebug() << "width: " << widthNode.value();
-                    qDebug() << "height: " << heightNode.value();
-                }
-
-            }
-            QDomNodeList layerNodes = mapElement.elementsByTagName("layer");
-            if (!layerNodes.isEmpty()){
-                qDebug() << "\nLayer:";
-                QDomElement layerElement = layerNodes.at(0).toElement();
-                QDomAttr nameNode = layerElement.attributeNode("name");
-                QDomAttr widthNode = layerElement.attributeNode("width");
-                QDomAttr heightNode = layerElement.attributeNode("height");
-                qDebug() << "name: " << nameNode.value();
-                qDebug() << "width: " << widthNode.value();
-                qDebug() << "height: " << heightNode.value();
-                QDomNodeList dataNodes = layerElement.elementsByTagName("data");
-                if(!dataNodes.isEmpty()){
-                    qDebug() << "\nData";
-                    QList<int> dataValues;
-                    QDomElement dataElement = dataNodes.at(0).toElement();
-                    QDomNode child = dataElement.firstChild();
-
-                    while (!child.isNull()){
-                        if (child.toElement().tagName().trimmed() == "tile"){
-                            QDomAttr gidValueNode = child.toElement().attributeNode("gid");
-                            dataValues.append(gidValueNode.value().toInt());
-                            qDebug() << "tile: " << gidValueNode.value();
-                        }
-                        child = child.nextSibling();
-                    }
-                }
-            }
-
-        }
-
-
-      return;
-    }
-    qDebug() << "Failed to parse";
+void MainWindow::on_actionStopSimulation_triggered(){
+    pauseSimulation();
+    simulationComplete();
+    statusBar()->clearMessage();
 }

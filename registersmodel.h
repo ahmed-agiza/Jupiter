@@ -25,6 +25,7 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index);*/
 
     QList<QPair<QString, int> > getAllData();
+    void emitDataChanged();
 
     void updateData();
 

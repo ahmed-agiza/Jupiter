@@ -51,6 +51,9 @@ public:
     void paste();
     void undo();
     void redo();
+
+    QMap<int, int> getLineMapping();
+
     ~CodeEditorWindow();
 private slots:
     void editedSlot();
@@ -71,6 +74,7 @@ private:
     void closeEvent(QCloseEvent *closeEvent);
 
     void init();
+    QMap<int, int> linesMapping;
 };
 
 #endif // CODEEDITORWINDOW_H

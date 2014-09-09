@@ -163,6 +163,7 @@
     <addaction name="actionAssemble"/>
     <addaction name="actionSimulate"/>
     <addaction name="actionAssemble_and_Simulate"/>
+    <addaction name="actionResumeSimulation"/>
     <addaction name="actionPause_Simulation"/>
     <addaction name="actionStopSimulation"/>
    </widget>
@@ -2199,6 +2200,16 @@
    </property>
    <property name="text">
     <string>Stop Simulation</string>
+   </property>
+  </action>
+  <action name="actionResumeSimulation">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/icons/toolbar/debuggingicons/moveStep.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Resume Simulation</string>
    </property>
   </action>
  </widget>

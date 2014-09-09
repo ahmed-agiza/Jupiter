@@ -21,6 +21,8 @@ private:
     void keyPressEvent(QKeyEvent *);
     QTextCursor deleteCurrentLine();
     QString getCurrentLine();
+    QTextCursor getSelectedLines();
+
 
 signals:
 public slots:

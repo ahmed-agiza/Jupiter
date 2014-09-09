@@ -50,7 +50,7 @@ public:
     void addTextFile(QString file);
     void addResourceFile(QString file);
 
-    bool containsTextFile(QString textFileName);
+    bool containsTextFile(QString textFileName) const;
 
 
     QString loadFileText(QString);
@@ -69,13 +69,13 @@ public:
 
     void resizeColumns();
 
-    bool hasOpenProject();
+    bool hasOpenProject() const;
 
     void openProjectFile(QString);
 
     void applyProjectSettings();
 
-    bool hasDataFile();
+    bool hasDataFile() const;
 
     void setOpenWith(QString);
 
@@ -88,6 +88,8 @@ public:
 
     void openTilesetViewer();
     void openPaletteViewer();
+
+    bool isSimulationPaused() const;
 
 
 
@@ -176,7 +178,10 @@ private slots:
     void waitingInput();
     void inputReceived();
 
-    void on_actionPause_Simulation_triggered();
+
+    void on_actionResumeSimulation_triggered();
+
+    void on_actionStopSimulation_triggered();
 
 public slots:
     void printToConsole(QString);
@@ -198,6 +203,12 @@ public slots:
     void simulationProgress();
 
     void appendErrorMessage(int, QString);
+
+    void pauseSimulation();
+    void resumeSimulation(bool);
+    void refreshModels();
+    void refreshMemoryModels();
+    void selectLine(int);
 
 private:
     Ui::MainWindow *ui;
@@ -267,9 +278,12 @@ private:
     bool assembling;
     bool simulating;
     bool simulateAfterAssembling;
+    bool simulationPaused;
 signals:
     void assembleSignal(QStringList, QStringList);
     void simulateSignal();
+    void resumeSimulationSignal();
+
 };
 
 #endif // MAINWINDOW_H

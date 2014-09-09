@@ -7,6 +7,7 @@
 #include <QHeaderView>
 #include <QListView>
 #include <QStringListModel>
+#include <QTextDocumentFragment>
 
 #include "completerlist.h"
 
@@ -244,6 +245,22 @@ QString CodeEditor::getCurrentLine(){
     return currentPos.selectedText();
 }
 
+QTextCursor CodeEditor::getSelectedLines(){
+    QTextCursor startCursor = textCursor();
+    QTextCursor endCursor = textCursor();
+    int selStart = startCursor.selectionStart();
+    int selEnd = endCursor.selectionEnd();
+    startCursor.setPosition(selStart);
+    endCursor.setPosition(selEnd);
+    startCursor.movePosition(QTextCursor::StartOfLine);
+    endCursor.movePosition(QTextCursor::EndOfLine);
+    QTextCursor selectionCursor = textCursor();
+    selectionCursor.clearSelection();
+    selectionCursor.setPosition(startCursor.position());
+    selectionCursor.setPosition(endCursor.position(), QTextCursor::KeepAnchor);
+    return selectionCursor;
+}
+
 void CodeEditor::deleteSelection(){
     QTextCursor currentPos = textCursor();
     currentPos.removeSelectedText();
@@ -315,6 +332,25 @@ void CodeEditor::popupSuggestions(){
 }
 
 void CodeEditor::commentLine(){
+
+    QTextCursor selectionCursor = getSelectedLines();
+    selectionCursor.beginEditBlock();
+    QStringList lines = selectionCursor.selectedText().trimmed().split("\n");
+    selectionCursor.removeSelectedText();
+    for(int i = 0; i < lines.size(); i++){
+        qDebug() << lines.at(i) << "-";
+        if (lines.at(i).startsWith("#"))
+            lines[i].remove(0, 1);
+        else
+            lines[i].prepend("#");
+        selectionCursor.insertText(lines.at(i));
+        if (i != lines.size() - 1)
+            selectionCursor.insertText("\n");
+    }
+    selectionCursor.endEditBlock();
+
+
+/*
     QTextCursor currentPos = textCursor();
     currentPos.movePosition(QTextCursor::StartOfLine);
     QTextCursor tempCursor(currentPos);
@@ -322,7 +358,7 @@ void CodeEditor::commentLine(){
     if (tempCursor.selectedText() == "#")
         tempCursor.removeSelectedText();
     else
-        currentPos.insertText("#");
+        currentPos.insertText("#");*/
 }
 
 void CodeEditor::insertCompletion(QString completion){
@@ -342,6 +378,7 @@ void CodeEditor::highlightLine(){
     lineHL.format.setBackground(QColor(Qt::lightGray).darker(180));
     lineHL.format.setProperty(QTextFormat::FullWidthSelection, true);
     lineHL.cursor = textCursor();
+
     lineHL.cursor.clearSelection();
     linesHL.append(lineHL);
     setExtraSelections(linesHL);

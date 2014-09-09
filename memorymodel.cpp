@@ -135,7 +135,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
             if(addressBase->currentText() == B10)
                 return adr;
             else if (addressBase->currentText() == B16)
-                return "0x" + QString::number(adr, 16).toUpper();
+                return "0x" + getPaddedHex(adr, 32);
             else if (addressBase->currentText() == B02)
                 return "0b" + getPaddedBinary(adr, 32);
         }
@@ -148,10 +148,10 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
 
 
                     if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
-                        return "0x" + QString::number(uvalue, 16).toUpper();
+                        return "0x" + getPaddedHex(uvalue, 32);
                     }else{
-                        QString untrimmed = QString::number(uvalue, 16);
-                        return "0x" + untrimmed.mid(untrimmed.size() -8).toUpper();
+                        //QString untrimmed = QString::number(uvalue, 16);
+                        return "0x" + getPaddedHex(uvalue, 8);
                     }
                 }
 
@@ -164,10 +164,9 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
 
 
                     if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
-                        return "0x" + QString::number(uvalue, 16).toUpper();
+                        return "0x" + getPaddedHex(uvalue, 32);
                     }else{
-                        QString untrimmed = QString::number(uvalue, 16);
-                        return "0x" + untrimmed.mid(untrimmed.size() - 8).toUpper();
+                        return "0x" + getPaddedHex(uvalue, 8);
                     }
                 }
             }else{
@@ -251,7 +250,14 @@ void MemoryModel::setModifiers(QComboBox *ab, QComboBox *mm, QComboBox *mb){
     addressBase = ab;
     memoryMode = mm;
     memoryBase = mb;
+
 }
+
+void MemoryModel::emitDataChanged(){
+    emit dataChanged(QModelIndex(), QModelIndex());
+}
+
+
 
 /*QString getPaddedBinary(int number, int padding){
     QString binary = QString::number(number, 2);
