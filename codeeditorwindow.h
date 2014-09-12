@@ -58,6 +58,10 @@ public:
 private slots:
     void editedSlot();
 
+public slots:
+    void enableEditing();
+    void disableEditing();
+
 private:
     CodeEditor *editor;
     QWidget *widgetsContainer;

@@ -231,6 +231,11 @@ private:
     IOConsole *console;
     QTimer *timer;
     QTreeWidget *treeWidget;
+    QStringList lastTextInstrs;
+    QStringList lastDataInstrs;
+
+
+    QString getActiveFileContent(QString);
 
     void addDefaultFont();
     void initMemoryModels(bool);
@@ -254,6 +259,8 @@ private:
     static QStringList projectTextFiles;
     static QString projectDataFile;
     static QMap<QString, QString> projectConf;
+    static QStringList stripContent(QString, QMap<int, int> &);
+
 
     QFile projectFile;
 

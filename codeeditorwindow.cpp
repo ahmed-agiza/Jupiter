@@ -249,6 +249,14 @@ void CodeEditorWindow::editedSlot(){
     setWindowTitle(title + "*");
 }
 
+void CodeEditorWindow::enableEditing(){
+    editor->setReadOnly(false);
+}
+
+void CodeEditorWindow::disableEditing(){
+    editor->setReadOnly(true);
+}
+
 
 void CodeEditorWindow::init(){
     setObjectName("newW");

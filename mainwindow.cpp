@@ -59,6 +59,9 @@ QMap<QString, QString> tempProjectConf;
 QString tempProjectPath;
 
 
+QMap<int, int> tempMap;
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
@@ -192,9 +195,11 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e){
 }
 
 void MainWindow::closeEvent(QCloseEvent *e){
-    if (closeAllWindows())
+    if (closeAllWindows()){
+        if (engine && engine->isVisible())
+            engine->hide();
         e->accept();
-    else
+   } else
         e->ignore();
 
 }
@@ -721,10 +726,11 @@ void MainWindow::resumeSimulation(bool resume = true)
     QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
     QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
     QObject::connect(assem, SIGNAL(instructionExecuted()), this, SLOT(refreshModels()));
+
     simulating = true;
     simulationPaused = false;
     refreshActions();
-    if (!simulationThread.isRunning());
+    if (!simulationThread.isRunning())
         simulationThread.start();
     timer->start();
     if (console->toPlainText().trimmed() != "")
@@ -770,9 +776,46 @@ void MainWindow::selectLine(int lineNumber){
     }
 }
 
+QString MainWindow::getActiveFileContent(QString file){
+    QList<QMdiSubWindow *> windows = ui->mdiAreaCode->subWindowList();
+    QString dataFileName = MainWindow::projectPath + file;
+    foreach(QMdiSubWindow* currentWindow, windows){
+        CodeEditorWindow *ceWindow = dynamic_cast<CodeEditorWindow *> (currentWindow);
+        if (ceWindow){
+            if (ceWindow->getFilePath() == dataFileName)
+                return ceWindow->getContent();
+        }
+    }
+    return loadFileText(MainWindow::projectDataFile);
+}
+
 
 
 void MainWindow::on_actionSimulate_triggered(){
+
+    if (!assemblerInitialized){
+        if (QMessageBox::question(this, "Assemble Project", "Could not detect assembled data, do you want to assemble the project first?", QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes){
+            on_actionAssemble_and_Simulate_triggered();
+        }
+
+        return;
+    }
+
+
+    if (lastTextInstrs.isEmpty())
+        return;
+
+
+    QStringList tempTextInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), tempMap);
+    QStringList tempDataInstrs = stripContent(getActiveFileContent(MainWindow::projectDataFile), tempMap);
+    if (tempTextInstrs != lastTextInstrs || tempDataInstrs != lastDataInstrs){
+        if (QMessageBox::question(this, "Re-assemble", "The assembled files have been modified, to you want to reassemble?", QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes){
+            on_actionAssemble_and_Simulate_triggered();
+        }
+
+        return;
+
+    }
 
 
     qDebug() << "Simulating..";
@@ -780,22 +823,35 @@ void MainWindow::on_actionSimulate_triggered(){
         if(engine){
             if(engine->isVisible())
                 engine->hide();
-            //delete engine;
         }
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
     memory->setTileEngine(engine);
-    if(ui->actionEnable_Graphics_Engine->isChecked()){
+    if(ui->actionEnable_Graphics_Engine->isChecked())
         engine->show();
-    }
+
 
 
     if (assemblerInitialized && assem){
+        QTreeWidgetItemIterator itMain(treeWidget);
+        while (*itMain) {
+            if ((*itMain)->text(0).trimmed() == MainWindow::getProjectMainFile()){
+                on_treeFiles_itemDoubleClicked((*itMain), 0);
+                break;
+            }
+            ++itMain;
+        }
+        CodeEditorWindow *mainWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+        if (mainWindow){
+            mainWindow->disableEditing();
+            QObject::connect(assem, SIGNAL(simulationComplete()), mainWindow, SLOT(enableEditing()));
+        }
+
+
         ui->actionAssemble->setEnabled(false);
         ui->actionSimulate->setEnabled(false);
-        ui->actionAssemble_and_Simulate->setEnabled(false);
+        ui->actionAssemble_and_Simulate->setEnabled(false);        
 
-
-        assemblerInitialized = false;
+        //assemblerInitialized = false;
         resumeSimulation(false);
     }
 
@@ -816,37 +872,16 @@ void MainWindow::on_actionAssemble_triggered(){
         return;
     }
 
-    QTreeWidgetItemIterator itMain(treeWidget);
-    while (*itMain) {
-        if ((*itMain)->text(0).trimmed() == MainWindow::getProjectMainFile()){
-            on_treeFiles_itemDoubleClicked((*itMain), 0);
-            break;
-        }
-        ++itMain;
-    }
+
     QStringList textInstrs;
     QStringList dataInstrs;
-    CodeEditorWindow *currentWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
     QMap<int, int> lineMapping;
-    if (currentWindow){
-        textInstrs = currentWindow->getStrippedContentList();//->getUncommentedContentList();
-        lineMapping = currentWindow->getLineMapping();
-    }
+        textInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), lineMapping);//currentWindow->getStrippedContentList();//->getUncommentedContentList();
+        lastTextInstrs = textInstrs;
 
     if (MainWindow::projectDataFile.trimmed() != ""){
-        QTreeWidgetItemIterator itData(treeWidget);
-        while (*itData) {
-            if ((*itData)->text(0).trimmed() == MainWindow::getProjectDataFile()){
-                on_treeFiles_itemDoubleClicked((*itData), 0);
-                break;
-            }
-            ++itData;
-        }
-        CodeEditorWindow *currentDataWindow = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
-
-        if (currentDataWindow){
-            dataInstrs = currentDataWindow->getStrippedContentList();//->getUncommentedContentList();
-        }
+        dataInstrs = stripContent(getActiveFileContent(MainWindow::projectDataFile), tempMap);
+        lastDataInstrs = dataInstrs;
     }
 
     ui->actionAssemble->setEnabled(false);
@@ -869,14 +904,6 @@ void MainWindow::on_actionAssemble_triggered(){
     assem->setLineMapping(lineMapping);
 
 
-    //assemblerInitialized = true;
-    //refreshActions();
-
-    if (currentWindow)
-        ui->mdiAreaCode->setActiveSubWindow(currentWindow);
-
-
-    // qDebug() << "Assembled.";
     assemblerInitialized = false;
     assem->moveToThread(&simulationThread);
     QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
@@ -886,12 +913,6 @@ void MainWindow::on_actionAssemble_triggered(){
     QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
     simulationThread.start();
     assembling = true;
-    //QStringList *dataPtr = &dataInstrs;
-    //QStringList *textPtr = &textInstrs;
-    //qDebug() << "Before singal";
-    //foreach(QString line, *textPtr)
-    //qDebug() << line;
-    //qDebug() << "After singal";
     emit assembleSignal(dataInstrs, textInstrs);
     if (simulationBar == NULL)
         simulationBar = new QProgressBar(this);
@@ -919,8 +940,7 @@ void MainWindow::on_actionPalette_Viewer_triggered(){
 }
 
 void MainWindow::on_actionTile_loader_triggered(){
-    //tileLoader = new TileLoader(this, memory);
-    //tileLoader->show();
+
 }
 
 
@@ -933,7 +953,6 @@ void MainWindow::on_actionReload_Tiles_Memory_triggered()
             memoryLoading->show();
             return;
         }
-       // delete memoryLoading;
     }
 
     memoryLoading = new MemoryLoading(0, this->memory);
@@ -945,7 +964,6 @@ void MainWindow::on_actionAssemble_and_Simulate_triggered()
 {
     simulateAfterAssembling = true;
     ui->actionAssemble->trigger();
-    //ui->actionSimulate->trigger();
 }
 
 void MainWindow::on_actionSprite_Editor_triggered()
@@ -1203,6 +1221,14 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
                     MainWindow::projectPath = tempProjectPath;
                     currentProjectString = tempCurrentProjectString;
                     loadProjectTree();
+                    if (simulating){
+                        pauseSimulation();
+                    }
+                    assemblerInitialized = false;
+                    assembling = false;
+                    simulating = false;
+                    simulateAfterAssembling = false;
+                    simulationPaused = true;
 
                     //ui->mdiAreaCode->closeAllSubWindows();
                     applyProjectSettings();
@@ -1326,6 +1352,7 @@ void MainWindow::pauseSimulation(){
     QObject::disconnect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
     QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
     //delete assem;
+
 
     console->enableEditing(false);
     //simulating = false;
@@ -1973,6 +2000,30 @@ void MainWindow::setupColumnsResize(){
 
     QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
     QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
+}
+
+QStringList MainWindow::stripContent(QString rawText, QMap<int, int> &mapping){
+    QStringList rawLines = rawText.split("\n");
+    int rawIterator = 0;
+    if (rawLines.size() == 0)
+        return QStringList();
+    QRegExp commentsRegEx("#[^\n]*");
+    QStringList lines = rawText.remove(commentsRegEx).split("\n");
+    for (int i = 0; i < lines.length(); i++)
+        lines[i] = lines[i].trimmed();
+    lines.removeAll("");
+    mapping.clear();
+    for (int i = 0; i < lines.length(); i++){
+        for(int j = rawIterator; j < rawLines.size(); j++){
+            if(lines.at(i) == rawLines.at(j).trimmed()){
+                mapping[i] = j;
+                rawIterator = j + 1;
+                break;
+            }
+        }
+    }
+
+    return lines;
 }
 
 
