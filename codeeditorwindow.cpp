@@ -59,6 +59,7 @@ bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
         }
         file.close();
         editor->setText(fileData);
+        //editor->setText(fileData);
         setWindowTitle(title);
         edited = false;
         return true;

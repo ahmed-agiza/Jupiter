@@ -6,12 +6,11 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QListView>
-#include <QStringListModel>
 #include <QTextDocumentFragment>
 
 #include "completerlist.h"
 
-#define PlusR + QString(" $rd, $rs, $rt")
+//#define PlusR + QString(" $rd, $rs, $rt")
 #define PlusR + QString("")
 #define PlusI + QString(" $rt, $rs, immediate")
 #define PlusJ + QString(" destination")
@@ -26,7 +25,7 @@ CodeEditor::CodeEditor(QWidget *parent) :
     SHL = new SyntaxHL(this); //Adding syntax highlighter.
 
     //Auto-complete setup:
-    QStringList compList; //Completion list.
+
     compList << "add"
              << "addu"
              << "sub"
@@ -152,7 +151,8 @@ CodeEditor::CodeEditor(QWidget *parent) :
 
 
 
-    QStringListModel *model = new QStringListModel(compList, this);
+    model = new QStringListModel(compList, this);
+
     codeCompleter = new QCompleter(model, this);
     codeCompleter->setCompletionMode(QCompleter::PopupCompletion);
     CompleterList *cl = new CompleterList(this);
@@ -161,16 +161,18 @@ CodeEditor::CodeEditor(QWidget *parent) :
     codeCompleter->setWidget(this);
 
     QObject::connect(codeCompleter, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
+    //QObject::connect(this, SIGNAL(labelsUpdated()), SHL, SLOT(rehighlight()));
+    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateLabels()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounter()));
-    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));
+    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));    
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(highlightLine()));
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightLine()));
+
 }
 
 
 
-void CodeEditor::focusInEvent(QFocusEvent *e)
-{
+void CodeEditor::focusInEvent(QFocusEvent *e){
     if (codeCompleter)
         codeCompleter->setWidget(this);
     QTextEdit::focusInEvent(e);
@@ -272,13 +274,6 @@ void CodeEditor::deleteLine(){
 }
 
 void CodeEditor::moveLineUp(){
-    /*QString line = getCurrentLine();
-    QTextCursor currentPos = deleteCurrentLine();
-    currentPos.movePosition(QTextCursor::StartOfLine);
-    currentPos.insertText(line + '\n');
-    currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
-    currentPos.endEditBlock();
-    setTextCursor(currentPos);*/
     QString line = getCurrentLine();
     QTextCursor curs = deleteCurrentLine();
     curs.movePosition(QTextCursor::StartOfLine);
@@ -324,11 +319,12 @@ void CodeEditor::copyLineDown(){
 }
 
 void CodeEditor::popupSuggestions(){
-    QRect popRect = this->cursorRect();
+    /*QRect popRect = this->cursorRect();
     popRect.setWidth(50);
     codeCompleter->complete(popRect);
     codeCompleter->setCurrentRow(3);
-    codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));
+    codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));*/
+    completerPop();
 }
 
 void CodeEditor::commentLine(){
@@ -384,6 +380,28 @@ void CodeEditor::highlightLine(){
     setExtraSelections(linesHL);
 }
 
+void CodeEditor::updateLabels(){
+    static QRegExp labelsRegEx("(\\S+)(?=:)");
+    QStringList contentList = toPlainText().split("\n");
+
+    labelsList.clear();
+    foreach(QString line, contentList){
+        if (line.trimmed() == "")
+            continue;
+        labelsRegEx.indexIn(line);
+        labelsList << labelsRegEx.cap(0);
+    }
+    labelsList.removeDuplicates();
+    labelsList.removeAll("");
+
+    model->setStringList(compList + labelsList);
+    SHL->setLabelsList(labelsList);
+    blockSignals(true);
+    SHL->rehighlight();
+    blockSignals(false);
+
+}
+
 
 void CodeEditor::updateCounter()
 {
@@ -408,27 +426,30 @@ void CodeEditor::completerPop()
 
     bool regS = (sel2.selectedText().mid(sel2.selectedText().lastIndexOf(QRegExp("( |,)+")) + 1, 1) == "$");
 
+    QTextCursor tempCursor = textCursor();
+    tempCursor.select(QTextCursor::LineUnderCursor);
+
+    QRegExp directivesRegEx("\\.[^\\s]*");
+
+    bool dirS = tempCursor.selectedText().lastIndexOf(directivesRegEx) != -1;
+
+
     if (regS)
         codeCompleter->setCompletionPrefix("$" + sel.selectedText());
-    else{
-        if (sel.selectionStart() != 0){
-            QTextCursor tempCursor(sel);
-            tempCursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-            if (tempCursor.selectedText().length() > 0)
-                if(tempCursor.selectedText().at(0) == '.')
-                    sel.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+    else if (dirS){
 
-        }
-
+        codeCompleter->setCompletionPrefix("." + sel.selectedText());
+        qDebug() << codeCompleter->completionPrefix();
+    }else
         codeCompleter->setCompletionPrefix(sel.selectedText());
-    }
+
 
     QString currenCom = codeCompleter->completionModel()->data(codeCompleter->model()->index(0, 0)).toString();
 
 
-    if(sel.selectedText().length() > 0 || regS)
+    if(sel.selectedText().length() > 0 || regS || dirS)
     {
-        if ((codeCompleter->completionCount() != 1) || (currenCom != sel.selectedText() && !regS) || (regS && currenCom != "$" + sel.selectedText()))
+        if ((codeCompleter->completionCount() != 1) || (currenCom != sel.selectedText() && !regS && !dirS) || (regS && currenCom != "$" + sel.selectedText()) || (dirS && currenCom != "." + sel.selectedText()))
         {
             QRect popRect = this->cursorRect();
             popRect.setWidth(50);

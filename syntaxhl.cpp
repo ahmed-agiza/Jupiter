@@ -75,7 +75,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    registerFormat.setFontWeight(QFont::Bold);
    commentFormat.setForeground(Qt::green);
    stringFormat.setForeground(QColor(Qt::darkGreen).lighter(190));
-   labelFormat.setForeground(Qt::darkBlue);
+   labelFormat.setForeground(Qt::cyan);
    macroFormat.setForeground(QColor(Qt::cyan).lighter(80));
    macroFormat.setFontItalic(true);
    pseudoFormat.setForeground(QColor(Qt::blue).lighter(150));
@@ -86,11 +86,12 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    //Instructions Syntax
 
    syntax tempSyn;
+   tempSyn.labelSyntax = false;
 
 
 
 
-   tempSyn.pattern = QRegExp("0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+"); tempSyn.format = immFormat;
+   tempSyn.pattern = QRegExp("\\b0x[0-9a-fA-F]+\\b|\\b[\\-\\d]+\\b|\\b0b[01]+\\b"); tempSyn.format = immFormat;
    syntaxes.append(tempSyn);
 
    instructionsList << "add" << "addu" << "sub" << "subu" << "and" << "or" << "xor"
@@ -169,6 +170,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
        syntaxes.append(tempSyn);
    }
 
+   //Directive's syntax
    macrosList << "\\.align" << "\\.ascii" << "\\.asciiz" << "\\.byte" << "\\.double" <<"\\.float" << "\\.half" << "\\.space" << "\\.word" << "\\.text" << "\\.data" << "\\.include";
 
    foreach(QString pattern, macrosList)
@@ -177,14 +179,36 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
        syntaxes.append(tempSyn);
    }
 
+   //String's syntax
    tempSyn.pattern = QRegExp("\\\".*\\\"", Qt::CaseInsensitive);
    tempSyn.format = stringFormat;
+   syntaxes.append(tempSyn);
+
+
+   //Label's syntax.
+   tempSyn.pattern = QRegExp("\\w+:"); tempSyn.format = labelFormat;
    syntaxes.append(tempSyn);
 
    //Comment's syntax.
    tempSyn.pattern = QRegExp("#[^\n]*"); tempSyn.format = commentFormat;
    syntaxes.append(tempSyn);
 
+
+
+}
+
+void SyntaxHL::setLabelsList(QStringList &labels){
+    for (int i = 0; i < syntaxes.size(); i++)
+        if (syntaxes.at(i).labelSyntax)
+            syntaxes.removeAt(i--);
+
+    syntax tempSyn;
+    tempSyn.labelSyntax = true;
+    tempSyn.format = labelFormat;
+    foreach(QString label, labels){
+        tempSyn.pattern = QRegExp(QString("\\b" + label + "\\b"));
+        syntaxes.append(tempSyn);
+    }
 
 }
 
@@ -194,7 +218,10 @@ void SyntaxHL::highlightBlock(const QString &text)
     {
              QRegExp formatRegEx(tempSyn.pattern);
              int index = formatRegEx.indexIn(text);
+
              while (index >= 0) {
+                 if (tempSyn.format == labelFormat)
+                     qDebug() << tempSyn.pattern.pattern();
                  int length = formatRegEx.matchedLength();
                  setFormat(index, length, tempSyn.format);
                  index = formatRegEx.indexIn(text, index + length);                

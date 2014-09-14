@@ -4,6 +4,7 @@
 #include <QTextEdit>
 #include "syntaxhl.h"
 #include <QCompleter>
+#include <QStringListModel>
 
 class CodeEditor : public QTextEdit
 {
@@ -22,9 +23,12 @@ private:
     QTextCursor deleteCurrentLine();
     QString getCurrentLine();
     QTextCursor getSelectedLines();
-
+    QStringListModel *model;
+    QStringList compList; //Completion list.
+    QStringList labelsList; //Labels list
 
 signals:
+    void labelsUpdated();
 public slots:
     void deleteSelection();
     void deleteLine();
@@ -34,12 +38,14 @@ public slots:
     void copyLineDown();
     void popupSuggestions();
     void commentLine();
+    void updateLabels();
 
 private slots:
     void insertCompletion(QString completion);
     void updateCounter();
     void completerPop();
     void highlightLine();
+
 
 
 };
