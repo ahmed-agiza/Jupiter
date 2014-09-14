@@ -200,7 +200,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
 void SyntaxHL::setLabelsList(QStringList &labels){
     for (int i = 0; i < syntaxes.size(); i++)
         if (syntaxes.at(i).labelSyntax)
-            syntaxes.remove(i--);
+            syntaxes.removeAt(i--);
 
     syntax tempSyn;
     tempSyn.labelSyntax = true;
