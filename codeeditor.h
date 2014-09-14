@@ -2,22 +2,23 @@
 #define CODEEDITOR_H
 
 #include <QTextEdit>
-#include "syntaxhl.h"
 #include <QCompleter>
 #include <QStringListModel>
+#include "syntaxhl.h"
+#include "linescounter.h"
 
 class CodeEditor : public QTextEdit
 {
     Q_OBJECT
 public:
     explicit CodeEditor(QWidget *parent = 0);
-    void setCounter(QTextEdit *lc);
+    void setCounter(LinesCounter *);
     void setOpened();
 
 private:
     SyntaxHL *SHL;
     QCompleter *codeCompleter;
-    QTextEdit *lCounter;
+    LinesCounter *lCounter;
     void focusInEvent(QFocusEvent *);
     void keyPressEvent(QKeyEvent *);
     QTextCursor deleteCurrentLine();
@@ -26,6 +27,7 @@ private:
     QStringListModel *model;
     QStringList compList; //Completion list.
     QStringList labelsList; //Labels list
+    int selectionStart, selectionEnd;
 
 signals:
     void labelsUpdated();
@@ -37,14 +39,19 @@ public slots:
     void copyLineUp();
     void copyLineDown();
     void popupSuggestions();
-    void commentLine();
+    void toggleComments();
     void updateLabels();
+    void selectLine(int);
+    void startSelection(int);
+    void addSelectedLines(int);
+    void endSelection(int);
 
 private slots:
     void insertCompletion(QString completion);
     void updateCounter();
     void completerPop();
     void highlightLine();
+    void updateCounterFormat();
 
 
 

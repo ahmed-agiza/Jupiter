@@ -220,8 +220,6 @@ void SyntaxHL::highlightBlock(const QString &text)
              int index = formatRegEx.indexIn(text);
 
              while (index >= 0) {
-                 if (tempSyn.format == labelFormat)
-                     qDebug() << tempSyn.pattern.pattern();
                  int length = formatRegEx.matchedLength();
                  setFormat(index, length, tempSyn.format);
                  index = formatRegEx.indexIn(text, index + length);                

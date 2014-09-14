@@ -270,7 +270,7 @@ void CodeEditorWindow::init(){
     widgetsContainer->setObjectName("NW");
     editorLayout = new QHBoxLayout(widgetsContainer);
     editor = new CodeEditor(widgetsContainer);
-    linesCounter = new QTextEdit(widgetsContainer);
+    linesCounter = new LinesCounter(widgetsContainer);
 
 
     editor->setObjectName("CodeE");
@@ -281,6 +281,10 @@ void CodeEditorWindow::init(){
     linesCounter->setMaximumSize(40, linesCounter->maximumSize().height());
     linesCounter->setText("0");
     editor->setCounter(linesCounter);
+    QObject::connect(linesCounter, SIGNAL(startSelection(int)), editor, SLOT(startSelection(int)));
+    QObject::connect(linesCounter, SIGNAL(selectLines(int)), editor, SLOT(addSelectedLines(int)));
+    QObject::connect(linesCounter, SIGNAL(endSelection(int)), editor, SLOT(endSelection(int)));
+
 
     editorLayout->setObjectName("HL");
     editorLayout->addWidget(linesCounter);

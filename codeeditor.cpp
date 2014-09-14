@@ -115,41 +115,41 @@ CodeEditor::CodeEditor(QWidget *parent) :
 
     compList << "blt"  <<  "bgt"
              <<  "ble"
-              <<  "bge"
-               <<  "bltu"
-                <<  "bgtu"
-                 <<  "bleu"
-                  <<  "bgeu"
-                   <<  "blti"
-                    <<  "bgti"
-                     <<  "blei"
-                      <<  "bgei"
-                       <<  "bltiu"
-                        <<  "bgtiu"
-                         <<  "bleiu"
-                          <<  "bgeiu"
-                           <<  "beqz"
-                            <<  "bnez"
-                             <<  "bltz"
-                              <<  "bgtz"
-                               <<  "blez"
-                                <<  "bgez"
-                                 <<  "li"
-                                  <<  "ror"
-                                   <<  "rol"
-                                    <<  "not"
-                                     <<  "neg"
-                                      <<  "move"
-                                       <<  "abs"
-                                        <<  "mul"
-                                         <<  "div"
-                                          <<  "rem"
-                                           <<  "clear"
-                                            <<  "subi"
-                                             <<  "la"
-                                              << ".align" << ".ascii" << ".asciiz" << ".byte" << ".double" <<".float" << ".half" << ".space" << ".word";
+             <<  "bge"
+             <<  "bltu"
+             <<  "bgtu"
+             <<  "bleu"
+             <<  "bgeu"
+             <<  "blti"
+             <<  "bgti"
+             <<  "blei"
+             <<  "bgei"
+             <<  "bltiu"
+             <<  "bgtiu"
+             <<  "bleiu"
+             <<  "bgeiu"
+             <<  "beqz"
+             <<  "bnez"
+             <<  "bltz"
+             <<  "bgtz"
+             <<  "blez"
+             <<  "bgez"
+             <<  "li"
+             <<  "ror"
+             <<  "rol"
+             <<  "not"
+             <<  "neg"
+             <<  "move"
+             <<  "abs"
+             <<  "mul"
+             <<  "div"
+             <<  "rem"
+             <<  "clear"
+             <<  "subi"
+             <<  "la"
+             << ".align" << ".ascii" << ".asciiz" << ".byte" << ".double" <<".float" << ".half" << ".space" << ".word";
 
-
+    lCounter = NULL;
 
     model = new QStringListModel(compList, this);
 
@@ -167,7 +167,8 @@ CodeEditor::CodeEditor(QWidget *parent) :
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));    
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(highlightLine()));
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightLine()));
-
+    QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCounterFormat()));
+    selectionStart = selectionEnd = 0;
 }
 
 
@@ -189,7 +190,11 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
     }
     else if (e->key() == Qt::Key_Tab)
     {
-        this->insertPlainText("    ");
+        QTextCursor cur = textCursor();
+        cur.beginEditBlock();
+        cur.insertText("\t");
+        cur.endEditBlock();
+        setTextCursor(cur);
         e->ignore();
         return;
     }
@@ -207,14 +212,12 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         popupSuggestions();
 
     }else if (e->key() == Qt::Key_3 && (e->modifiers() & Qt::ControlModifier)){
-        commentLine();
+        toggleComments();
     }else if(e->key() == Qt::Key_Period){
          popupSuggestions();
          QTextEdit::keyPressEvent(e);
     }else
         QTextEdit::keyPressEvent(e);
-
-
 
 
 }
@@ -270,91 +273,97 @@ void CodeEditor::deleteSelection(){
 }
 
 void CodeEditor::deleteLine(){
-    deleteCurrentLine().endEditBlock();
+    QTextCursor selection = getSelectedLines();
+    selection.beginEditBlock();
+    selection.removeSelectedText();
+    selection.deleteChar();
+    selection.endEditBlock();
 }
 
 void CodeEditor::moveLineUp(){
-    QString line = getCurrentLine();
-    QTextCursor curs = deleteCurrentLine();
-    curs.movePosition(QTextCursor::StartOfLine);
-    curs.insertText(line + "\n" );
-    curs.movePosition(QTextCursor::PreviousCharacter);
-    curs.endEditBlock();
-    setTextCursor(curs);
+    QTextCursor selectionCursor = getSelectedLines();
+    QString selectedLines = selectionCursor.selection().toPlainText();
+    selectionCursor.beginEditBlock();
+    selectionCursor.removeSelectedText();
+    selectionCursor.deleteChar();
+    selectionCursor.movePosition(QTextCursor::Up);
+    selectionCursor.insertText(QString(selectedLines + "\n"));
+    selectionCursor.movePosition(QTextCursor::Up, QTextCursor::MoveAnchor, selectedLines.split("\n").size());
+    selectionCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, selectedLines.size());
+    selectionCursor.endEditBlock();
+    setTextCursor(selectionCursor);
+    if(codeCompleter->popup()->isVisible())
+        codeCompleter->popup()->hide();
 }
 
 void CodeEditor::moveLineDown(){
-    QString line = getCurrentLine();
-    QTextCursor curs = deleteCurrentLine();
-    curs.movePosition(QTextCursor::NextCharacter);
-    curs.movePosition(QTextCursor::EndOfLine);
-    curs.insertText("\n" + line);
-    curs.endEditBlock();
-    setTextCursor(curs);
+    QTextCursor selectionCursor = getSelectedLines();
+    QString selectedLines = selectionCursor.selection().toPlainText();
+    selectionCursor.beginEditBlock();
+    selectionCursor.removeSelectedText();
+    selectionCursor.deleteChar();
+    selectionCursor.movePosition(QTextCursor::EndOfLine);
+    selectionCursor.insertText(QString("\n" + selectedLines));
+    selectionCursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, selectedLines.size());
+    selectionCursor.endEditBlock();
+    setTextCursor(selectionCursor);
+    if(codeCompleter->popup()->isVisible())
+        codeCompleter->popup()->hide();
 
 }
 
 void CodeEditor::copyLineUp(){
-    QTextCursor currentPos = textCursor();
-    textCursor().setKeepPositionOnInsert(true);
-    currentPos.select(QTextCursor::LineUnderCursor);
-    QString line = currentPos.selectedText();
-    currentPos = textCursor();
-    currentPos.movePosition(QTextCursor::EndOfLine);
-    currentPos.insertText('\n' + line);
-    currentPos.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, line.length() + 1);
-    setTextCursor(currentPos);
+    QTextCursor selectionCursor = getSelectedLines();
+    QString selectedLines = selectionCursor.selection().toPlainText();
+    selectionCursor.beginEditBlock();
+    selectionCursor.setPosition(selectionCursor.selectionStart());
+    selectionCursor.movePosition(QTextCursor::StartOfLine);
+    selectionCursor.insertText(QString(selectedLines + "\n"));
+    selectionCursor.movePosition(QTextCursor::PreviousCharacter);
+    selectionCursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, selectedLines.size());
+    selectionCursor.endEditBlock();
+    setTextCursor(selectionCursor);
+    if(codeCompleter->popup()->isVisible())
+        codeCompleter->popup()->hide();
 }
 
 void CodeEditor::copyLineDown(){
-    QTextCursor currentPos = textCursor();
-    textCursor().setKeepPositionOnInsert(true);
-    currentPos.select(QTextCursor::LineUnderCursor);
-    QString line = currentPos.selectedText();
-    currentPos = textCursor();
-    currentPos.movePosition(QTextCursor::EndOfLine);
-    currentPos.insertText('\n' + line);
-    currentPos.movePosition(QTextCursor::EndOfBlock);
-    setTextCursor(currentPos);
+    QTextCursor selectionCursor = getSelectedLines();
+    QString selectedLines = selectionCursor.selection().toPlainText();
+    selectionCursor.beginEditBlock();
+    selectionCursor.movePosition(QTextCursor::EndOfLine);
+    selectionCursor.insertText(QString("\n" + selectedLines));
+    selectionCursor.movePosition(QTextCursor::EndOfBlock);
+    selectionCursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, selectedLines.size());
+    selectionCursor.endEditBlock();
+    setTextCursor(selectionCursor);
+    if(codeCompleter->popup()->isVisible())
+        codeCompleter->popup()->hide();
 }
 
 void CodeEditor::popupSuggestions(){
-    /*QRect popRect = this->cursorRect();
-    popRect.setWidth(50);
-    codeCompleter->complete(popRect);
-    codeCompleter->setCurrentRow(3);
-    codeCompleter->popup()->setCurrentIndex(codeCompleter->popup()->indexAt(QPoint(0, 0)));*/
     completerPop();
 }
 
-void CodeEditor::commentLine(){
-
+void CodeEditor::toggleComments(){
     QTextCursor selectionCursor = getSelectedLines();
+    QStringList selectedLines = selectionCursor.selection().toPlainText().split("\n");
     selectionCursor.beginEditBlock();
-    QStringList lines = selectionCursor.selectedText().trimmed().split("\n");
     selectionCursor.removeSelectedText();
-    for(int i = 0; i < lines.size(); i++){
-        qDebug() << lines.at(i) << "-";
-        if (lines.at(i).startsWith("#"))
-            lines[i].remove(0, 1);
-        else
-            lines[i].prepend("#");
-        selectionCursor.insertText(lines.at(i));
-        if (i != lines.size() - 1)
-            selectionCursor.insertText("\n");
+    selectionCursor.deleteChar();
+    for (int i = 0; i < selectedLines.size(); i++){
+        if (selectedLines.at(i).trimmed().size() > 0){
+            if(!selectedLines.at(i).startsWith("#"))
+                selectedLines[i] = "#" + selectedLines[i];
+            else
+                selectedLines[i].remove(0, 1);
+        }
     }
+    foreach(QString line, selectedLines)
+        selectionCursor.insertText(line + "\n");
+    selectionCursor.movePosition(QTextCursor::PreviousCharacter);
     selectionCursor.endEditBlock();
-
-
-/*
-    QTextCursor currentPos = textCursor();
-    currentPos.movePosition(QTextCursor::StartOfLine);
-    QTextCursor tempCursor(currentPos);
-    tempCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
-    if (tempCursor.selectedText() == "#")
-        tempCursor.removeSelectedText();
-    else
-        currentPos.insertText("#");*/
+    setTextCursor(selectionCursor);
 }
 
 void CodeEditor::insertCompletion(QString completion){
@@ -380,6 +389,18 @@ void CodeEditor::highlightLine(){
     setExtraSelections(linesHL);
 }
 
+void CodeEditor::updateCounterFormat(){
+    if (lCounter != NULL){
+        QTextCursor selectedCur = getSelectedLines();
+        int start = toPlainText().mid(0, selectedCur.selectionStart()).count("\n");
+        int end = toPlainText().mid(0, selectedCur.selectionEnd()).count("\n");
+        if (start > end)
+            lCounter->boldLines(end, start);
+        else
+            lCounter->boldLines(start, end);
+    }
+}
+
 void CodeEditor::updateLabels(){
     static QRegExp labelsRegEx("(\\S+)(?=:)");
     QStringList contentList = toPlainText().split("\n");
@@ -401,6 +422,44 @@ void CodeEditor::updateLabels(){
     blockSignals(false);
 
 }
+
+void CodeEditor::selectLine(int num){
+    QTextCursor cur = textCursor();
+    cur.clearSelection();
+    cur.setPosition(0);
+    cur.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, num);
+    cur.select(QTextCursor::LineUnderCursor);
+    setTextCursor(cur);
+}
+
+void CodeEditor::startSelection(int lineNum){
+    //qDebug() << "Start " << lineNum;
+    selectionStart = lineNum;
+}
+
+void CodeEditor::addSelectedLines(int lineNum){
+    //qDebug() << "Add: " << lineNum;
+    selectionEnd = lineNum;
+    QTextCursor cur = textCursor();
+    cur.setPosition(0);
+    cur.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, selectionStart);
+    if (selectionStart == lineNum)
+        cur.select(QTextCursor::LineUnderCursor);
+    else if (selectionStart > lineNum)
+        cur.movePosition(QTextCursor::Up, QTextCursor::KeepAnchor, selectionStart - lineNum);
+    else if (selectionStart < lineNum)
+        cur.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor, lineNum - selectionStart);
+    setTextCursor(cur);
+
+}
+
+void CodeEditor::endSelection(int lineNum){
+    //qDebug() << "End: " << lineNum;
+    if (lineNum == selectionStart)
+        selectLine(lineNum);
+}
+
+
 
 
 void CodeEditor::updateCounter()
@@ -467,8 +526,7 @@ void CodeEditor::completerPop()
 
 }
 
-void CodeEditor::setCounter(QTextEdit *lc)
-{
+void CodeEditor::setCounter(LinesCounter *lc){
     lCounter = lc;
 }
 

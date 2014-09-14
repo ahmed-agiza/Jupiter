@@ -56,7 +56,8 @@ SOURCES += main.cpp\
     paletteloadingthread.cpp \
     palettesavingthread.cpp \
     tilemaploadingthread.cpp \
-    tilemapsavingthread.cpp
+    tilemapsavingthread.cpp \
+    linescounter.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -103,7 +104,8 @@ HEADERS  += mainwindow.h \
     paletteloadingthread.h \
     palettesavingthread.h \
     tilemaploadingthread.h \
-    tilemapsavingthread.h
+    tilemapsavingthread.h \
+    linescounter.h
 
 
 FORMS    += \

@@ -8,6 +8,7 @@
 #include <QList>
 #include "codeeditor.h"
 #include <QObject>
+#include "linescounter.h"
 
 enum MirageFileType {DATA_FILE, TEXT_FILE};
 
@@ -66,7 +67,7 @@ private:
     CodeEditor *editor;
     QWidget *widgetsContainer;
     QHBoxLayout *editorLayout;
-    QTextEdit *linesCounter;
+    LinesCounter *linesCounter;
     QString filePath;
     QString title;
     MirageFileType fileType;
