@@ -168,6 +168,7 @@ CodeEditor::CodeEditor(QWidget *parent) :
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(highlightLine()));
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightLine()));
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCounterFormat()));
+    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounterFormat()));
     selectionStart = selectionEnd = 0;
 }
 
