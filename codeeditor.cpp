@@ -520,8 +520,6 @@ void CodeEditor::completerPop()
     if (regS)
         codeCompleter->setCompletionPrefix("$" + sel.selectedText());
     else if (dirS){
-        qDebug() << directivesRegEx.matchedLength();
-        qDebug() << directivesRegEx.cap(0);
         codeCompleter->setCompletionPrefix("." + sel.selectedText());
     }else
         codeCompleter->setCompletionPrefix(sel.selectedText());
