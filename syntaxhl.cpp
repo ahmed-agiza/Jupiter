@@ -82,6 +82,7 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
    pseudoFormat.setFontItalic(true);
    immFormat.setForeground(QColor(Qt::white).darker(110));
    immFormat.setFontWeight(QFont::Bold);
+   openStringFormat.setForeground(QColor(Qt::darkGreen).lighter(310));
 
    //Instructions Syntax
 
@@ -179,15 +180,17 @@ SyntaxHL::SyntaxHL(QTextEdit *parent) :
        syntaxes.append(tempSyn);
    }
 
+   //Label's syntax.
+   tempSyn.pattern = QRegExp("\\w+:"); tempSyn.format = labelFormat;
+   syntaxes.append(tempSyn);
+
    //String's syntax
    tempSyn.pattern = QRegExp("\\\".*\\\"", Qt::CaseInsensitive);
    tempSyn.format = stringFormat;
    syntaxes.append(tempSyn);
 
 
-   //Label's syntax.
-   tempSyn.pattern = QRegExp("\\w+:"); tempSyn.format = labelFormat;
-   syntaxes.append(tempSyn);
+
 
    //Comment's syntax.
    tempSyn.pattern = QRegExp("#[^\n]*"); tempSyn.format = commentFormat;
@@ -207,7 +210,7 @@ void SyntaxHL::setLabelsList(QStringList &labels){
     tempSyn.format = labelFormat;
     foreach(QString label, labels){
         tempSyn.pattern = QRegExp(QString("\\b" + label + "\\b"));
-        syntaxes.append(tempSyn);
+        syntaxes.prepend(tempSyn);
     }
 
 }
@@ -224,5 +227,11 @@ void SyntaxHL::highlightBlock(const QString &text)
                  setFormat(index, length, tempSyn.format);
                  index = formatRegEx.indexIn(text, index + length);                
              }
+   }
+   if (text.contains("\"")){
+       if ((text.count("\"")%2) != 0){
+           int pos = text.lastIndexOf("\"");
+           setFormat(pos, text.length() - pos, openStringFormat);
+       }
    }
 }

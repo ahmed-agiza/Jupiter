@@ -41,8 +41,8 @@ void QuickSearchDialog::showEvent(QShowEvent *e){
 void QuickSearchDialog::on_btnFind_clicked(){
     QString editorText = editor->toPlainText();
     QString searchText = ui->txtSearch->text();
-    int currentPosition = editor->textCursor().position();
-    int nextPosition = editorText.indexOf(searchText, currentPosition + 1);
+    int currentPosition = editor->textCursor().selectionEnd();
+    int nextPosition = editorText.indexOf(searchText, currentPosition);
     if (nextPosition == -1 && editorText.indexOf(searchText) != -1)
         nextPosition = editorText.indexOf(searchText, 0);
 

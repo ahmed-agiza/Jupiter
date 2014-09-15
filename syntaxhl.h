@@ -34,6 +34,7 @@ private:
     QTextCharFormat labelFormat;
     QTextCharFormat macroFormat;
     QTextCharFormat immFormat;
+    QTextCharFormat openStringFormat;
 
     QStringList instructionsList;
     QStringList pseudoList;

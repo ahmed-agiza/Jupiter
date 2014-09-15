@@ -482,13 +482,37 @@ void CodeEditor::completerPop()
     sel.select(QTextCursor::WordUnderCursor);
     QTextCursor sel2 = textCursor();
     sel2.select(QTextCursor::LineUnderCursor);
+    if (sel2.selection().toPlainText().trimmed().startsWith("#")){
+        codeCompleter->popup()->hide();
+        return;
+    }
+    if (sel2.selection().toPlainText().contains("\"") && sel2.selection().toPlainText().count("\"") % 2 != 0){
+        QTextCursor stringChecker(sel);
+        stringChecker.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+        QString firstHalf = sel2.selection().toPlainText().mid(0, stringChecker.selectionStart());
+        if (firstHalf.count("\"")%2 != 0){
+            codeCompleter->popup()->hide();
+            return;
+        }
+
+
+    }
+
 
     bool regS = (sel2.selectedText().mid(sel2.selectedText().lastIndexOf(QRegExp("( |,)+")) + 1, 1) == "$");
 
     QTextCursor tempCursor = textCursor();
-    tempCursor.select(QTextCursor::LineUnderCursor);
+    tempCursor.select(QTextCursor::WordUnderCursor);
+    if (tempCursor.selectionStart() != 0){
+        int length = tempCursor.selection().toPlainText().length();
+        tempCursor.setPosition(tempCursor.selectionStart() - 1);
+        tempCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, length == 0? 1:length);
+    }
 
-    QRegExp directivesRegEx("\\.[^\\s]*");
+    QRegExp directivesRegEx("\\.\\w*");
+    directivesRegEx.setPatternSyntax(QRegExp::RegExp2);
+
+
 
     bool dirS = tempCursor.selectedText().lastIndexOf(directivesRegEx) != -1;
 
@@ -496,9 +520,9 @@ void CodeEditor::completerPop()
     if (regS)
         codeCompleter->setCompletionPrefix("$" + sel.selectedText());
     else if (dirS){
-
+        qDebug() << directivesRegEx.matchedLength();
+        qDebug() << directivesRegEx.cap(0);
         codeCompleter->setCompletionPrefix("." + sel.selectedText());
-        qDebug() << codeCompleter->completionPrefix();
     }else
         codeCompleter->setCompletionPrefix(sel.selectedText());
 
