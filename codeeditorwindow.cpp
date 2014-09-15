@@ -129,11 +129,11 @@ void CodeEditorWindow::deleteText(){
 }
 
 void CodeEditorWindow::quickFind(){
-
+    quickSearch->show();
 }
 
 void CodeEditorWindow::findAndReplace(){
-
+    findReplace->show();
 }
 
 void CodeEditorWindow::setDestryoed(bool value){
@@ -298,5 +298,8 @@ void CodeEditorWindow::init(){
     widgetsContainer->showMaximized();
     connect(editor, SIGNAL(textChanged()), this, SLOT(editedSlot()));
     destroyed = false;
-
+    quickSearch = new QuickSearchDialog(this);
+    quickSearch->hide();
+    findReplace = new FindAndReplaceDialog(this);
+    findReplace->hide();
 }

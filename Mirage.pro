@@ -57,7 +57,9 @@ SOURCES += main.cpp\
     palettesavingthread.cpp \
     tilemaploadingthread.cpp \
     tilemapsavingthread.cpp \
-    linescounter.cpp
+    linescounter.cpp \
+    findandreplacedialog.cpp \
+    quicksearchdialog.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -67,7 +69,6 @@ HEADERS  += mainwindow.h \
     assembler.h \
     memory.h \
     InstructionFuncs.h \
-    registersmodel.h \
     memorymodel.h \
     instructionsmodel.h \
     palettecolor.h \
@@ -105,7 +106,10 @@ HEADERS  += mainwindow.h \
     palettesavingthread.h \
     tilemaploadingthread.h \
     tilemapsavingthread.h \
-    linescounter.h
+    linescounter.h \
+    quicksearchdialog.h \
+    findandreplacedialog.h \
+    registersmodel.h
 
 
 FORMS    += \
@@ -122,7 +126,9 @@ FORMS    += \
     filenamedialog.ui \
     deletefiledialog.ui \
     memorydump.ui \
-    gpumemorydump.ui
+    gpumemorydump.ui \
+    quicksearchdialog.ui \
+    findandreplacedialog.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \

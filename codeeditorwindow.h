@@ -9,6 +9,8 @@
 #include "codeeditor.h"
 #include <QObject>
 #include "linescounter.h"
+#include "quicksearchdialog.h"
+#include "findandreplacedialog.h"
 
 enum MirageFileType {DATA_FILE, TEXT_FILE};
 
@@ -53,6 +55,7 @@ public:
     void undo();
     void redo();
 
+
     QMap<int, int> getLineMapping();
 
     ~CodeEditorWindow();
@@ -72,6 +75,9 @@ private:
     QString title;
     MirageFileType fileType;
     QMdiArea *p;
+    QuickSearchDialog *quickSearch;
+    FindAndReplaceDialog *findReplace;
+
 
     bool edited;
     bool destroyed;

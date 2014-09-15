@@ -238,8 +238,8 @@ void FileLoader::init(){
 
     QRect screenGeo = QApplication::desktop()->screenGeometry(0);
     QPoint centerPoint = screenGeo.center();
-    centerPoint.setX(centerPoint.x() - this->width()/2);
-    centerPoint.setY(centerPoint.y() - this->height()/2);
+    centerPoint.setX(centerPoint.x() - width()/2);
+    centerPoint.setY(centerPoint.y() - height()/2);
     move(centerPoint);
 
     if(dialogType == CREATE_FILE){
