@@ -2,20 +2,19 @@
 
 bool saved = 0;
 #define TILE_SIZE 16
-TileEngine::TileEngine(QWidget* parent, const QPoint& position, const QSize& size, Memory* mem) : QRenderWindow(parent, position, size, 20)
+TileEngine::TileEngine(QWidget* parent, const QPoint& position, const QSize& size, Memory* mem, QVector<int> *mRegisters) : QRenderWindow(parent, position, size, 20)
 {
     this->setWindowTitle("Game Screen");
     memory = mem;
+    verticalScroll = &((*mRegisters)[25]);
+    horizontalScroll = &((*mRegisters)[24]);
     connect(memory, SIGNAL(renderNow()), this, SLOT(repaint()));
-
 }
 
 void TileEngine::initialize()
 {
     screenSize.x = 512;
     screenSize.y = 384;
-    verticalScroll = 80;
-    horizontalScroll = 88;
 }
 
 void TileEngine::update()
@@ -32,17 +31,17 @@ void TileEngine::setMemory(Memory * memory)
 void TileEngine::renderFrame()
 {
 
-    for (unsigned int i = verticalScroll / TILE_SIZE; i < ceil((verticalScroll + float(screenSize.y)) / float(TILE_SIZE)); i++)
-        for (unsigned int j = horizontalScroll / TILE_SIZE; j < ceil((horizontalScroll + float(screenSize.x)) / float(TILE_SIZE)); j++){
-            Vector2f spritePosition(Vector2f(j * TILE_SIZE - horizontalScroll, i * TILE_SIZE - verticalScroll));
+    for (unsigned int i = (*verticalScroll) / TILE_SIZE; i < ceil(((*verticalScroll) + float(screenSize.y)) / float(TILE_SIZE)); i++)
+        for (unsigned int j = (*horizontalScroll) / TILE_SIZE; j < ceil(((*horizontalScroll) + float(screenSize.x)) / float(TILE_SIZE)); j++){
+            Vector2f spritePosition(Vector2f(j * TILE_SIZE - (*horizontalScroll), i * TILE_SIZE - (*verticalScroll)));
             Vector2f spriteOrigin(0,0);
 
-            if(j * TILE_SIZE < horizontalScroll){
-                spritePosition.x = ((j + 1) * TILE_SIZE - horizontalScroll - 1);
+            if(j * TILE_SIZE < (*horizontalScroll)){
+                spritePosition.x = ((j + 1) * TILE_SIZE - (*horizontalScroll) - 1);
                 spriteOrigin.x = TILE_SIZE - 1;
             }
-            if(i * TILE_SIZE < verticalScroll){
-                spritePosition.y = ((i + 1) * TILE_SIZE - verticalScroll - 1);
+            if(i * TILE_SIZE < (*verticalScroll)){
+                spritePosition.y = ((i + 1) * TILE_SIZE - (*verticalScroll) - 1);
                 spriteOrigin.y = TILE_SIZE - 1;
             }
             memory->backgroundMatrix[i][j].setPosition(spritePosition);

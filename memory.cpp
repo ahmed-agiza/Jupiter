@@ -519,6 +519,9 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
     QFile in(fileName);
     in.open(QIODevice::ReadOnly);
 
+    qDebug() << claculateLoadSize(segmentsToLoad);
+    if(claculateLoadSize(segmentsToLoad) != in.size())
+        return;
     char* byte = new char;
 
     if(segmentsToLoad[0]){

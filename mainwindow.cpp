@@ -824,7 +824,7 @@ void MainWindow::on_actionSimulate_triggered(){
             if(engine->isVisible())
                 engine->hide();
         }
-    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory);
+    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory, &this->mainProcessorRegisters);
     memory->setTileEngine(engine);
     if(ui->actionEnable_Graphics_Engine->isChecked())
         engine->show();
@@ -988,7 +988,6 @@ void MainWindow::on_actionOpen_Project_triggered()
         closeProject();
     openProjectFile(tempProjectFileName);
 
-    memory->resizeTileMap();
 }
 
 
@@ -1252,6 +1251,7 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
         qDebug() << "Failed to open!";
     }
     refreshActions();
+    memory->resizeTileMap();
 }
 
 void MainWindow::applyProjectSettings(){

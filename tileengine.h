@@ -13,9 +13,9 @@ private:
     int framesPerSecond;
 
     Vector2u screenSize;
-    unsigned int horizontalScroll, verticalScroll;
+    int *horizontalScroll, *verticalScroll;
 public:
-    TileEngine(QWidget*, const QPoint&, const QSize&, Memory *);
+    TileEngine(QWidget*, const QPoint&, const QSize&, Memory *, QVector<int> *mRegisters);
     ~TileEngine();
     void initialize();
     void update();
