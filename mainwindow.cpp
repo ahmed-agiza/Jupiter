@@ -199,6 +199,7 @@ void MainWindow::closeEvent(QCloseEvent *e){
         if (engine && engine->isVisible())
             engine->hide();
         e->accept();
+        exit(0);
    } else
         e->ignore();
 
@@ -875,7 +876,9 @@ void MainWindow::on_actionAssemble_triggered(){
 
     QStringList textInstrs;
     QStringList dataInstrs;
+    QStringList rawInstrs;
     QMap<int, int> lineMapping;
+        rawInstrs = getActiveFileContent(MainWindow::projectMainFile).split("\n");
         textInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), lineMapping);//currentWindow->getStrippedContentList();//->getUncommentedContentList();
         lastTextInstrs = textInstrs;
 
@@ -902,6 +905,7 @@ void MainWindow::on_actionAssemble_triggered(){
     assem = new Assembler(memory, &mainProcessorRegisters, this);
     assem->setSimulationSpeed(1000);
     assem->setLineMapping(lineMapping);
+    //assem->setRawList(rawInstrs);
 
 
     assemblerInitialized = false;

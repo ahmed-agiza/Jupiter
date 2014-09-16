@@ -40,6 +40,8 @@ private:
     QMap<QString, int> dataLabels;
     QMap<QString, int> opcode;
     QMap<QString, int (*)(fParam2)> functionsMap;
+    QStringList strippedInstrs;
+    QStringList rawLines;
 
 
 
@@ -92,6 +94,9 @@ public:
     void setSimulationSpeed(int);
 
     void setLineMapping(QMap<int, int>);
+
+    void getLineMapping();
+    void setRawList(QStringList);
 
     QVector<int> *registers;
     ~Assembler();

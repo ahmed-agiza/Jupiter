@@ -1069,6 +1069,9 @@ void Assembler::parseTextSegment(QStringList* stringList)
         //mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
+
+    //getLineMapping();
+
     emit assemblyComplete();
 }
 
@@ -1846,6 +1849,31 @@ void Assembler::setLineMapping(QMap<int, int> mapping){
     lineMapping = mapping;
 }
 
+void Assembler::setRawList(QStringList list){
+    rawLines = list;
+}
+
+void Assembler::getLineMapping(){
+    if (rawLines.isEmpty() || strippedInstrs.isEmpty()){
+        lineMapping.clear();
+        return;
+    }
+
+    int rawIterator = 0;
+
+    lineMapping.clear();
+    for (int i = 0; i < strippedInstrs.length(); i++){
+        for(int j = rawIterator; j < rawLines.size(); j++){
+            if(strippedInstrs.at(i) == rawLines.at(j).trimmed()){
+                lineMapping[i] = j;
+                rawIterator = j + 1;
+                break;
+            }
+        }
+    }
+
+}
+
 
 Assembler::Assembler(){
 
@@ -1858,8 +1886,10 @@ inline void Assembler::executeFunction()
 
     activePC = PC/4;
     emit executingInstruction(activePC);
-    if (lineMapping.contains(activePC))
-        emit executingLine(lineMapping[activePC]);
+    if (lineMapping.contains(activePC)){
+        if (!instructions.at(activePC).isFromAssembler())
+            emit executingLine(lineMapping[activePC]);
+    }
     if (instructions[activePC].getName() == "syscall"){
         int functionNumber = (*registers)[2];
         QString msg;
@@ -2304,6 +2334,9 @@ void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStr
 
     waiting = false;
     resumeFlag = false;
+
+    strippedInstrs = textFileStringList;
+
     parseDataSegment(&dataFileStringList);
     parseTextSegment(&textFileStringList);
 }

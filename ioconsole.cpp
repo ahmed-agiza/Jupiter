@@ -22,7 +22,6 @@
 
 IOConsole::IOConsole(QWidget *parent) :
     QTextEdit(parent){
-    //installEventFilter(this);
     lockPosition = 0;
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorChanged()));
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(onSelectionChanged()));
@@ -30,7 +29,8 @@ IOConsole::IOConsole(QWidget *parent) :
     setContextMenuPolicy(Qt::CustomContextMenu);
     requestNumber = 0;
     readingLimt = -1;
-    setReadOnly(true);
+    setTextInteractionFlags(Qt::TextEditable);
+    setReadOnly(true);   
 }
 
 void IOConsole::setLock(int pos){

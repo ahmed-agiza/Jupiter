@@ -28,6 +28,7 @@ Instruction::Instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
        registers->push_back(i);*/
 
     func = NULL;
+    fromAssembler = false;
 
 }
 
@@ -44,7 +45,8 @@ Instruction::Instruction(const Instruction &inst)
     opcode(inst.opcode),
     mem(inst.mem),
     format(inst.format),
-    instructionWord(inst.instructionWord)
+    instructionWord(inst.instructionWord),
+    fromAssembler(inst.fromAssembler)
 {}
 
 Instruction::Instruction()
@@ -71,6 +73,14 @@ Instruction & Instruction::operator = (const Instruction &inst)
 
     instructionWord = inst.instructionWord;
     return *this;
+}
+
+void Instruction::setFromAssembler(bool flag){
+    fromAssembler = flag;
+}
+
+bool Instruction::isFromAssembler() const{
+    return fromAssembler;
 }
 
 

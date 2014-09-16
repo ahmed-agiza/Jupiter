@@ -48,6 +48,9 @@ public:
     Instruction();
     Instruction & operator=(const Instruction &inst);
 
+    void setFromAssembler(bool);
+    bool isFromAssembler() const;
+
 signals:
     void raiseException(int exceptionNumber);
 
@@ -68,6 +71,7 @@ private:
 
     InstructionFormat format;
     int instructionWord;
+    bool fromAssembler;
 };
 
 #endif // INSTRUCTION_H

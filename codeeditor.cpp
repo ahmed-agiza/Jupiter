@@ -21,7 +21,8 @@ CodeEditor::CodeEditor(QWidget *parent) :
     QTextEdit(parent)
 {
 
-
+    setAcceptRichText(false);
+    setTabStopWidth(40);
     SHL = new SyntaxHL(this); //Adding syntax highlighter.
 
     //Auto-complete setup:
