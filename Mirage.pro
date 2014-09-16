@@ -59,7 +59,9 @@ SOURCES += main.cpp\
     tilemapsavingthread.cpp \
     linescounter.cpp \
     findandreplacedialog.cpp \
-    quicksearchdialog.cpp
+    quicksearchdialog.cpp \
+    baseconverter.cpp \
+    logiccalculator.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -109,7 +111,9 @@ HEADERS  += mainwindow.h \
     linescounter.h \
     quicksearchdialog.h \
     findandreplacedialog.h \
-    registersmodel.h
+    registersmodel.h \
+    baseconverter.h \
+    logiccalculator.h
 
 
 FORMS    += \
@@ -128,7 +132,9 @@ FORMS    += \
     memorydump.ui \
     gpumemorydump.ui \
     quicksearchdialog.ui \
-    findandreplacedialog.ui
+    findandreplacedialog.ui \
+    baseconverter.ui \
+    logiccalculator.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \

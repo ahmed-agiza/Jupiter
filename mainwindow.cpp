@@ -2037,3 +2037,9 @@ void MainWindow::on_actionStopSimulation_triggered(){
     simulationComplete();
     statusBar()->clearMessage();
 }
+
+void MainWindow::on_actionBase_Converter_triggered()
+{
+    logicCalculator = new LogicCalculator(this);
+    logicCalculator->show();
+}

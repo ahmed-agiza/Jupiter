@@ -25,6 +25,8 @@
 #include "ioconsole.h"
 #include "memorydump.h"
 #include "gpumemorydump.h"
+#include "baseconverter.h"
+#include "logiccalculator.h"
 
 namespace Ui {
 class MainWindow;
@@ -183,6 +185,8 @@ private slots:
 
     void on_actionStopSimulation_triggered();
 
+    void on_actionBase_Converter_triggered();
+
 public slots:
     void printToConsole(QString);
 
@@ -224,6 +228,8 @@ private:
     Assembler *assem;
     MemoryDump *memoryDump;
     GpuMemoryDump *gpuMemoryDump;
+    BaseConverter *baseConverter;
+    LogicCalculator *logicCalculator;
     RegistersModel *regModel;
     MemoryModel *textModel, *dataModel, *stackModel, *heapModel, *tmModel, *bgtsModel, *sptsModel, *spRamModel, *paletteModel, *inputModel;
     bool assemblerInitialized;
