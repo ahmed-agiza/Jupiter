@@ -1070,7 +1070,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
 
-    //getLineMapping();
+    getLineMapping();
 
     emit assemblyComplete();
 }
@@ -1888,12 +1888,16 @@ void Assembler::getLineMapping(){
     }
 
     int rawIterator = 0;
-
+    int fromAssemCount = 0;
     lineMapping.clear();
     for (int i = 0; i < strippedInstrs.length(); i++){
+        if (instructions.at(i).isFromAssembler()){
+            fromAssemCount++;
+            continue;
+        }
         for(int j = rawIterator; j < rawLines.size(); j++){
             if(strippedInstrs.at(i) == rawLines.at(j).trimmed()){
-                lineMapping[i] = j;
+                lineMapping[i] = j - fromAssemCount;
                 rawIterator = j + 1;
                 break;
             }
@@ -1914,9 +1918,16 @@ inline void Assembler::executeFunction()
 
     activePC = PC/4;
     emit executingInstruction(activePC);
+    //qDebug()  << instructions.at(activePC).getName() << "  " << instructions.at(activePC).isFromAssembler() << "   " << activePC << ": " << lineMapping[activePC];
     if (lineMapping.contains(activePC)){
         if (!instructions.at(activePC).isFromAssembler())
-            emit executingLine(lineMapping[activePC]);
+          emit executingLine(lineMapping[activePC]);
+            //qDebug()  << instructions.at(activePC).getName() << "  " << instructions.at(activePC).getLineNumber() << "  " << instructions.at(activePC).isFromAssembler();
+    }
+    int lineN = instructions.at(activePC).getLineNumber();
+    if (lineN >= 0){
+        qDebug() << instructions.at(activePC).getName() << "  " << lineN;
+        emit executingLine(lineN);
     }
     if (instructions[activePC].getName() == "syscall"){
         int functionNumber = (*registers)[2];

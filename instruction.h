@@ -51,6 +51,12 @@ public:
     void setFromAssembler(bool);
     bool isFromAssembler() const;
 
+    void setRawString(QString);
+    QString getRawString() const;
+
+    void setLineNumber(int);
+    int getLineNumber() const;
+
 signals:
     void raiseException(int exceptionNumber);
 
@@ -72,6 +78,8 @@ private:
     InstructionFormat format;
     int instructionWord;
     bool fromAssembler;
+    QString rawString;
+    int lineNumber;
 };
 
 #endif // INSTRUCTION_H

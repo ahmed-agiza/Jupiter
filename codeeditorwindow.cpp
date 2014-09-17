@@ -271,7 +271,7 @@ void CodeEditorWindow::init(){
     editorLayout = new QHBoxLayout(widgetsContainer);
     editor = new CodeEditor(widgetsContainer);
     linesCounter = new LinesCounter(widgetsContainer);
-
+    QObject::connect(editor, SIGNAL(updateScroll(int)), linesCounter, SLOT(scrollWithEditor(int)));
 
     editor->setObjectName("CodeE");
     //newCode->setFont(editorFont);

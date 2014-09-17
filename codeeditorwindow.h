@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QTextEdit>
 #include <QList>
+#include <QScroller>
 #include "codeeditor.h"
 #include <QObject>
 #include "linescounter.h"

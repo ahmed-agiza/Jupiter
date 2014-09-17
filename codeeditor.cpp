@@ -7,6 +7,8 @@
 #include <QHeaderView>
 #include <QListView>
 #include <QTextDocumentFragment>
+#include <QScrollBar>
+
 
 #include "completerlist.h"
 
@@ -20,6 +22,7 @@
 CodeEditor::CodeEditor(QWidget *parent) :
     QTextEdit(parent)
 {
+
 
     setAcceptRichText(false);
     setTabStopWidth(40);
@@ -171,6 +174,7 @@ CodeEditor::CodeEditor(QWidget *parent) :
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCounterFormat()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounterFormat()));
     selectionStart = selectionEnd = 0;
+
 }
 
 
@@ -180,6 +184,8 @@ void CodeEditor::focusInEvent(QFocusEvent *e){
         codeCompleter->setWidget(this);
     QTextEdit::focusInEvent(e);
 }
+
+
 
 
 
@@ -266,6 +272,14 @@ QTextCursor CodeEditor::getSelectedLines(){
     selectionCursor.setPosition(startCursor.position());
     selectionCursor.setPosition(endCursor.position(), QTextCursor::KeepAnchor);
     return selectionCursor;
+}
+
+
+void CodeEditor::scrollContentsBy(int x, int y)
+{
+    emit updateScroll(verticalScrollBar()->value());
+
+    QTextEdit::scrollContentsBy(x, y);
 }
 
 void CodeEditor::deleteSelection(){
@@ -402,6 +416,8 @@ void CodeEditor::updateCounterFormat(){
             lCounter->boldLines(start, end);
     }
 }
+
+
 
 void CodeEditor::updateLabels(){
     static QRegExp labelsRegEx("(\\S+)(?=:)");

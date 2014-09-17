@@ -29,6 +29,7 @@ Instruction::Instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
 
     func = NULL;
     fromAssembler = false;
+    lineNumber = -1;
 
 }
 
@@ -46,7 +47,8 @@ Instruction::Instruction(const Instruction &inst)
     mem(inst.mem),
     format(inst.format),
     instructionWord(inst.instructionWord),
-    fromAssembler(inst.fromAssembler)
+    fromAssembler(inst.fromAssembler),
+    lineNumber(inst.lineNumber)
 {}
 
 Instruction::Instruction()
@@ -81,6 +83,22 @@ void Instruction::setFromAssembler(bool flag){
 
 bool Instruction::isFromAssembler() const{
     return fromAssembler;
+}
+
+void Instruction::setRawString(QString insText){
+    rawString = insText;
+}
+
+QString Instruction::getRawString() const{
+    return rawString;
+}
+
+void Instruction::setLineNumber(int line){
+    lineNumber = line;
+}
+
+int Instruction::getLineNumber() const{
+    return lineNumber;
 }
 
 

@@ -2,6 +2,7 @@
 #define LINESCOUNTER_H
 
 #include <QTextEdit>
+#include <QScrollBar>
 
 class LinesCounter : public QTextEdit
 {
@@ -14,6 +15,7 @@ public:
 private:
     QTextCharFormat defaultFormat;
     QTextCharFormat boldFormat;
+    QScrollBar *vbar;
 
 protected:
     bool eventFilter(QObject *, QEvent *);
@@ -27,6 +29,7 @@ signals:
 
 
 public slots:
+    void scrollWithEditor(int);
 
 };
 

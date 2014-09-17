@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QTextDocumentFragment>
 
+
 LinesCounter::LinesCounter(QWidget *parent) :
     QTextEdit(parent){
     installEventFilter(this);
@@ -23,6 +24,8 @@ LinesCounter::LinesCounter(QWidget *parent) :
 
     boldFormat = defaultFormat;
     boldFormat.setFont(boldFont);
+    vbar = verticalScrollBar();
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 int LinesCounter::getLineNumber(QPoint linePos){
@@ -77,6 +80,13 @@ bool LinesCounter::eventFilter(QObject *o, QEvent *e)
     }
 
     return QTextEdit::eventFilter(o, e);
+
+}
+
+void LinesCounter::scrollWithEditor(int val){
+    if (vbar){
+        vbar->setValue(val);
+    }
 
 }
 

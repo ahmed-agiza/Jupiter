@@ -904,8 +904,8 @@ void MainWindow::on_actionAssemble_triggered(){
     memory = new Memory(this);
     assem = new Assembler(memory, &mainProcessorRegisters, this);
     assem->setSimulationSpeed(1000);
-    assem->setLineMapping(lineMapping);
-    //assem->setRawList(rawInstrs);
+    //assem->setLineMapping(lineMapping);
+    assem->setRawList(rawInstrs);
 
 
     assemblerInitialized = false;

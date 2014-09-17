@@ -4,6 +4,7 @@
 #include <QTextEdit>
 #include <QCompleter>
 #include <QStringListModel>
+#include <QScroller>
 #include "syntaxhl.h"
 #include "linescounter.h"
 
@@ -28,9 +29,14 @@ private:
     QStringList compList; //Completion list.
     QStringList labelsList; //Labels list
     int selectionStart, selectionEnd;
+    QScroller *scroll;
+
+protected:
+    void scrollContentsBy(int, int);
 
 signals:
     void labelsUpdated();
+    void updateScroll(int);
 public slots:
     void deleteSelection();
     void deleteLine();
