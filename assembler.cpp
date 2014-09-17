@@ -1343,6 +1343,7 @@ void Assembler::handlePR(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "div")
     {
@@ -1356,6 +1357,7 @@ void Assembler::handlePR(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "rem")
     {
@@ -1369,6 +1371,7 @@ void Assembler::handlePR(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
 }
 
@@ -1392,6 +1395,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bgti")
     {
@@ -1412,6 +1416,8 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address += 2;
+        instructions[instructions.size()-2].setFromAssembler(true);
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "blei")
     {
@@ -1432,6 +1438,8 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address += 2;
+        instructions[instructions.size()-2].setFromAssembler(true);
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bgei")
     {
@@ -1451,6 +1459,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bltiu")
     {
@@ -1470,6 +1479,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bgtiu")
     {
@@ -1490,6 +1500,8 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address += 2;
+        instructions[instructions.size()-2].setFromAssembler(true);
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bleiu")
     {
@@ -1510,6 +1522,8 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address += 2;
+        instructions[instructions.size()-2].setFromAssembler(true);
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bgeiu")
     {
@@ -1529,6 +1543,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
             labels[labelName] = address;
         }
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
 }
 
@@ -1667,6 +1682,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         if(m.cap(1).size()) labels[m.cap(1)] = address;
     }
     address++;
+    instructions[instructions.size()-1].setFromAssembler(true);
 }
 
 void Assembler::handlePZ(QRegExp m, QString line)
@@ -1705,6 +1721,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bgez")
     {
@@ -1718,6 +1735,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "bgtz")
     {
@@ -1731,6 +1749,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "blez")
     {
@@ -1744,6 +1763,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "la")
     {
@@ -1761,6 +1781,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
 }
 
@@ -1774,6 +1795,7 @@ void Assembler::handlePSI(QRegExp m, QString line)
             instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,numberToLoad & 0xffff,0,IFormat));
             if(m.cap(1).size()) labels[m.cap(1)] = address;
             address++;
+            instructions[instructions.size()-1].setFromAssembler(true);
         }
         else{
             instructions.push_back(Instruction("addi",registers,opcode["addi"],registerIndex["0"],registerIndex[m.cap(3)],0,numberToLoad,0,IFormat));
@@ -1787,6 +1809,8 @@ void Assembler::handlePSI(QRegExp m, QString line)
         instructions.push_back(Instruction("or" ,registers,opcode["or" ],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
+        instructions[instructions.size()-2].setFromAssembler(true);
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
     else if(m.cap(2) == "rol")
     {
@@ -1795,6 +1819,8 @@ void Assembler::handlePSI(QRegExp m, QString line)
         instructions.push_back(Instruction("or" ,registers,opcode["or" ],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address += 2;
+        instructions[instructions.size()-2].setFromAssembler(true);
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
 }
 
@@ -1821,6 +1847,8 @@ void Assembler::handlePDR(QRegExp m, QString line)
         instructions.push_back(Instruction("xor",registers,opcode["xor"],registerIndex["at"],registerIndex[m.cap(4)],registerIndex[m.cap(3)],0,0,RFormat));
         instructions.push_back(Instruction("subu",registers,opcode["subu"],registerIndex[m.cap(3)],registerIndex["at"],registerIndex[m.cap(3)],0,0,RFormat));
         address += 2;
+        instructions[instructions.size()-2].setFromAssembler(true);
+        instructions[instructions.size()-1].setFromAssembler(true);
     }
 }
 
