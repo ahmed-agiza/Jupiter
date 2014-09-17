@@ -38,7 +38,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 75 10pt &quot;Consolas&quot;;</string>
+     <string notr="true">font: 75 14pt &quot;Consolas&quot;;</string>
     </property>
     <property name="text">
      <string>0</string>
@@ -104,6 +104,27 @@
       <string>Hex</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QLabel" name="hexbinlabel_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 14pt &quot;Consolas&quot;;
+background-color: rgba(255, 255, 255, 0);
+color: rgb(170, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_source_1">
@@ -183,7 +204,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 75 10pt &quot;Consolas&quot;;</string>
+     <string notr="true">font: 75 14pt &quot;Consolas&quot;;</string>
     </property>
     <property name="text">
      <string/>
@@ -249,6 +270,27 @@
       <string>Hex</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QLabel" name="hexbinlabel_1">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>20</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 14pt &quot;Consolas&quot;;
+background-color: rgba(255, 255, 255, 0);
+color: rgb(170, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_source_2">
@@ -328,7 +370,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 75 10pt &quot;Consolas&quot;;</string>
+     <string notr="true">font: 75 14pt &quot;Consolas&quot;;</string>
     </property>
     <property name="text">
      <string/>
@@ -394,6 +436,27 @@
       <string>Hex</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QLabel" name="hexbinlabel_2">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>20</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 14pt &quot;Consolas&quot;;
+background-color: rgba(255, 255, 255, 0);
+color: rgb(170, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
   </widget>
   <widget class="QPushButton" name="button_and">
