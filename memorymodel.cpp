@@ -150,7 +150,6 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                     if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
                         return "0x" + getPaddedHex(uvalue, 32);
                     }else{
-                        //QString untrimmed = QString::number(uvalue, 16);
                         return "0x" + getPaddedHex(uvalue, 8);
                     }
                 }
@@ -171,12 +170,12 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
                 }
             }else{
                 value = memory->loadWord(adr);
+                //if (value)
             }
             if (memoryBase->currentText() == B16){
                 if (memoryMode->currentText() == WORD || memoryMode->currentText() == UWORD){
                     return "0x" + getPaddedHex(value, 32);
                 }else{
-                    //QString untrimmed = QString::number(value, 16);
                     return "0x" + getPaddedHex(value, 8); //+ untrimmed.mid(untrimmed.size() - 8).toUpper();
                 }
             }else if (memoryBase->currentText() == B02){
@@ -256,70 +255,4 @@ void MemoryModel::setModifiers(QComboBox *ab, QComboBox *mm, QComboBox *mb){
 void MemoryModel::emitDataChanged(){
     emit dataChanged(QModelIndex(), QModelIndex());
 }
-
-
-
-/*QString getPaddedBinary(int number, int padding){
-    QString binary = QString::number(number, 2);
-    QString trimmed = binary.mid(binary.length() - padding);
-    while(trimmed.size() %4 != 0)
-        trimmed.prepend("0");
-    if(trimmed.size() > 4)
-        for(int i = 4; i < trimmed.size(); i += 5)
-            trimmed.insert(i, ' ');
-
-    return trimmed;
-}*/
-/*bool RegistersModel::setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole)
-{
-
-    if (index.isValid() && role == Qt::EditRole)
-    {
-             //QPair<int, int> p = tableData->value(index.row());
-             if(index.column() == 0)
-                    registersMap[index.row()] = value.toString();
-             else if (index.column() == 1)
-                    (*regs)[index.row()] = value.toInt();
-             else
-                 return false;
-
-             //tableData->replace(index.row(), p);
-
-             emit(dataChanged(index, index));
-
-             return true;
-    }
-
-    return false;
-}*/
-
-/*bool RegistersModel::insertRows(int position, int rows, const QModelIndex &index=QModelIndex())
-{
-    Q_UNUSED(index);
-    beginInsertRows(QModelIndex(), position, position+rows-1);
-
-    //<int, int> r; r.first = 0; r.second = 0;
-    for (int row=0; row < rows; row++)
-       //tableData->insert(position, r);
-
-
-
-    endInsertRows();
-    return true;
-}
-
-bool RegistersModel::removeRows(int position, int rows, const QModelIndex &index=QModelIndex())
-{
-    Q_UNUSED(index);
-    beginRemoveRows(QModelIndex(), position, position+rows-1);
-
-     for (int row=0; row < rows; ++row)
-     {
-        tableData->removeAt(position);
-     }
-
-     endRemoveRows();
-     return true;
-}*/
-
 

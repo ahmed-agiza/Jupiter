@@ -91,6 +91,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     memory = new Memory(this);
 
+    //int baseAddress = memory->dataSegmentBaseAddress;
+    //memory->storeWord(baseAddress + 4, 20);
+
     timer = new QTimer(this);
     timer->setSingleShot(false);
     timer->setInterval(300);
@@ -746,6 +749,9 @@ void MainWindow::resumeSimulation(bool resume = true)
 
 void MainWindow::refreshModels(){
     regModel->emitDataChanged();
+    refreshMemoryModels();
+    //dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
+    //ui->dataTable->setModel(dataModel);
 
 }
 
@@ -763,7 +769,6 @@ void MainWindow::refreshMemoryModels(){
         paletteModel->emitDataChanged();
         inputModel->emitDataChanged();
     }
-
 }
 
 void MainWindow::selectLine(int lineNumber){
@@ -901,10 +906,9 @@ void MainWindow::on_actionAssemble_triggered(){
 
     }
     ui->tabsProject->setCurrentIndex(1);
-    memory = new Memory(this);
     assem = new Assembler(memory, &mainProcessorRegisters, this);
+
     assem->setSimulationSpeed(1000);
-    //assem->setLineMapping(lineMapping);
     assem->setRawList(rawInstrs);
 
 
@@ -1829,6 +1833,7 @@ void MainWindow::assemblyComplete(){
     refreshActions();
     assemblerInitialized = true;
     refreshModels();
+    refreshMemoryModels();
 
     simulationThread.quit();
     simulationThread.wait();

@@ -288,7 +288,11 @@ QRegExp invalidR(invalidRegisterFormat, Qt::CaseInsensitive), invalidM(invalidMe
 Assembler::Assembler(Memory *memory, QVector<int> * mRegisters, MainWindow * mainW)
 {
     this->mainW = mainW;
+
     this->mem = memory;
+
+    int baseAddress = mem->dataSegmentBaseAddress;
+    mem->storeWord(baseAddress + 4, 25);
     this->registers = mRegisters;
     totalCount = 0;
     currentProgress = 0;
@@ -1886,22 +1890,30 @@ void Assembler::getLineMapping(){
         lineMapping.clear();
         return;
     }
-
-    int rawIterator = 0;
-    int fromAssemCount = 0;
     lineMapping.clear();
-    for (int i = 0; i < strippedInstrs.length(); i++){
-        if (instructions.at(i).isFromAssembler()){
-            fromAssemCount++;
+
+    int strippedIterator = 0;
+    int instrIterator = 0;
+    int rawIterator = 0;
+
+    for (strippedIterator = 0; strippedIterator < strippedInstrs.size(); strippedIterator++){
+        if (instrIterator >= instructions.size()){
+            qDebug() << "Out of " << instructions.size() << " range " << instrIterator << "  " << strippedIterator
+                        << "\n" << "Line: " << strippedInstrs.at(strippedIterator) << "  " << instructions.at(instrIterator - 1).getName();
+            break;
+        }
+        if (instructions.at(instrIterator).isFromAssembler()){
+            instrIterator++;
+            strippedIterator--;
             continue;
         }
-        for(int j = rawIterator; j < rawLines.size(); j++){
-            if(strippedInstrs.at(i) == rawLines.at(j).trimmed()){
-                lineMapping[i] = j - fromAssemCount;
-                rawIterator = j + 1;
+        for (rawIterator = strippedIterator; rawIterator < rawLines.size(); rawIterator++){
+            if (strippedInstrs.at(strippedIterator) == rawLines.at(rawIterator).trimmed()){
+                lineMapping[instrIterator] = rawIterator;
                 break;
             }
         }
+        instrIterator++;
     }
 
 }
@@ -1918,17 +1930,11 @@ inline void Assembler::executeFunction()
 
     activePC = PC/4;
     emit executingInstruction(activePC);
-    //qDebug()  << instructions.at(activePC).getName() << "  " << instructions.at(activePC).isFromAssembler() << "   " << activePC << ": " << lineMapping[activePC];
     if (lineMapping.contains(activePC)){
         if (!instructions.at(activePC).isFromAssembler())
           emit executingLine(lineMapping[activePC]);
-            //qDebug()  << instructions.at(activePC).getName() << "  " << instructions.at(activePC).getLineNumber() << "  " << instructions.at(activePC).isFromAssembler();
     }
-    int lineN = instructions.at(activePC).getLineNumber();
-    if (lineN >= 0){
-        qDebug() << instructions.at(activePC).getName() << "  " << lineN;
-        emit executingLine(lineN);
-    }
+
     if (instructions[activePC].getName() == "syscall"){
         int functionNumber = (*registers)[2];
         QString msg;
@@ -2375,6 +2381,8 @@ void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStr
     resumeFlag = false;
 
     strippedInstrs = textFileStringList;
+
+    //mem->clearAll();
 
     parseDataSegment(&dataFileStringList);
     parseTextSegment(&textFileStringList);

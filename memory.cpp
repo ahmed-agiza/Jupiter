@@ -147,6 +147,38 @@ void Memory::resizeTileMap()
     tileMap.fill( QVector<char>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
 }
 
+void Memory::clearText(){
+    textSegment.fill(0);
+}
+
+void Memory::clearData(){
+    dataSegment.fill(0);
+}
+
+void Memory::clearHeap(){
+    heapSegment.fill(0);
+}
+
+void Memory::clearStack(){
+    stackSegment.fill(0);
+}
+
+void Memory::clearAll(){
+    clearText();
+    clearData();
+    clearHeap();
+    clearStack();
+}
+
+void Memory::clearGFX(){
+    /*backgroundMatrix.fill(0);
+    spriteRam.fill(0);
+    backgroundTileSet.fill(0);
+    spritesTileSet.clear();
+    tileMap.fill(0);
+    palette.fill(0);*/
+}
+
 Memory::~Memory(){
 }
 
