@@ -1,4 +1,4 @@
-Jupiter
+Mirage
 =======
 
-MIPS AUC assembler.
+MIPS IDE.
