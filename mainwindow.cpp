@@ -2023,7 +2023,7 @@ QStringList MainWindow::stripContent(QString rawText, QMap<int, int> &mapping){
     QStringList lines = rawText.remove(commentsRegEx).split("\n");
     for (int i = 0; i < lines.length(); i++)
         lines[i] = lines[i].trimmed();
-    lines.removeAll("");
+    //lines.removeAll("");
     mapping.clear();
     for (int i = 0; i < lines.length(); i++){
         for(int j = rawIterator; j < rawLines.size(); j++){
