@@ -61,7 +61,9 @@ SOURCES += main.cpp\
     findandreplacedialog.cpp \
     quicksearchdialog.cpp \
     baseconverter.cpp \
-    logiccalculator.cpp
+    logiccalculator.cpp \
+    dealyedsimulationdialog.cpp \
+    codemdiarea.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -113,7 +115,9 @@ HEADERS  += mainwindow.h \
     findandreplacedialog.h \
     registersmodel.h \
     baseconverter.h \
-    logiccalculator.h
+    logiccalculator.h \
+    dealyedsimulationdialog.h \
+    codemdiarea.h
 
 
 FORMS    += \
@@ -134,7 +138,8 @@ FORMS    += \
     quicksearchdialog.ui \
     findandreplacedialog.ui \
     baseconverter.ui \
-    logiccalculator.ui
+    logiccalculator.ui \
+    dealyedsimulationdialog.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \

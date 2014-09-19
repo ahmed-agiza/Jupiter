@@ -291,8 +291,6 @@ Assembler::Assembler(Memory *memory, QVector<int> * mRegisters, MainWindow * mai
 
     this->mem = memory;
 
-    int baseAddress = mem->dataSegmentBaseAddress;
-    mem->storeWord(baseAddress + 4, 25);
     this->registers = mRegisters;
     totalCount = 0;
     currentProgress = 0;
@@ -1923,6 +1921,10 @@ Assembler::Assembler(){
 
 }
 
+int Assembler::numberOfErrors(){
+    return errorList.size();
+}
+
 inline void Assembler::executeFunction()
 {
     if (waiting)
@@ -2327,6 +2329,34 @@ int Assembler::minimum4(int n1, int n2, int n3, int n4)
     return std::min(min1, min2);
 }
 
+void Assembler::reset(){
+    totalCount = 0;
+    currentProgress = 0;
+    simulationSpeed = 0;
+    initializeRegisters();
+    initializeFunctions();
+
+    totalCount = 0;
+    currentProgress = 0;
+    PC = 0;
+    activePC = 0;
+
+    waiting = false;
+    resumeFlag = false;
+    exitExec = false;
+
+    strippedInstrs.clear();
+    lineMapping.clear();
+    rawLines.clear();
+    instructions.clear();
+    errorList.clear();
+    labels.clear();
+    dataLabels.clear();
+
+    mem->clearAll();
+
+}
+
 int Assembler::stringDistance(std::string s, std::string t){
     int i, j, cost, k, i1,j1,DB;
     int _INFINITY = s.length() + t.length();
@@ -2382,7 +2412,7 @@ void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStr
 
     strippedInstrs = textFileStringList;
 
-    //mem->clearAll();
+    mem->clearAll();
 
     parseDataSegment(&dataFileStringList);
     parseTextSegment(&textFileStringList);

@@ -15,6 +15,9 @@ public:
     explicit CodeEditor(QWidget *parent = 0);
     void setCounter(LinesCounter *);
     void setOpened();
+    void setEmitLabels(bool);
+    void sendLabelsSignal();
+    QStringList getLabels();
 
 private:
     SyntaxHL *SHL;
@@ -27,9 +30,12 @@ private:
     QTextCursor getSelectedLines();
     QStringListModel *model;
     QStringList compList; //Completion list.
-    QStringList labelsList; //Labels list
+    QStringList localLabelsList; //Labels list
+    QStringList globalLabelList;
+    QStringList externalLabelsList;
     int selectionStart, selectionEnd;
     QScroller *scroll;
+    bool emitLabels;
 
 protected:
     void scrollContentsBy(int, int);
@@ -37,6 +43,7 @@ protected:
 signals:
     void labelsUpdated();
     void updateScroll(int);
+
 public slots:
     void deleteSelection();
     void deleteLine();
@@ -51,6 +58,8 @@ public slots:
     void startSelection(int);
     void addSelectedLines(int);
     void endSelection(int);
+    void updateGlobalLabel(QStringList);
+
 
 private slots:
     void insertCompletion(QString completion);

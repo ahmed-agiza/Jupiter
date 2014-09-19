@@ -21,6 +21,7 @@
 #include <QStatusBar>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QPointer>
 
 #include "projectcreator.h"
 #include "codeeditor.h"
@@ -31,6 +32,7 @@
 #include "InstructionFuncs.h"
 #include "startupdialog.h"
 #include "deletefiledialog.h"
+#include "dealyedsimulationdialog.h"
 
 QString MainWindow::projectPath;
 QString MainWindow::projectFileName;
@@ -78,8 +80,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionTile_loader->setEnabled(false);
     ui->actionSprite_Editor->setEnabled(false);
 
-    ui->mdiAreaCode->setActivationOrder(QMdiArea::ActivationHistoryOrder);
-
+    codeArea = new CodeMDIArea(ui->dockCode);
+    ui->mdiLayout->addWidget(codeArea);
 
     console = new IOConsole(ui->tabConsole);
     console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -100,7 +102,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer->stop();
 
     memoryLoading = NULL;
-    assem = NULL;
+
     engine = NULL;
     simulationBar = NULL;
 
@@ -112,6 +114,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initRegs();
     initMemoryModels(false);
+
+    assem = new Assembler(memory, &mainProcessorRegisters, this);
 
     refreshActions();
     refreshEditActions();
@@ -137,6 +141,100 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e){
                 e->acceptProposedAction();
         }
 
+}
+
+void MainWindow::assembleAction(int speed){
+
+    if(MainWindow::getProjectMainFile() == ""){
+        QMessageBox::critical(this, "Error", "Cannot find main text file");
+        return;
+    }
+
+
+    QStringList textInstrs;
+    QStringList dataInstrs;
+    QStringList rawInstrs;
+    QMap<int, int> lineMapping;
+        rawInstrs = getActiveFileContent(MainWindow::projectMainFile).split("\n");
+        textInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), lineMapping);//currentWindow->getStrippedContentList();//->getUncommentedContentList();
+        lastTextInstrs = textInstrs;
+
+    if (MainWindow::projectDataFile.trimmed() != ""){
+        dataInstrs = stripContent(getActiveFileContent(MainWindow::projectDataFile), tempMap);
+        lastDataInstrs = dataInstrs;
+    }
+
+    ui->actionAssemble->setEnabled(false);
+    ui->actionSimulate->setEnabled(false);
+    ui->actionAssemble_and_Simulate->setEnabled(false);
+    if(assemblerInitialized || assem){
+        ui->tableLog->clearContents();
+        ui->tableLog->setRowCount(0);
+        if (assem){
+            simulationThread.quit();
+            simulationThread.wait();
+            pauseSimulation();
+        }
+
+    }
+    ui->tabsProject->setCurrentIndex(1);
+    //assem = new Assembler(memory, &mainProcessorRegisters, this);
+    assem->reset();
+    assem->setSimulationSpeed(speed);
+    assem->setRawList(rawInstrs);
+
+
+    assemblerInitialized = false;
+    assem->moveToThread(&simulationThread);
+    QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
+    QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
+    QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
+    QObject::connect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
+    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
+    simulationThread.start();
+    assembling = true;
+    emit assembleSignal(dataInstrs, textInstrs);
+    if (simulationBar == NULL)
+        simulationBar = new QProgressBar(this);
+    statusBar()->show();
+    simulationBar->setValue(0);
+    statusBar()->addWidget(simulationBar);
+}
+
+void MainWindow::getProjectLabels(bool checkClosed){
+    Q_UNUSED(checkClosed);
+
+    if (!projectFile.isOpen())
+        return;
+
+    globalLabels.clear();
+    if (MainWindow::projectDataFile.trimmed() != ""){
+        globalLabels.append(getFileLabels(MainWindow::projectDataFile, checkClosed));
+    }
+    foreach(QString fileName, MainWindow::projectTextFiles){
+        globalLabels.append(getFileLabels(fileName, checkClosed));
+    }
+
+    globalLabels.removeDuplicates();
+    globalLabels.removeAll("");
+
+
+
+
+}
+
+QStringList MainWindow::getFileLabels(QString file, bool checkClosed){
+    QStringList contentList = getActiveFileContent(file, checkClosed).split("\n");
+    static QRegExp labelsRegEx("(\\S+)(?=:)");
+
+    QStringList labelsList;
+    foreach(QString line, contentList){
+        if (line.trimmed() == "")
+            continue;
+        labelsRegEx.indexIn(line);
+        labelsList << labelsRegEx.cap(0);
+    }
+    return labelsList;
 }
 
 void MainWindow::dropEvent(QDropEvent *e){
@@ -221,7 +319,7 @@ void MainWindow::createProjectAction()
 
 void MainWindow::closeProject()
 {
-    //ui->mdiAreaCode->closeAllSubWindows();
+    //codeArea->closeAllSubWindows();
 
     if (closeAllWindows()){
         if (projectFile.isOpen()){
@@ -244,9 +342,12 @@ void MainWindow::closeProject()
 
 void MainWindow::addEditorWindow(QString file, QString title, MirageFileType type)
 {
-    CodeEditorWindow *editorWindow = new CodeEditorWindow(ui->mdiAreaCode, editorFont, type);
+    CodeEditorWindow *editorWindow = new CodeEditorWindow(codeArea, editorFont, type);
     if(editorWindow->openFile(file, title)){
-        ui->mdiAreaCode->addSubWindow(editorWindow);
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(textChanged()), this, SLOT(getLabels()));
+        codeArea->addSubWindow(editorWindow);
+        if (MainWindow::projectMainFile.trimmed()!= "" && editorWindow->getTitle() == MainWindow::projectMainFile)
+            codeArea->setMainWindow(editorWindow);
         editorWindow->codeEditor()->setContextMenuPolicy(Qt::CustomContextMenu);
         QObject::connect(editorWindow->codeEditor(), SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(editorWindowMenuRequested(QPoint)));
         QObject::connect(editorWindow->codeEditor(), SIGNAL(copyAvailable(bool)), this, SLOT(enableCopyCutDelete(bool)));
@@ -323,7 +424,6 @@ void MainWindow::removeDataFile(QString file){
         rebuildProjectFile();
         loadProjectTree();
     }
-    qDebug() << "Removed data file " << file;
 }
 
 
@@ -357,7 +457,6 @@ void MainWindow::removeTextFile(QString file){
         }
 
     }
-    qDebug() << "Removed text file " << file;
 }
 
 void MainWindow::removeMainTextFile(QString file){
@@ -391,7 +490,6 @@ void MainWindow::removeMainTextFile(QString file){
         }
 
     }
-    qDebug() << "Removed main text file " << file;
 }
 
 
@@ -519,6 +617,7 @@ void MainWindow::resizeColumns(){
     resizeHeapColumns();
     resizeStackColumns();
     resizeRegsColumns();
+    refreshMemoryModels();
 }
 
 bool MainWindow::hasOpenProject() const{
@@ -528,13 +627,8 @@ bool MainWindow::hasOpenProject() const{
 
 
 MainWindow::~MainWindow(){
-    //delete memory;
     if (projectFile.isOpen())
         projectFile.close();
-    /*if(assemblerInitialized)
-        delete assem;
-    if (engine)
-        delete engine;*/
     delete ui;
     simulationThread.quit();
     simulationThread.wait();
@@ -681,7 +775,7 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
 }
 
 void MainWindow::editorWindowMenuRequested(QPoint loc){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         QMenu *menu=new QMenu(this);
         menu->addAction(ui->actionUndo);
@@ -750,9 +844,6 @@ void MainWindow::resumeSimulation(bool resume = true)
 void MainWindow::refreshModels(){
     regModel->emitDataChanged();
     refreshMemoryModels();
-    //dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
-    //ui->dataTable->setModel(dataModel);
-
 }
 
 void MainWindow::refreshMemoryModels(){
@@ -772,18 +863,18 @@ void MainWindow::refreshMemoryModels(){
 }
 
 void MainWindow::selectLine(int lineNumber){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
-    if (activeWindow){
-        QTextCursor curs = activeWindow->codeEditor()->textCursor();
-        curs.clearSelection();
-        curs.setPosition(0);
-        curs.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, lineNumber);
-        activeWindow->codeEditor()->setTextCursor(curs);
-    }
+    codeArea->selectMainFileLine(lineNumber);
 }
 
-QString MainWindow::getActiveFileContent(QString file){
-    QList<QMdiSubWindow *> windows = ui->mdiAreaCode->subWindowList();
+void MainWindow::getLabels(){
+    //QStringList tempLabels(globalLabels);
+    getProjectLabels(true);
+    //if (tempLabels != globalLabels)
+        codeArea->setLabels(globalLabels);
+}
+
+QString MainWindow::getActiveFileContent(QString file, bool checkFiles){
+    QList<QMdiSubWindow *> windows = codeArea->subWindowList();
     QString dataFileName = MainWindow::projectPath + file;
     foreach(QMdiSubWindow* currentWindow, windows){
         CodeEditorWindow *ceWindow = dynamic_cast<CodeEditorWindow *> (currentWindow);
@@ -792,7 +883,11 @@ QString MainWindow::getActiveFileContent(QString file){
                 return ceWindow->getContent();
         }
     }
-    return loadFileText(MainWindow::projectDataFile);
+
+    if (!checkFiles)
+        return "";
+
+    return loadFileText(file);
 }
 
 
@@ -846,7 +941,7 @@ void MainWindow::on_actionSimulate_triggered(){
             }
             ++itMain;
         }
-        CodeEditorWindow *mainWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+        CodeEditorWindow *mainWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
         if (mainWindow){
             mainWindow->disableEditing();
             QObject::connect(assem, SIGNAL(simulationComplete()), mainWindow, SLOT(enableEditing()));
@@ -857,7 +952,6 @@ void MainWindow::on_actionSimulate_triggered(){
         ui->actionSimulate->setEnabled(false);
         ui->actionAssemble_and_Simulate->setEnabled(false);        
 
-        //assemblerInitialized = false;
         resumeSimulation(false);
     }
 
@@ -871,62 +965,7 @@ void MainWindow::on_actionNew_triggered(){
 
 
 void MainWindow::on_actionAssemble_triggered(){
-
-
-    if(MainWindow::getProjectMainFile() == ""){
-        QMessageBox::critical(this, "Error", "Cannot find main text file");
-        return;
-    }
-
-
-    QStringList textInstrs;
-    QStringList dataInstrs;
-    QStringList rawInstrs;
-    QMap<int, int> lineMapping;
-        rawInstrs = getActiveFileContent(MainWindow::projectMainFile).split("\n");
-        textInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), lineMapping);//currentWindow->getStrippedContentList();//->getUncommentedContentList();
-        lastTextInstrs = textInstrs;
-
-    if (MainWindow::projectDataFile.trimmed() != ""){
-        dataInstrs = stripContent(getActiveFileContent(MainWindow::projectDataFile), tempMap);
-        lastDataInstrs = dataInstrs;
-    }
-
-    ui->actionAssemble->setEnabled(false);
-    ui->actionSimulate->setEnabled(false);
-    ui->actionAssemble_and_Simulate->setEnabled(false);
-    if(assemblerInitialized || assem){
-        ui->tableLog->clearContents();
-        ui->tableLog->setRowCount(0);
-        if (assem){
-            simulationThread.quit();
-            simulationThread.wait();
-            pauseSimulation();
-        }
-
-    }
-    ui->tabsProject->setCurrentIndex(1);
-    assem = new Assembler(memory, &mainProcessorRegisters, this);
-
-    assem->setSimulationSpeed(1000);
-    assem->setRawList(rawInstrs);
-
-
-    assemblerInitialized = false;
-    assem->moveToThread(&simulationThread);
-    QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
-    QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
-    QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-    QObject::connect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
-    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
-    simulationThread.start();
-    assembling = true;
-    emit assembleSignal(dataInstrs, textInstrs);
-    if (simulationBar == NULL)
-        simulationBar = new QProgressBar(this);
-    statusBar()->show();
-    simulationBar->setValue(0);
-    statusBar()->addWidget(simulationBar);
+    assembleAction(0);
 }
 
 void MainWindow::on_actionClose_triggered(){
@@ -1173,7 +1212,7 @@ bool MainWindow::validateTempProjectFiles(bool forceAll = true)
 }
 
 bool MainWindow::closeAllWindows(){
-    QList<QMdiSubWindow *> subWindows = ui->mdiAreaCode->subWindowList();
+    QList<QMdiSubWindow *> subWindows = codeArea->subWindowList();
     foreach (QMdiSubWindow *currentWindow, subWindows){
         CodeEditorWindow *editorWindow = dynamic_cast<CodeEditorWindow*>(currentWindow);
         if (editorWindow){
@@ -1193,7 +1232,7 @@ bool MainWindow::closeAllWindows(){
             editorWindow->setDestryoed(true);
     }
 
-    ui->mdiAreaCode->closeAllSubWindows();
+    codeArea->closeAllSubWindows();
     return true;
 
 }
@@ -1237,15 +1276,18 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
                     simulateAfterAssembling = false;
                     simulationPaused = true;
 
-                    //ui->mdiAreaCode->closeAllSubWindows();
                     applyProjectSettings();
-                    QTreeWidgetItemIterator it(treeWidget);
-                    while (*it) {
-                        if ((*it)->text(0).trimmed() == MainWindow::getProjectMainFile()){
-                            on_treeFiles_itemDoubleClicked((*it), 0);
+
+                    getProjectLabels(true);
+                    codeArea->setLabels(globalLabels);
+
+                    QTreeWidgetItemIterator it2(treeWidget);
+                    while (*it2) {
+                        if ((*it2)->text(0).trimmed() == MainWindow::getProjectMainFile()){
+                            on_treeFiles_itemDoubleClicked((*it2), 0);
                             break;
                         }
-                        ++it;
+                        ++it2;
                     }
                     setWindowTitle("Mirage - " + tempProjectTitle);
                 }else{
@@ -1292,7 +1334,7 @@ void MainWindow::setDeleteFromDisk(bool value){
 }
 
 bool MainWindow::closeFileWindow(QString fileName){
-    QList<QMdiSubWindow *> windows = ui->mdiAreaCode->subWindowList();
+    QList<QMdiSubWindow *> windows = codeArea->subWindowList();
     foreach (QMdiSubWindow *currentWindow, windows){
         CodeEditorWindow *editorWindow = dynamic_cast<CodeEditorWindow *>(currentWindow);
         if (editorWindow){
@@ -1308,7 +1350,7 @@ bool MainWindow::closeFileWindow(QString fileName){
 }
 
 void MainWindow::renameFileWindow(QString fileName, QString newName){
-    QList<QMdiSubWindow *> windows = ui->mdiAreaCode->subWindowList();
+    QList<QMdiSubWindow *> windows = codeArea->subWindowList();
     foreach (QMdiSubWindow *currentWindow, windows){
         CodeEditorWindow *editorWindow = dynamic_cast<CodeEditorWindow *>(currentWindow);
         if (editorWindow){
@@ -1378,7 +1420,6 @@ void MainWindow::pauseSimulation(){
 
     statusBar()->clearMessage();
     statusBar()->showMessage("Paused", 2000);
-    qDebug() << "Paused";
 
 
     simulationPaused = true;
@@ -1408,9 +1449,9 @@ void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int colum
 
             QString fileName = projectPath + item->text(0);
 
-            foreach(QMdiSubWindow *window, ui->mdiAreaCode->subWindowList()){
+            foreach(QMdiSubWindow *window, codeArea->subWindowList()){
                 if((dynamic_cast<CodeEditorWindow*> (window))->getFilePath() == fileName){
-                    ui->mdiAreaCode->setActiveSubWindow(window);
+                    codeArea->setActiveSubWindow(window);
                     return;
                 }
             }
@@ -1423,8 +1464,8 @@ void MainWindow::on_treeFiles_itemDoubleClicked(QTreeWidgetItem *item, int colum
                 addEditorWindow(fileName, item->text(0), DATA_FILE);
             else
                 qDebug() << "Error: " << (dynamic_cast<ExplorerTreeItem*>(item))->getItemType();
-            if(dynamic_cast<CodeEditorWindow*> (ui->mdiAreaCode->activeSubWindow()))
-                ((dynamic_cast<CodeEditorWindow*> (ui->mdiAreaCode->activeSubWindow())))->setOpened();
+            if(dynamic_cast<CodeEditorWindow*> (codeArea->activeSubWindow()))
+                ((dynamic_cast<CodeEditorWindow*> (codeArea->activeSubWindow())))->setOpened();
 
         }
     }
@@ -1482,14 +1523,14 @@ void MainWindow::openTreeItem(QObject *itm){
 }
 
 void MainWindow::activeWindowCopy(){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->copy();
     }
 }
 
 void MainWindow::activeWindowCut(){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->cut();
     }else
@@ -1497,21 +1538,21 @@ void MainWindow::activeWindowCut(){
 }
 
 void MainWindow::activeWindowPaste(){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->paste();
     }
 }
 
 void MainWindow::activeWindowUndo(){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->undo();
     }
 }
 
 void MainWindow::activeWindowRedo(){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->redo();
     }
@@ -1519,7 +1560,7 @@ void MainWindow::activeWindowRedo(){
 
 void MainWindow::activeWindowSelectAll()
 {
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->selectAll();
     }
@@ -1527,7 +1568,7 @@ void MainWindow::activeWindowSelectAll()
 
 void MainWindow::activeWindowQuickFind()
 {
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->quickFind();
     }
@@ -1535,14 +1576,14 @@ void MainWindow::activeWindowQuickFind()
 
 void MainWindow::activeWindowFindAndReplace()
 {
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->findAndReplace();
     }
 }
 
 void MainWindow::activeWindowDelete(){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (activeWindow){
         activeWindow->deleteText();
     }
@@ -1555,10 +1596,6 @@ void MainWindow::refreshActions(){
         ui->actionAssemble->setEnabled(value);
         ui->actionAssemble_and_Simulate->setEnabled(value);
         ui->actionSimulate->setEnabled(value);
-    }else{
-        qDebug() << assembling;
-        qDebug() << simulating;
-        qDebug() << simulationPaused;
     }
 
     ui->actionPause_Simulation->setEnabled(simulating && !simulationPaused);
@@ -1577,7 +1614,7 @@ void MainWindow::refreshActions(){
 }
 
 void MainWindow::refreshEditActions(){
-    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
     if (!activeWindow){
         ui->actionCopy->setEnabled(false);
         ui->actionCut->setEnabled(false);
@@ -1775,7 +1812,7 @@ void MainWindow::on_actionDefaultLayout_triggered()
 }
 
 void MainWindow::on_actionSave_triggered(){
-    CodeEditorWindow *activeWin = dynamic_cast<CodeEditorWindow *> (ui->mdiAreaCode->activeSubWindow());
+    CodeEditorWindow *activeWin = dynamic_cast<CodeEditorWindow *> (codeArea->activeSubWindow());
     if (activeWin)
         activeWin->saveFile();
 
@@ -1843,7 +1880,7 @@ void MainWindow::assemblyComplete(){
         simulationBar->hide();
     }
     statusBar()->showMessage("Assembled", 2000);
-    if (simulateAfterAssembling)
+    if (simulateAfterAssembling && !(assem->numberOfErrors() > 0))
         ui->actionSimulate->trigger();
     simulateAfterAssembling = false;
 }
@@ -1964,7 +2001,7 @@ void MainWindow::initRegs(){
 void MainWindow::connectActions(){
     QObject::connect(ui->actionEnable_Graphics_Engine, SIGNAL(toggled(bool)), this,SLOT(refreshGraphicsAction()));
     QObject::connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
-    QObject::connect(ui->mdiAreaCode,SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(refreshEditActions()));
+    QObject::connect(codeArea,SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(refreshEditActions()));
     QObject::connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(activeWindowCopy()));
     QObject::connect(ui->actionCut, SIGNAL(triggered()), this, SLOT(activeWindowCut()));
     QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(activeWindowPaste()));
@@ -1975,7 +2012,6 @@ void MainWindow::connectActions(){
     QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
     QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
     QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()));
-    //QObject::connect(ui->actionResumeSimulation, SIGNAL(triggered()), this, SLOT(resumeSimulation(bool)));
 }
 
 void MainWindow::setupColumnsResize(){
@@ -2051,4 +2087,18 @@ void MainWindow::on_actionBase_Converter_triggered()
 {
     logicCalculator = new LogicCalculator(this);
     logicCalculator->show();
+}
+
+void MainWindow::on_actionDelayedSimulation_triggered(){
+    QPointer<DealyedSimulationDialog> simDlg = new DealyedSimulationDialog(this);
+
+    if (simDlg->exec() == QDialog::Accepted){
+        int speed = simDlg->getSpeed();
+        simulateAfterAssembling = true;
+        assembleAction(speed);
+    }
+}
+
+void MainWindow::on_actionStepForwared_triggered(){
+    qDebug() << codeArea->isMainFileOpen();
 }

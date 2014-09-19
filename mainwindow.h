@@ -9,6 +9,7 @@
 #include <QThread>
 #include <QProgressBar>
 #include <QTimer>
+#include "codemdiarea.h"
 
 #include "syntaxhl.h"
 #include "assembler.h"
@@ -187,6 +188,10 @@ private slots:
 
     void on_actionBase_Converter_triggered();
 
+    void on_actionDelayedSimulation_triggered();
+
+    void on_actionStepForwared_triggered();
+
 public slots:
     void printToConsole(QString);
 
@@ -213,6 +218,8 @@ public slots:
     void refreshModels();
     void refreshMemoryModels();
     void selectLine(int);
+
+    void getLabels();
 
 private:
     Ui::MainWindow *ui;
@@ -241,7 +248,7 @@ private:
     QStringList lastDataInstrs;
 
 
-    QString getActiveFileContent(QString);
+    QString getActiveFileContent(QString, bool = true);
 
     void addDefaultFont();
     void initMemoryModels(bool);
@@ -292,6 +299,14 @@ private:
     bool simulating;
     bool simulateAfterAssembling;
     bool simulationPaused;
+
+    void assembleAction(int);
+
+    void getProjectLabels(bool);
+    QStringList getFileLabels(QString, bool = true);
+
+    CodeMDIArea *codeArea;
+    QStringList globalLabels;
 signals:
     void assembleSignal(QStringList, QStringList);
     void simulateSignal();

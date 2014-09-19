@@ -242,6 +242,14 @@ QMap<int, int> CodeEditorWindow::getLineMapping(){
     return linesMapping;
 }
 
+bool CodeEditorWindow::isMainFile(){
+    return mainFile;
+}
+
+void CodeEditorWindow::setMainFile(bool value){
+    mainFile = value;
+}
+
 CodeEditorWindow::~CodeEditorWindow(){
 }
 

@@ -75,8 +75,7 @@ private:
     bool resumeFlag;
 
     QMap<int, int> lineMapping;
-public:
-    Assembler(Memory *memory, QVector<int> *mRegisters, MainWindow*);
+
     void parseTextSegment(QStringList*);
     void parseDataSegment(QStringList*);
     int getNumber(QString);
@@ -91,6 +90,12 @@ public:
     void handlePSR(QRegExp m, QString line);
     void handlePI(QRegExp m, QString line);
 
+
+public:
+    Assembler(Memory *memory, QVector<int> *mRegisters, MainWindow*);
+
+    void reset();
+
     void setSimulationSpeed(int);
 
     void setLineMapping(QMap<int, int>);
@@ -101,11 +106,13 @@ public:
     QVector<int> *registers;
     ~Assembler();
     Assembler();
+    Trie instructionSet;
+    QVector<QString> instructionList;
+    void handleInstruction();
 
-     Trie instructionSet;
-     QVector<QString> instructionList;
-     void handleInstruction();
-     inline void executeFunction();
+    int numberOfErrors();
+
+    inline void executeFunction();
 public slots:
     void exceptionHandler(int);
     void assemble(QStringList dataFileStringList, QStringList textFileStringList);

@@ -59,9 +59,13 @@ public:
 
     QMap<int, int> getLineMapping();
 
+    bool isMainFile();
+    void setMainFile(bool);
+
     ~CodeEditorWindow();
 private slots:
     void editedSlot();
+
 
 public slots:
     void enableEditing();
@@ -82,6 +86,7 @@ private:
 
     bool edited;
     bool destroyed;
+    bool mainFile;
 
     void closeEvent(QCloseEvent *closeEvent);
 

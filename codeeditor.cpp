@@ -420,24 +420,26 @@ void CodeEditor::updateCounterFormat(){
 
 
 void CodeEditor::updateLabels(){
-    static QRegExp labelsRegEx("(\\S+)(?=:)");
+    /*static QRegExp labelsRegEx("(\\S+)(?=:)");
     QStringList contentList = toPlainText().split("\n");
 
-    labelsList.clear();
+    localLabelsList.clear();
     foreach(QString line, contentList){
         if (line.trimmed() == "")
             continue;
         labelsRegEx.indexIn(line);
-        labelsList << labelsRegEx.cap(0);
+        localLabelsList << labelsRegEx.cap(0);
     }
-    labelsList.removeDuplicates();
-    labelsList.removeAll("");
 
-    model->setStringList(compList + labelsList);
-    SHL->setLabelsList(labelsList);
+
+    localLabelsList.removeDuplicates();
+    localLabelsList.removeAll("");
+
+    model->setStringList(compList + localLabelsList);
+    SHL->setLabelsList(localLabelsList);
     blockSignals(true);
     SHL->rehighlight();
-    blockSignals(false);
+    blockSignals(false);*/
 
 }
 
@@ -476,6 +478,17 @@ void CodeEditor::endSelection(int lineNum){
     if (lineNum == selectionStart)
         selectLine(lineNum);
 }
+
+void CodeEditor::updateGlobalLabel(QStringList list){
+    globalLabelList = list;
+    model->setStringList(compList + globalLabelList);
+    SHL->setLabelsList(globalLabelList);
+    blockSignals(true);
+    SHL->rehighlight();
+    blockSignals(false);
+}
+
+
 
 
 
@@ -575,4 +588,10 @@ void CodeEditor::setOpened(){
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     setTextCursor(cursor);
     codeCompleter->popup()->hide();
+}
+
+
+
+QStringList CodeEditor::getLabels(){
+    return localLabelsList;
 }
