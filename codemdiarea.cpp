@@ -10,6 +10,7 @@ CodeMDIArea::CodeMDIArea(QWidget *parent) :
     setTabsMovable(true);
     hasMainFile = false;
     lastLine = 0;
+    enableEditing = true;
 
 }
 
@@ -29,6 +30,10 @@ void CodeMDIArea::setMainWindow(CodeEditorWindow *window){
         filePath = mainWindow->getFilePath();
         fileName = mainWindow->getTitle();
         lastLine = 0;
+        if (enableEditing)
+            enableMainFileEditing();
+        else
+            disableMainFileEditing();
     }
 }
 
@@ -45,6 +50,11 @@ void CodeMDIArea::setLabels(QStringList labels){
 
 CodeEditorWindow *CodeMDIArea::getMainWindow(){
     return mainWindow;
+}
+
+void CodeMDIArea::activateMainWindow(){
+    if (hasMainFile && mainWindow)
+        setActiveSubWindow(mainWindow);
 }
 
 QMdiSubWindow *CodeMDIArea::addSubWindow(QWidget *widget, Qt::WindowFlags flags){
@@ -68,6 +78,18 @@ void CodeMDIArea::selectMainFileLine(int lineNumber){
 
     }
 
+}
+
+void CodeMDIArea::enableMainFileEditing(){
+    if (hasMainFile)
+        mainWindow->codeEditor()->setReadOnly(false);
+    enableEditing = true;
+}
+
+void CodeMDIArea::disableMainFileEditing(){
+    if (hasMainFile)
+        mainWindow->codeEditor()->setReadOnly(true);
+    enableEditing = false;
 }
 
 

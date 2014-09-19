@@ -152,7 +152,7 @@ void MainWindow::assembleAction(int speed){
     QStringList dataInstrs;
     QStringList rawInstrs;
     QMap<int, int> lineMapping;
-        rawInstrs = getActiveFileContent(MainWindow::projectMainFile).split("\n");
+        rawInstrs = getActiveFileContent(MainWindow::projectMainFile).remove(QRegExp("#[^\n]*")).split("\n");
         textInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), lineMapping);
         lastTextInstrs = textInstrs;
 
@@ -329,8 +329,11 @@ void MainWindow::closeProject()
         MainWindow::projectTextFiles.clear();
         MainWindow::projectDataFile = "";
         MainWindow::projectConf.clear();
+        pauseSimulation();
+        codeArea->enableMainFileEditing();
     }
     refreshActions();
+
 }
 
 
@@ -1979,6 +1982,8 @@ void MainWindow::connectActions(){
     QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
     QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
     QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()));
+    QObject::connect(this, SIGNAL(simulateSignal()), codeArea, SLOT(disableMainFileEditing()));
+    QObject::connect(assem, SIGNAL(simulationComplete()), codeArea, SLOT(enableMainFileEditing()));
 }
 
 void MainWindow::setupColumnsResize(){
@@ -2067,5 +2072,4 @@ void MainWindow::on_actionDelayedSimulation_triggered(){
 }
 
 void MainWindow::on_actionStepForwared_triggered(){
-    qDebug() << codeArea->isMainFileOpen();
 }

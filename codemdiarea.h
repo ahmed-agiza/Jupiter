@@ -14,6 +14,7 @@ public:
     void setMainWindow(CodeEditorWindow* );
     void setLabels(QStringList);
     CodeEditorWindow* getMainWindow();
+    void activateMainWindow();
 
     QMdiSubWindow* addSubWindow(QWidget *, Qt::WindowFlags = 0);
 private:
@@ -23,11 +24,14 @@ private:
     QStringList globalLabels;
     bool hasMainFile;
     int lastLine;
+    bool enableEditing;
 
 signals:
 
 public slots:
     void selectMainFileLine(int);
+    void enableMainFileEditing();
+    void disableMainFileEditing();
 private slots:
     void mainFileRemoved();
 

@@ -1050,20 +1050,6 @@ void Assembler::parseTextSegment(QStringList* stringList)
     }
 
 
-   /* for (int i = 0; i < instructions.size(); i++)
-    {
-        qDebug() << "********* instruction " + QString::number(i) + " ********";
-        qDebug() << "Name: " << instructions[i].getName();
-        qDebug() << "Rd: " << instructions[i].getRd();
-        qDebug() << "Rs: " << instructions[i].getRs();
-        qDebug() << "Rt: " << instructions[i].getRt();
-        qDebug() << "Imm: " << instructions[i].getImm();
-        qDebug() << "Shamt: " << instructions[i].getShamt();
-        qDebug() << "**********************************************";
-
-    }*/
-
-
     for (int i = 0; i<errorList.size(); i++)
     {
         emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description);
@@ -1907,7 +1893,6 @@ void Assembler::getLineMapping(){
         }
         instrIterator++;
     }
-
 }
 
 
@@ -1923,6 +1908,9 @@ inline void Assembler::executeFunction()
 {
     if (waiting)
         return;
+
+    if (simulationSpeed > 0)
+        thread()->msleep(simulationSpeed);
 
     activePC = PC/4;
     emit executingInstruction(activePC);
@@ -2027,8 +2015,7 @@ inline void Assembler::executeFunction()
     (*registers)[0] = 0;
     (*registers)[34] = PC;
     emit instructionExecuted();
-    if (simulationSpeed > 0)
-        thread()->msleep(simulationSpeed);
+
 }
 
 void Assembler::simulate()
@@ -2127,12 +2114,6 @@ void Assembler::simulate()
                 }
             }
         }
-        /*QString logText = QString::number(i) + ": PC: " + QString::number(PC)
-                + " Active PC: " + QString::number(activePC) + "\n*" + instructions[activePC].getName()
-                + " Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
-                + " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
-                + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "  "
-                + " Im" + QString::number(instructions[activePC].getImm());*/
 
         if (waiting || mainW->isSimulationPaused())
             break;
