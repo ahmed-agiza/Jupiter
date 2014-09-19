@@ -2,6 +2,8 @@
 #define LOGICCALCULATOR_H
 
 #include <QDialog>
+#include <QRegExp>
+#include <QRegExpValidator>
 
 namespace Ui {
 class LogicCalculator;
@@ -62,6 +64,8 @@ private slots:
 
 private:
     Ui::LogicCalculator *ui;
+    QRegExp decRegex, binRegex, hexRegex;
+    QRegExpValidator *decRegexValidator, *binRegexValidator, *hexRegexValidator;
 };
 
 #endif // LOGICCALCULATOR_H
