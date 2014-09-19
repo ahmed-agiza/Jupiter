@@ -1,11 +1,12 @@
 #include "paletteloadingthread.h"
 
-PaletteLoadingThread::PaletteLoadingThread(QObject *parent, Memory *memory, QString fileName, bool stdPalette) :
+PaletteLoadingThread::PaletteLoadingThread(QObject *parent, Memory *memory, QString fileName, bool stdPalette, bool dynamic) :
     QThread(parent)
 {
     this->memory = memory;
     this->fileName = fileName;
     this->stdPalette = stdPalette;
+    this->dynamic = dynamic;
 }
 
 void PaletteLoadingThread::run()

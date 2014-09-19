@@ -5,12 +5,12 @@
 #include <QDomComment>
 #include <QMessageBox>
 
-TilemapLoadingThread::TilemapLoadingThread(QObject *parent, Memory *memory, QString fileName) :
+TilemapLoadingThread::TilemapLoadingThread(QObject *parent, Memory *memory, QString fileName, bool dynamic) :
     QThread(parent)
 {
     this->fileName = fileName;
     this->memory = memory;
-
+    this->dynamic = dynamic;
 }
 
 void TilemapLoadingThread::run()

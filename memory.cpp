@@ -545,8 +545,9 @@ int Memory::claculateLoadSize(const QVector<bool>& segments)
     return totalSize;
 }
 
-void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
+void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dynamic)
 {
+    QStringList dynamicOutFileList;
     int count = 0;
     QFile in(fileName);
     in.open(QIODevice::ReadOnly);
@@ -578,10 +579,33 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
     qDebug() << count;
 
     if(segmentsToLoad[2]){
+        int byteNumber = 0;
+        Uint32 loadedNumber = 0;
+        const int maxRange = 32767;
+        uint liBaseAddress = this->backgroundTileSetBaseAddress;
+        if(dynamic){
+            dynamicOutFileList.append("# Dumping background tileset");
+            dynamicOutFileList.append(QString("\tli\t$t0, 0x")+QString::number(liBaseAddress,16)+QString("\t# background tileset base address"));
+            dynamicOutFileList.append("");
+        }
+
         for(int i=0; i<backgroundTileSetPhysicalSize; i++){
             in.getChar(byte);
-            storeByte(backgroundTileSetBaseAddress + i, *byte);
-            if(count %1024 == 0)
+            if(dynamic){
+                if(MainWindow::isLittleEndian()){
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((byteNumber%4)*8));
+                }else{
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
+                }if(byteNumber%4 == 3){
+                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    loadedNumber = 0;
+                }
+                byteNumber++;
+
+            }else{
+                storeByte(backgroundTileSetBaseAddress + i, *byte);
+            }if(count %1024 == 0)
                 emit loadingNumberChanged(count / 1024);
             count++;
         }
@@ -589,10 +613,32 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
     qDebug() << count;
 
     if(segmentsToLoad[3]){
+        int byteNumber = 0;
+        Uint32 loadedNumber = 0;
+        const int maxRange = 32767;
+        uint liBaseAddress = this->spritesTileSetBaseAddress;
+        if(dynamic){
+            dynamicOutFileList.append("# Dumping sprites tileset");
+            dynamicOutFileList.append(QString("\tli\t$t0, 0x")+QString::number(liBaseAddress,16)+QString("\t# sprites tileset base address"));
+            dynamicOutFileList.append("");
+        }
+
         for(int i=0; i<spritesTileSetPhysicalSize; i++){
             in.getChar(byte);
-            storeByte(spritesTileSetBaseAddress + i, *byte);
-            if(count %1024 == 0)
+            if(dynamic){
+                if(MainWindow::isLittleEndian()){
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((byteNumber%4)*8));
+                }else{
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
+                }if(byteNumber%4 == 3){
+                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    loadedNumber = 0;
+                }
+                byteNumber++;
+            }else{
+                storeByte(spritesTileSetBaseAddress + i, *byte);
+            }if(count %1024 == 0)
                 emit loadingNumberChanged(count / 1024);
             count++;
         }
@@ -600,10 +646,33 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
     qDebug() << count;
 
     if(segmentsToLoad[4]){
+        int byteNumber = 0;
+        Uint32 loadedNumber = 0;
+        const int maxRange = 32767;
+        uint liBaseAddress = this->tileMapBaseAddress;
+        if(dynamic){
+            dynamicOutFileList.append("# Dumping tile maps");
+            dynamicOutFileList.append(QString("\tli\t$t0, 0x")+QString::number(liBaseAddress,16)+QString("\t# tile maps base address"));
+            dynamicOutFileList.append("");
+        }
+
         for(int i=0; i<tileMapPhysicalSize; i++){
             in.getChar(byte);
-            storeByte(tileMapBaseAddress + i, *byte);
-            if(count %1024 == 0)
+            if(dynamic){
+                if(MainWindow::isLittleEndian()){
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((byteNumber%4)*8));
+                }else{
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
+                }if(byteNumber%4 == 3){
+                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    loadedNumber = 0;
+                }
+                byteNumber++;
+
+            }else{
+                storeByte(tileMapBaseAddress + i, *byte);
+            }if(count %1024 == 0)
                 emit loadingNumberChanged(count / 1024);
             count++;
         }
@@ -611,10 +680,32 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
     qDebug() << count;
 
     if(segmentsToLoad[5]){
+        int byteNumber = 0;
+        Uint32 loadedNumber = 0;
+        const int maxRange = 32767;
+        uint liBaseAddress = this->spriteRamBaseAddress;
+        if(dynamic){
+            dynamicOutFileList.append("# Dumping OAM");
+            dynamicOutFileList.append(QString("\tli\t$t0, 0x")+QString::number(liBaseAddress,16)+QString("\t# OAM base address"));
+            dynamicOutFileList.append("");
+        }
         for(int i=0; i<spriteRamPhysicalSize; i++){
             in.getChar(byte);
-            storeByte(spriteRamBaseAddress + i, *byte);
-            if(count %1024 == 0)
+            if(dynamic){
+                if(MainWindow::isLittleEndian()){
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((byteNumber%4)*8));
+                }else{
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
+                }if(byteNumber%4 == 3){
+                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    loadedNumber = 0;
+                }
+                byteNumber++;
+
+            }else{
+                storeByte(spriteRamBaseAddress + i, *byte);
+            }if(count %1024 == 0)
                 emit loadingNumberChanged(count / 1024);
             count++;
         }
@@ -622,13 +713,44 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
     qDebug() << count;
 
     if(segmentsToLoad[6]){
+        int byteNumber = 0;
+        Uint32 loadedNumber = 0;
+        const int maxRange = 32767;
+        uint liBaseAddress = this->paletteBaseAddress;
+        if(dynamic){
+            dynamicOutFileList.append("# Dumping palette");
+            dynamicOutFileList.append(QString("\tli\t$t0, 0x")+QString::number(liBaseAddress,16)+QString("\t# Palette base address"));
+            dynamicOutFileList.append("");
+        }
         for(int i=0; i<palettePhysicalSize; i++){
             in.getChar(byte);
-            storeByte(paletteBaseAddress + i, *byte);
-            if(count %1024 == 0)
+            if(dynamic){
+                if(MainWindow::isLittleEndian()){
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((byteNumber%4)*8));
+                }else{
+                    loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
+                }if(byteNumber%4 == 3){
+                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    loadedNumber = 0;
+                }
+                byteNumber++;
+
+            }else{
+                storeByte(paletteBaseAddress + i, *byte);
+            }if(count %1024 == 0)
                 emit loadingNumberChanged(count / 1024);
             count++;
         }
+    }
+
+    if(dynamic){
+        qDebug() << "hello";
+        ofstream myFile("D:/testFile.txt");
+        for(QString line: dynamicOutFileList ){
+            myFile << line.toStdString() << std::endl;
+        }
+        myFile.close();
     }
 
     qDebug() << "loaded: "<<count<<" bytes\n";

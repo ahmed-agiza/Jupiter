@@ -46,7 +46,7 @@ public:
     unsigned int getHWordSegment(unsigned int) const;
     unsigned int getWordSegment(unsigned int) const;
 
-    void loadMemory(QString, QVector<bool>);
+    void loadMemory(QString, QVector<bool>, bool dynamic = false);
     void saveMemory(QString, QVector<bool>);
     void resizeTileMap();
 

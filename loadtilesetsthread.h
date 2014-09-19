@@ -10,7 +10,7 @@ class LoadTilesetsThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit LoadTilesetsThread(QObject *parent, Memory *memory, bool tileSetIndex, bool indImages, QString fileName, QStringList *nameList);
+    explicit LoadTilesetsThread(QObject *parent, Memory *memory, bool tileSetIndex, bool indImages, QString fileName, QStringList *nameList, bool dynamic = false);
     void OpenSingle();
     void OpenMultiple();
     Memory *memory;
@@ -21,6 +21,7 @@ public:
     QVector<int> tilesFailed;
     QMap< Uint32, Uint8 > paletteSet;
     sf::Uint8 palettePointer;
+    bool dynamic;
     void run();
     sf::Uint32 colorToInt(sf::Color color);
 signals:

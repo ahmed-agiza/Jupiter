@@ -4,7 +4,7 @@
 #include <QStringList>
 #include "mainwindow.h"
 
-LoadTilesetsThread::LoadTilesetsThread(QObject *parent, Memory* memory, bool tileSetIndex, bool indImages, QString fileName, QStringList *nameList) :
+LoadTilesetsThread::LoadTilesetsThread(QObject *parent, Memory* memory, bool tileSetIndex, bool indImages, QString fileName, QStringList *nameList, bool dynamic) :
     QThread(parent)
 {
     this->memory = memory;
@@ -12,7 +12,7 @@ LoadTilesetsThread::LoadTilesetsThread(QObject *parent, Memory* memory, bool til
     this->tileSetIndex = tileSetIndex;
     this->indImages = indImages;
     this->fileName = fileName;
-
+    this->dynamic = dynamic;
 
     for(int i=0; i<256; i++){
         paletteSet[colorToInt(memory->palette[palettePointer].getColor())] = palettePointer;
