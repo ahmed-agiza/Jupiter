@@ -607,7 +607,6 @@ void Assembler::parseTextSegment(QStringList* stringList)
         else if((J.indexIn(line, 0)) != -1)
         {
             if(labels.contains(J.cap(3))){
-                qDebug()<<"Yes!";
                 instructions.push_back(Instruction(J.cap(2),registers,opcode[J.cap(2)],0,0,0,(labels[J.cap(3)]&0xfffffff),0,JFormat));
             }
             else{
@@ -1068,7 +1067,6 @@ void Assembler::parseTextSegment(QStringList* stringList)
     for (int i = 0; i<errorList.size(); i++)
     {
         emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description);
-        //mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }
 
@@ -1078,11 +1076,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
 }
 
 Assembler::~Assembler()
-{
-    //delete mem;
-    //delete engine;
-    //delete registers;
-}
+{}
 
 
 void Assembler::initializeFunctions()
@@ -1941,7 +1935,6 @@ inline void Assembler::executeFunction()
         int functionNumber = (*registers)[2];
         QString msg;
         QString charac;
-        //QString previousChar;
         QByteArray strArray;
         QByteArray strByte(1, ' ');
         int offset;
@@ -1971,13 +1964,11 @@ inline void Assembler::executeFunction()
             baseAddress = (*registers)[4];
             strArray.resize(1);
             strArray[0] = (char) mem->loadByte(baseAddress);
-            //charac = QString::fromLatin1(strArray);
             while (strArray[0] != '\0' && offset < 100){
                 charac = QString::fromLatin1(strArray);
                 strArray [0] = (char) mem->loadByte(baseAddress + offset++);
                 msg.append(charac);
             }
-            //msg.remove(msg.length() - 1, 1);
             emit printToConsole(msg);
             PC += 4;
             break;
@@ -2147,12 +2138,7 @@ void Assembler::simulate()
             break;
 
         executeFunction();
-        //logText.append(QString("\nAfter: PC ") + QString::number(PC) + QString("\n"));
-        //logText.append(" Rd" + QString::number(instructions[activePC].getRd()) + ":" + QString::number(instructions[activePC].getRdData()) + "  "
-                       //+ " Rt" + QString::number(instructions[activePC].getRt()) + ":" + QString::number(instructions[activePC].getRtData()) + "  "
-                      // + " Rs" + QString::number(instructions[activePC].getRs()) + ":" + QString::number(instructions[activePC].getRsData()) + "\n\n\n");
-        //logData.append(logText);
-        //emit logStringSignal(logText); //For testing.
+
         i++;
 
     }
@@ -2316,7 +2302,6 @@ void Assembler::initializeRegisters()
     (*registers)[28] = 0x10008000;
     (*registers)[29] = 0x7FFFEFFC;
 
-    //registers = new QVector<int>(32,0);
 
 }
 

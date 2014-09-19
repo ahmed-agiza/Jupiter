@@ -165,8 +165,6 @@ CodeEditor::CodeEditor(QWidget *parent) :
     codeCompleter->setWidget(this);
 
     QObject::connect(codeCompleter, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
-    //QObject::connect(this, SIGNAL(labelsUpdated()), SHL, SLOT(rehighlight()));
-    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateLabels()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounter()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));    
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(highlightLine()));
@@ -420,27 +418,6 @@ void CodeEditor::updateCounterFormat(){
 
 
 void CodeEditor::updateLabels(){
-    /*static QRegExp labelsRegEx("(\\S+)(?=:)");
-    QStringList contentList = toPlainText().split("\n");
-
-    localLabelsList.clear();
-    foreach(QString line, contentList){
-        if (line.trimmed() == "")
-            continue;
-        labelsRegEx.indexIn(line);
-        localLabelsList << labelsRegEx.cap(0);
-    }
-
-
-    localLabelsList.removeDuplicates();
-    localLabelsList.removeAll("");
-
-    model->setStringList(compList + localLabelsList);
-    SHL->setLabelsList(localLabelsList);
-    blockSignals(true);
-    SHL->rehighlight();
-    blockSignals(false);*/
-
 }
 
 void CodeEditor::selectLine(int num){
@@ -453,12 +430,10 @@ void CodeEditor::selectLine(int num){
 }
 
 void CodeEditor::startSelection(int lineNum){
-    //qDebug() << "Start " << lineNum;
     selectionStart = lineNum;
 }
 
 void CodeEditor::addSelectedLines(int lineNum){
-    //qDebug() << "Add: " << lineNum;
     selectionEnd = lineNum;
     QTextCursor cur = textCursor();
     cur.setPosition(0);
@@ -474,7 +449,6 @@ void CodeEditor::addSelectedLines(int lineNum){
 }
 
 void CodeEditor::endSelection(int lineNum){
-    //qDebug() << "End: " << lineNum;
     if (lineNum == selectionStart)
         selectLine(lineNum);
 }
@@ -483,9 +457,9 @@ void CodeEditor::updateGlobalLabel(QStringList list){
     globalLabelList = list;
     model->setStringList(compList + globalLabelList);
     SHL->setLabelsList(globalLabelList);
-    blockSignals(true);
+    bool currentSingalsState = blockSignals(true);
     SHL->rehighlight();
-    blockSignals(false);
+    blockSignals(currentSingalsState);
 }
 
 

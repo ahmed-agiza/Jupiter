@@ -93,9 +93,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     memory = new Memory(this);
 
-    //int baseAddress = memory->dataSegmentBaseAddress;
-    //memory->storeWord(baseAddress + 4, 20);
-
     timer = new QTimer(this);
     timer->setSingleShot(false);
     timer->setInterval(300);
@@ -156,7 +153,7 @@ void MainWindow::assembleAction(int speed){
     QStringList rawInstrs;
     QMap<int, int> lineMapping;
         rawInstrs = getActiveFileContent(MainWindow::projectMainFile).split("\n");
-        textInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), lineMapping);//currentWindow->getStrippedContentList();//->getUncommentedContentList();
+        textInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), lineMapping);
         lastTextInstrs = textInstrs;
 
     if (MainWindow::projectDataFile.trimmed() != ""){
@@ -178,7 +175,6 @@ void MainWindow::assembleAction(int speed){
 
     }
     ui->tabsProject->setCurrentIndex(1);
-    //assem = new Assembler(memory, &mainProcessorRegisters, this);
     assem->reset();
     assem->setSimulationSpeed(speed);
     assem->setRawList(rawInstrs);
@@ -319,8 +315,6 @@ void MainWindow::createProjectAction()
 
 void MainWindow::closeProject()
 {
-    //codeArea->closeAllSubWindows();
-
     if (closeAllWindows()){
         if (projectFile.isOpen()){
             projectFile.close();
@@ -867,9 +861,9 @@ void MainWindow::selectLine(int lineNumber){
 }
 
 void MainWindow::getLabels(){
-    //QStringList tempLabels(globalLabels);
+    QStringList tempLabels(globalLabels);
     getProjectLabels(true);
-    //if (tempLabels != globalLabels)
+    if (tempLabels != globalLabels)
         codeArea->setLabels(globalLabels);
 }
 
@@ -1074,7 +1068,6 @@ bool MainWindow::parseProjectXML(QFile &data, bool load = true){
                     QString tempTagValue = textL.at(i).toElement().text().trimmed();
 
                     if (tempTag == "MainFile"){
-                        // qDebug() << "Main: " << tempTagValue;
                         tempProjectMainFile = tempTagValue;
                         tempProjectTextFiles.append(tempTagValue);
                     }else if (tempTag == "File"){
@@ -1340,7 +1333,6 @@ bool MainWindow::closeFileWindow(QString fileName){
         if (editorWindow){
             if(editorWindow->getTitle().trimmed() == fileName.trimmed()){
                 editorWindow->setDestryoed(true);
-                //editorWindow->setParent(0);
                 return editorWindow->close();
             }
         }
@@ -1378,7 +1370,6 @@ void MainWindow::appendErrorMessage(int lineNumber, QString msg){
     ui->tableLog->resizeColumnsToContents();
     ui->tableLog->resizeRowsToContents();
     ui->tabsProject->setCurrentIndex(2);
-    //qDebug() << ui->tableLog->itemAt(0, 1)->text();
 
 }
 
@@ -1401,19 +1392,12 @@ void MainWindow::pauseSimulation(){
     QObject::disconnect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
     QObject::disconnect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
     QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
-    //delete assem;
 
 
     console->enableEditing(false);
-    //simulating = false;
-    //simulationThread.wait();
+
     timer->stop();
 
-
-
-    //mainProcessorRegisters = *assem->registers;
-
-    //initMemoryModels(true);
     refreshModels();
 
     resizeColumns();
@@ -1518,7 +1502,6 @@ void MainWindow::on_actionOpen_triggered(){
 }
 
 void MainWindow::openTreeItem(QObject *itm){
-    // qDebug() << "Triggered" << ((QTreeWidgetItem *)itm)->text(0);
     this->on_treeFiles_itemDoubleClicked((QTreeWidgetItem *)itm, 0);
 }
 
@@ -1591,7 +1574,6 @@ void MainWindow::activeWindowDelete(){
 
 void MainWindow::refreshActions(){
     bool value = projectFile.isOpen();
-    //setAcceptDrops(value);
     if (!(assembling || simulating) && !(simulating && simulationPaused)){
         ui->actionAssemble->setEnabled(value);
         ui->actionAssemble_and_Simulate->setEnabled(value);
@@ -1736,7 +1718,6 @@ void MainWindow::unsetMainProjectFile(){
 }
 
 void MainWindow::renameDataItem(QString file){
-    //QRegExp("^[A-Za-z0-9_\\@\\$\\.\\s]*$")
     QString newName = QInputDialog::getText(this, "Rename Data File", "Enter the new file name").trimmed();
     if (newName.trimmed() == "")
         return;
@@ -1839,21 +1820,7 @@ void MainWindow::simulationComplete(){
     simulationThread.quit();
     simulationThread.wait();
 
-    //mainProcessorRegisters = *assem->registers;
 
-    /*regModel = new RegistersModel(&mainProcessorRegisters, this, ui->registersNaming, ui->registersBase);
-    ui->tableMainRegisters->setModel(regModel);
-
-    textModel = new MemoryModel(memory, this, TextSegment, ui->textAddressMode, ui->textMemoryMode, ui->textMemoryBase);
-    dataModel = new MemoryModel(memory, this, DataSegment, ui->dataAddressMode, ui->dataMemoryMode, ui->dataMemoryBase);
-    stackModel = new MemoryModel(memory, this, StackSegment, ui->stackAddressMode, ui->stackMemoryMode, ui->stackMemoryBase);
-    heapModel = new MemoryModel(memory, this, HeapSegment, ui->heapAddressMode, ui->heapMemoryMode, ui->heapMemoryBase);
-
-    ui->textTable->setModel(textModel);
-    ui->dataTable->setModel(dataModel);
-    ui->stackTable->setModel(stackModel);
-    ui->heapTable->setModel(heapModel);*/
-    //initMemoryModels(true);
     refreshModels();
 
     resizeColumns();
