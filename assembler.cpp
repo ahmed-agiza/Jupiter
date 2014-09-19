@@ -2377,6 +2377,7 @@ void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStr
     resumeFlag = false;
 
     strippedInstrs = textFileStringList;
+    strippedInstrs.removeAll("");
 
     mem->clearAll();
 
