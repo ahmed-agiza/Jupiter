@@ -167,6 +167,8 @@ CodeEditor::CodeEditor(QWidget *parent) :
 
     QObject::connect(codeCompleter, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(updateCounter()));
+    QObject::connect(this, SIGNAL(textChanged()), this, SLOT(refreshScroll()));
+    QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(refreshScroll()));
     QObject::connect(this, SIGNAL(textChanged()), this, SLOT(completerPop()));    
     QObject::connect(this, SIGNAL(selectionChanged()), this, SLOT(highlightLine()));
     QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightLine()));
@@ -414,6 +416,10 @@ void CodeEditor::updateCounterFormat(){
         else
             lCounter->boldLines(start, end);
     }
+}
+
+void CodeEditor::refreshScroll(){
+    emit updateScroll(verticalScrollBar()->value());
 }
 
 

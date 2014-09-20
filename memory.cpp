@@ -459,7 +459,7 @@ char Memory::loadByte(unsigned int addr) const
 
     void Memory::saveMemory(QString fileName, QVector<bool> segmentsToLoad)
     {
-        int count = 0;
+        unsigned int count = 0;
         std::ofstream out;
         out.open(fileName.toStdString().c_str(), std::ofstream::binary);
         if(segmentsToLoad[0]){
@@ -471,7 +471,7 @@ char Memory::loadByte(unsigned int addr) const
             }
         }
         if(segmentsToLoad[1]){
-            for(int i=0; i<dataSegmentPhysicalSize; i++){
+            for(unsigned int i=0; i<dataSegmentPhysicalSize; i++){
                 out.put(loadByte(dataSegmentBaseAddress + i));
                 if(count %1024 == 0)
                     emit savingNumberChanged(count / 1024);
@@ -479,7 +479,7 @@ char Memory::loadByte(unsigned int addr) const
             }
         }
         if(segmentsToLoad[2]){
-            for(int i=0; i<backgroundTileSetPhysicalSize; i++){
+            for(unsigned int i=0; i<backgroundTileSetPhysicalSize; i++){
                 out.put(loadByte(backgroundTileSetBaseAddress + i));
                 if(count %1024 == 0)
                     emit savingNumberChanged(count / 1024);
@@ -487,7 +487,7 @@ char Memory::loadByte(unsigned int addr) const
             }
         }
         if(segmentsToLoad[3]){
-            for(int i=0; i<spritesTileSetPhysicalSize; i++){
+            for(unsigned int i=0; i<spritesTileSetPhysicalSize; i++){
                 out.put(loadByte(spritesTileSetBaseAddress + i));
                 if(count %1024 == 0)
                     emit savingNumberChanged(count / 1024);
@@ -495,7 +495,7 @@ char Memory::loadByte(unsigned int addr) const
             }
         }
         if(segmentsToLoad[4]){
-            for(int i=0; i<tileMapPhysicalSize; i++){
+            for(unsigned int i=0; i<tileMapPhysicalSize; i++){
                 out.put(loadByte(tileMapBaseAddress + i));
                 if(count %1024 == 0)
                     emit savingNumberChanged(count / 1024);
@@ -503,7 +503,7 @@ char Memory::loadByte(unsigned int addr) const
             }
         }
         if(segmentsToLoad[5]){
-            for(int i=0; i<spriteRamPhysicalSize; i++){
+            for(unsigned int i=0; i<spriteRamPhysicalSize; i++){
                 out.put(loadByte(spriteRamBaseAddress + i));
                 if(count %1024 == 0)
                     emit savingNumberChanged(count / 1024);
@@ -511,7 +511,7 @@ char Memory::loadByte(unsigned int addr) const
             }
         }
         if(segmentsToLoad[6]){
-            for(int i=0; i<palettePhysicalSize; i++){
+            for(unsigned int i=0; i<palettePhysicalSize; i++){
                 out.put(loadByte(paletteBaseAddress + i));
                 if(count %1024 == 0)
                     emit savingNumberChanged(count / 1024);

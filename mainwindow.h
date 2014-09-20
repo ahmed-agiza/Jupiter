@@ -93,6 +93,7 @@ public:
     void openPaletteViewer();
 
     bool isSimulationPaused() const;
+    bool isSimulationStopped() const;
 
 
 
@@ -197,6 +198,7 @@ private slots:
 
 public slots:
     void printToConsole(QString);
+    void stopSimulation();
 
     void setMainProjectFile(QString);
     void unsetMainProjectFile();
@@ -302,6 +304,8 @@ private:
     bool simulating;
     bool simulateAfterAssembling;
     bool simulationPaused;
+
+    bool simulationStopped;
 
     void assembleAction(int);
 

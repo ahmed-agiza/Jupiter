@@ -67,6 +67,7 @@ private slots:
     void completerPop();
     void highlightLine();
     void updateCounterFormat();
+    void refreshScroll();
 
 
 

@@ -353,7 +353,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         parameters.replace("\\b","\b");
                         parameters.replace("\\0","\0");
                         std::string actualString = parameters.mid(1,parameters.length()-2).toStdString();
-                        int i;
+                        unsigned int i;
                         for(i=address; i<actualString.size() + address; i++){
                             mem->storeByte(i + mem->dataSegmentBaseAddress , actualString[i-address]);
                         }
@@ -1922,7 +1922,7 @@ inline void Assembler::executeFunction()
 
     activePC = PC/4;
     emit executingInstruction(activePC);
-    if (lineMapping.contains(activePC)){
+    if (simulationSpeed > 0 && lineMapping.contains(activePC)){
         if (!instructions.at(activePC).isFromAssembler())
           emit executingLine(lineMapping[activePC]);
     }
@@ -2037,6 +2037,7 @@ void Assembler::simulate()
         exitExec = false;
         emit setReadingLimit(-1);
     }
+
     int i = 0;
     while (PC != -1 && ((PC/4) < instructions.size() && !exitExec /*&& i < 150*/))
     {
@@ -2127,6 +2128,11 @@ void Assembler::simulate()
         if (waiting || mainW->isSimulationPaused())
             break;
 
+        if (mainW->isSimulationStopped()){
+            waiting = false;
+            break;
+        }
+
         executeFunction();
 
         i++;
@@ -2174,6 +2180,8 @@ void Assembler::readCharacter(QString charc){
     resumeFlag = true;
     simulate();
 }
+
+
 
 
 
@@ -2333,8 +2341,8 @@ void Assembler::reset(){
 }
 
 int Assembler::stringDistance(std::string s, std::string t){
-    int i, j, cost, k, i1,j1,DB;
-    int _INFINITY = s.length() + t.length();
+    unsigned int i, j, cost, k, i1,j1,DB;
+    unsigned int _INFINITY = s.length() + t.length();
     QVector<int> DA(256);
     QVector< QVector<int> > dpMatrix(s.length()+2, QVector<int>(t.length()+2));
     for(i = 0; i < s.length()+1; i++) {

@@ -834,6 +834,7 @@ void MainWindow::resumeSimulation(bool resume = true)
 
     simulating = true;
     simulationPaused = false;
+    simulationStopped = false;
     refreshActions();
     if (!simulationThread.isRunning())
         simulationThread.start();
@@ -1409,7 +1410,6 @@ void MainWindow::disconnectSimulator()
     QObject::disconnect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int,QString, QString)));
     QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
 
-    qDebug() << "Disable";
     console->enableEditing(false);
 
     timer->stop();
@@ -1935,6 +1935,10 @@ void MainWindow::printToConsole(QString msg){
     console->addText(msg, true);
 }
 
+void MainWindow::stopSimulation(){
+    simulationStopped = true;
+}
+
 void MainWindow::openTilesetViewer(){
     on_actionTileset_viewer_triggered();
 }
@@ -1945,6 +1949,10 @@ void MainWindow::openPaletteViewer(){
 
 bool MainWindow::isSimulationPaused() const{
     return simulationPaused;
+}
+
+bool MainWindow::isSimulationStopped() const{
+    return simulationStopped;
 }
 
 void MainWindow::initMemoryModels(bool checkGFX = false){
@@ -2070,9 +2078,10 @@ void MainWindow::on_actionResumeSimulation_triggered(){
 }
 
 void MainWindow::on_actionStopSimulation_triggered(){
-    pauseSimulation();
+    /*pauseSimulation();
     simulationComplete();
-    statusBar()->clearMessage();
+    statusBar()->clearMessage();*/
+    simulationStopped = true;
 }
 
 void MainWindow::on_actionBase_Converter_triggered()

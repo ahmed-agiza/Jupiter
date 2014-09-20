@@ -124,6 +124,7 @@ public slots:
     void readInt(int);
     void readString(QString);
     void readCharacter(QString);
+
 signals:
     void buttonPressed(int, int, bool);
     void simulationComplete();
