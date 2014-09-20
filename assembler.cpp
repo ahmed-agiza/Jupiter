@@ -31,6 +31,7 @@ QString commentRegex = "#.+";
 // Matches labels
 QString labelRegex = "[a-zA-Z_]\\w*";
 QString labelRegexCapture = "(" + labelRegex +"):";
+QString labelRegexCaptureAlone = "^[\\t ]*(" + labelRegex +"):[\\t ]*$";
 // Matches invalid labels (start with a number or an invalid character)
 QString invalidLabelRegex = "\\b[^a-zA-Z_]\\w*:\\b";
 // Matches valid directives' names
@@ -281,7 +282,7 @@ QString invalidShiftFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + invali
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensitive), I(immFormat, Qt::CaseInsensitive), L(labelFormat, Qt::CaseInsensitive), SR(singleRegisterFormat, Qt::CaseInsensitive), SI(singleimmFormat, Qt::CaseInsensitive), DR(doubleRegisterFormat, Qt::CaseInsensitive), J(jumpFormat, Qt::CaseInsensitive), SA(standaloneInstructions, Qt::CaseInsensitive), LBL(labelRegexCapture, Qt::CaseInsensitive), CMT(commentRegex, Qt::CaseInsensitive), WHITSPACE("^[ \\t]+$", Qt::CaseInsensitive);
+QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensitive), I(immFormat, Qt::CaseInsensitive), L(labelFormat, Qt::CaseInsensitive), SR(singleRegisterFormat, Qt::CaseInsensitive), SI(singleimmFormat, Qt::CaseInsensitive), DR(doubleRegisterFormat, Qt::CaseInsensitive), J(jumpFormat, Qt::CaseInsensitive), SA(standaloneInstructions, Qt::CaseInsensitive), LBL(labelRegexCapture, Qt::CaseInsensitive), LBLALONE(labelRegexCaptureAlone, Qt::CaseInsensitive), CMT(commentRegex, Qt::CaseInsensitive), WHITSPACE("^[ \\t]+$", Qt::CaseInsensitive);
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 QRegExp invalidR(invalidRegisterFormat, Qt::CaseInsensitive), invalidM(invalidMemoryFormat, Qt::CaseInsensitive), invalidI(invalidImmediateFormat, Qt::CaseInsensitive), invalidSh(invalidShiftFormat, Qt::CaseInsensitive);
 
@@ -351,7 +352,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         std::string actualString = parameters.mid(1,parameters.length()-2).toStdString();
                         int i;
                         for(i=address; i<actualString.size() + address; i++){
-                            mem->storeByte(i + mem->dataSegmentBaseAddress , actualString[i]);
+                            mem->storeByte(i + mem->dataSegmentBaseAddress , actualString[i-address]);
                         }
                         if(labelName.size()){
 
@@ -664,9 +665,9 @@ void Assembler::parseTextSegment(QStringList* stringList)
         {
             handlePI(PI,line);
         }
-        else if((LBL.indexIn(line, 0)) != -1)
+        else if((LBLALONE.indexIn(line, 0)) != -1)
         {
-            labels[LBL.cap(1)] = address;
+            labels[LBLALONE.cap(1)] = address;
             address--;
         }
         else if((CMT.indexIn(line, 0)) != -1 || WHITSPACE.indexIn(line, 0) != -1 || line.size()==0)
