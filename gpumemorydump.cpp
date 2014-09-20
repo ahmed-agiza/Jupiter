@@ -118,7 +118,7 @@ void GpuMemoryDump::on_loadFromFilePushButton_clicked()
         segmentsToLoad[5] = ui->oamCheckbox->isChecked();
         segmentsToLoad[6] = ui->paletteCheckbox->isChecked();
         ui->progressBar->setMaximum((claculateMemorySize(segmentsToLoad) + 1024 - 1)/1024);
-        loadingThread = new LoadMemoryThread(this,segmentsToLoad,true);
+        loadingThread = new LoadMemoryThread(this,segmentsToLoad,ui->checkBox->isChecked());
         loadingThread->memory = mem;
         loadingThread->filePath = filePath;
         QObject::connect(loadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
