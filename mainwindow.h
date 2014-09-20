@@ -196,6 +196,8 @@ private slots:
 
     void on_tableLog_doubleClicked(const QModelIndex &index);
 
+    void on_actionInsert_Breakpoint_triggered();
+
 public slots:
     void printToConsole(QString);
     void stopSimulation();

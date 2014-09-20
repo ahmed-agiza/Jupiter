@@ -238,6 +238,10 @@ void CodeEditorWindow::redo(){
     editor->redo();
 }
 
+void CodeEditorWindow::toogleBP(){
+    editor->toogleBP();
+}
+
 QMap<int, int> CodeEditorWindow::getLineMapping(){
     return linesMapping;
 }
@@ -264,6 +268,10 @@ void CodeEditorWindow::enableEditing(){
 
 void CodeEditorWindow::disableEditing(){
     editor->setReadOnly(true);
+}
+
+void CodeEditorWindow::getBreakpoints(QVector<int> breakPs){
+    bps = breakPs;
 }
 
 

@@ -115,7 +115,14 @@ MainWindow::MainWindow(QWidget *parent) :
     assem = new Assembler(memory, &mainProcessorRegisters, this);
 
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory, &mainProcessorRegisters);
+    engine->hide();
     memory->setTileEngine(engine);
+    memory->setParent(assem);
+
+
+    assem->moveToThread(&simulationThread);
+    memory->moveToThread(&simulationThread);
+
 
     refreshActions();
     refreshEditActions();
@@ -125,6 +132,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     ui->toolBar->setAccessibleName("Toolbar");
+
 
     ui->tabsProject->setCurrentIndex(0);
     ui->tableMemory->setCurrentIndex(1);
@@ -194,7 +202,7 @@ void MainWindow::assembleAction(int speed){
 
 
     assemblerInitialized = false;
-    assem->moveToThread(&simulationThread);
+
     QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
     QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
@@ -211,24 +219,37 @@ void MainWindow::assembleAction(int speed){
 }
 
 void MainWindow::getProjectLabels(bool checkClosed){
-    Q_UNUSED(checkClosed);
 
     if (!projectFile.isOpen())
         return;
 
     globalLabels.clear();
-    if (MainWindow::projectDataFile.trimmed() != ""){
-        globalLabels.append(getFileLabels(MainWindow::projectDataFile, checkClosed));
+    if (checkClosed){
+        if (MainWindow::projectDataFile.trimmed() != ""){
+            globalLabels.append(getFileLabels(MainWindow::projectDataFile, checkClosed));
+        }
+        foreach(QString fileName, MainWindow::projectTextFiles){
+            globalLabels.append(getFileLabels(fileName, checkClosed));
+        }
+
+    }else{
+        QStringList openFiles;
+        foreach(QMdiSubWindow *window, codeArea->subWindowList()){
+            CodeEditorWindow *currentWindow = dynamic_cast<CodeEditorWindow *>(window);
+            if (currentWindow){
+                openFiles << currentWindow->getTitle();
+            }
+        }
+        foreach(QString openFile, openFiles){
+            globalLabels.append(getFileLabels(openFile, checkClosed));
+        }
+
     }
-    foreach(QString fileName, MainWindow::projectTextFiles){
-        globalLabels.append(getFileLabels(fileName, checkClosed));
-    }
+
+
 
     globalLabels.removeDuplicates();
     globalLabels.removeAll("");
-
-
-
 
 }
 
@@ -881,7 +902,7 @@ void MainWindow::selectLine(int lineNumber){
 
 void MainWindow::getLabels(){
     QStringList tempLabels(globalLabels);
-    getProjectLabels(true);
+    getProjectLabels(false);
     if (tempLabels != globalLabels)
         codeArea->setLabels(globalLabels);
 }
@@ -2151,4 +2172,10 @@ void MainWindow::on_tableLog_doubleClicked(const QModelIndex &index){
             textWindow->codeEditor()->setTextCursor(curs);
         }
     }
+}
+
+void MainWindow::on_actionInsert_Breakpoint_triggered(){
+    CodeEditorWindow *activeWin = dynamic_cast<CodeEditorWindow *> (codeArea->activeSubWindow());
+    if (activeWin)
+        activeWin->toogleBP();
 }

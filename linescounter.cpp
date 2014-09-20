@@ -26,6 +26,9 @@ LinesCounter::LinesCounter(QWidget *parent) :
     boldFormat.setFont(boldFont);
     vbar = verticalScrollBar();
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    lastLine = 0;
+
+    //QObject::connect(this, SIGNAL(textChanged()), this, SLOT(setMaxLine()));
 }
 
 int LinesCounter::getLineNumber(QPoint linePos){
@@ -49,12 +52,24 @@ void LinesCounter::boldLines(int start, int end){
     }
 
     selectionCursor.setCharFormat(boldFormat);
+    updateBPs();
 
+}
+
+QList<int> LinesCounter::getBreakPoints(){
+    return bps;
 }
 
 bool LinesCounter::eventFilter(QObject *o, QEvent *e)
 {
-    if (e->type() == QEvent::MouseButtonPress){
+
+    if (e->type() == QEvent::MouseButtonDblClick){
+        QMouseEvent *mouseEvent = dynamic_cast<QMouseEvent *>(e);
+        if (mouseEvent){
+            int line = getLineNumber(mouseEvent->pos());
+            toggleBPs(line);
+        }
+    }else if (e->type() == QEvent::MouseButtonPress){
         QMouseEvent *mouseEvent = dynamic_cast<QMouseEvent *>(e);
         if (mouseEvent)
             if (mouseEvent->buttons() & Qt::LeftButton){
@@ -72,8 +87,7 @@ bool LinesCounter::eventFilter(QObject *o, QEvent *e)
     }else if  (e->type() == QEvent::MouseButtonRelease){
         QMouseEvent *mouseEvent = dynamic_cast<QMouseEvent *>(e);
         if (mouseEvent){
-                emit endSelection(getLineNumber(mouseEvent->pos()));
-            int line = getLineNumber(mouseEvent->pos());
+            emit endSelection(getLineNumber(mouseEvent->pos()));
 
         }
 
@@ -88,6 +102,75 @@ void LinesCounter::scrollWithEditor(int val){
         vbar->setValue(val);
     }
 
+}
+
+void LinesCounter::clearBPs(){
+    bps.clear();
+}
+
+void LinesCounter::updateBPs(){
+    foreach(int line, bps){
+        highlightBPs(line, true);
+    }
+}
+
+void LinesCounter::toggleBPs(int line){
+    if (bps.contains(line)){
+        bps.removeOne(line);
+        highlightBPs(line, false);
+    }else{
+        bps.append(line);
+    }
+
+    std::sort(bps.begin(), bps.end(), qLess<int>());
+    updateBPs();
+}
+
+void LinesCounter::highlightBPs(int line, bool hl){
+   QTextCursor currentCur = textCursor();
+
+   currentCur.setPosition(0);
+   bool validMove = currentCur.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor, line);
+   if (!validMove)
+       return;
+   currentCur.select(QTextCursor::LineUnderCursor);
+   QTextCharFormat tempFormat = currentCur.charFormat();
+   if (hl){
+        tempFormat.setForeground(QColor(Qt::red).lighter(135));
+   }else
+       tempFormat.setForeground(defaultFormat.foreground());
+   currentCur.setCharFormat(tempFormat);
+
+}
+
+void LinesCounter::refreshAll(){
+    QTextCursor cur = textCursor();
+    for(int i = 0; i < lastLine; i++){
+        cur.setPosition(0);
+        cur.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, i);
+        cur.select(QTextCursor::LineUnderCursor);
+        bool hl = bps.contains(cur.selection().toPlainText().trimmed().toInt());
+        highlightBPs(i, hl);
+    }
+
+}
+
+void LinesCounter::setMaxLine(int num){
+    lastLine = num;
+    trimBPs();
+
+}
+
+void LinesCounter::trimBPs(){
+    bool trimmed = false;
+    while (!bps.isEmpty() && bps.last() > lastLine){
+        trimmed = true;
+        bps.removeLast();
+    }
+
+     if (trimmed)
+         refreshAll();
+     updateBPs();
 }
 
 

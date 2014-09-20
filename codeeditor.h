@@ -42,6 +42,7 @@ protected:
 
 signals:
     void labelsUpdated();
+    void refreshLabels();
     void updateScroll(int);
 
 public slots:
@@ -59,6 +60,7 @@ public slots:
     void addSelectedLines(int);
     void endSelection(int);
     void updateGlobalLabel(QStringList);
+    void toogleBP();
 
 
 private slots:
@@ -68,6 +70,7 @@ private slots:
     void highlightLine();
     void updateCounterFormat();
     void refreshScroll();
+    void checkLabels();
 
 
 

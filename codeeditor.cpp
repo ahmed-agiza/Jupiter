@@ -376,9 +376,15 @@ void CodeEditor::toggleComments(){
                 selectedLines[i].remove(0, 1);
         }
     }
-    foreach(QString line, selectedLines)
+    int contentCount = 0;
+    foreach(QString line, selectedLines){
         selectionCursor.insertText(line + "\n");
+        contentCount += line.size() + 1;
+    }
+
+
     selectionCursor.movePosition(QTextCursor::PreviousCharacter);
+    selectionCursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, contentCount);
     selectionCursor.endEditBlock();
     setTextCursor(selectionCursor);
 }
@@ -420,6 +426,10 @@ void CodeEditor::updateCounterFormat(){
 
 void CodeEditor::refreshScroll(){
     emit updateScroll(verticalScrollBar()->value());
+}
+
+void CodeEditor::checkLabels(){
+
 }
 
 
@@ -469,6 +479,15 @@ void CodeEditor::updateGlobalLabel(QStringList list){
     blockSignals(currentSingalsState);
 }
 
+void CodeEditor::toogleBP(){
+    QTextCursor cur = textCursor();
+    int lineNum = 0;
+    while (cur.movePosition(QTextCursor::Up))
+        lineNum++;
+    if (lCounter)
+        lCounter->toggleBPs(lineNum);
+}
+
 
 
 
@@ -479,11 +498,22 @@ void CodeEditor::updateCounter()
     //Line count.
     if(lCounter)
     {
-        lCounter->clear();
+        QString content;
+        QTextCursor counCur = lCounter->textCursor();
+        counCur.beginEditBlock();
+        counCur.select(QTextCursor::Document);
+        counCur.removeSelectedText();
         lCounter->setAlignment(Qt::AlignCenter);
         int numLines = this->toPlainText().count("\n");
-        for (int i = 0; i <= numLines; i++)
-            lCounter->append(QString::number(i));
+        for (int i = 0; i <= numLines; i++){
+            content.append(QString::number(i));
+            if (i != numLines)
+                content.append("\n");
+        }
+        counCur.insertText(content);
+        counCur.endEditBlock();
+        lCounter->setMaxLine(numLines);
+        lCounter->setAlignment(Qt::AlignCenter);
 
     }
 }

@@ -56,6 +56,8 @@ public:
     void undo();
     void redo();
 
+    void toogleBP();
+
 
     QMap<int, int> getLineMapping();
 
@@ -70,6 +72,7 @@ private slots:
 public slots:
     void enableEditing();
     void disableEditing();
+    void getBreakpoints(QVector<int>);
 
 private:
     CodeEditor *editor;
@@ -82,6 +85,7 @@ private:
     QMdiArea *p;
     QuickSearchDialog *quickSearch;
     FindAndReplaceDialog *findReplace;
+    QVector<int> bps;
 
 
     bool edited;

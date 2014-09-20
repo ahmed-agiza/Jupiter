@@ -48,6 +48,7 @@ void TileEngine::renderFrame()
             memory->backgroundMatrix[i][j].setOrigin(spriteOrigin);
 
             RenderWindow::draw(memory->backgroundMatrix[i][j]);
+
         }
 
     for(int priority=0; priority<4; priority++)

@@ -1962,7 +1962,7 @@
   </action>
   <action name="actionInsert_Breakpoint">
    <property name="text">
-    <string>Insert Breakpoint</string>
+    <string>Toggle Breakpoint</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
