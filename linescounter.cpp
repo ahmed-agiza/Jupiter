@@ -106,6 +106,7 @@ void LinesCounter::scrollWithEditor(int val){
 
 void LinesCounter::clearBPs(){
     bps.clear();
+    refreshAll();
 }
 
 void LinesCounter::updateBPs(){

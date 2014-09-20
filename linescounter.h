@@ -41,6 +41,7 @@ public slots:
     void highlightBPs(int, bool);
     void refreshAll();
     void setMaxLine(int);
+
 private slots:
     void trimBPs();
 

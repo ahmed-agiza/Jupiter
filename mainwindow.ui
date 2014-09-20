@@ -153,6 +153,7 @@
      <string>Debug</string>
     </property>
     <addaction name="actionInsert_Breakpoint"/>
+    <addaction name="actionClearBreakpoints"/>
     <addaction name="separator"/>
     <addaction name="actionResumeSimulation"/>
     <addaction name="actionPause_Simulation"/>
@@ -2214,6 +2215,11 @@
   <action name="actionDelayedSimulation">
    <property name="text">
     <string>Delayed Simulation</string>
+   </property>
+  </action>
+  <action name="actionClearBreakpoints">
+   <property name="text">
+    <string>Clear Breakpoints</string>
    </property>
   </action>
  </widget>

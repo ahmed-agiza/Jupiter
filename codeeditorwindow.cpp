@@ -242,6 +242,10 @@ void CodeEditorWindow::toogleBP(){
     editor->toogleBP();
 }
 
+void CodeEditorWindow::clearBPs(){
+    linesCounter->clearBPs();
+}
+
 QMap<int, int> CodeEditorWindow::getLineMapping(){
     return linesMapping;
 }

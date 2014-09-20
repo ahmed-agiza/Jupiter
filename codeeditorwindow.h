@@ -57,6 +57,7 @@ public:
     void redo();
 
     void toogleBP();
+    void clearBPs();
 
 
     QMap<int, int> getLineMapping();

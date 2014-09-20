@@ -198,6 +198,8 @@ private slots:
 
     void on_actionInsert_Breakpoint_triggered();
 
+    void on_actionClearBreakpoints_triggered();
+
 public slots:
     void printToConsole(QString);
     void stopSimulation();

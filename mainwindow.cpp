@@ -223,8 +223,9 @@ void MainWindow::getProjectLabels(bool checkClosed){
     if (!projectFile.isOpen())
         return;
 
-    globalLabels.clear();
+
     if (checkClosed){
+        globalLabels.clear();
         if (MainWindow::projectDataFile.trimmed() != ""){
             globalLabels.append(getFileLabels(MainWindow::projectDataFile, checkClosed));
         }
@@ -2178,4 +2179,10 @@ void MainWindow::on_actionInsert_Breakpoint_triggered(){
     CodeEditorWindow *activeWin = dynamic_cast<CodeEditorWindow *> (codeArea->activeSubWindow());
     if (activeWin)
         activeWin->toogleBP();
+}
+
+void MainWindow::on_actionClearBreakpoints_triggered(){
+    CodeEditorWindow *activeWin = dynamic_cast<CodeEditorWindow *> (codeArea->activeSubWindow());
+    if (activeWin)
+        activeWin->clearBPs();
 }
