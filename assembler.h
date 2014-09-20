@@ -113,6 +113,8 @@ public:
 
     int numberOfErrors();
 
+    bool isWaiting();
+
     inline void executeFunction();
 public slots:
     void exceptionHandler(int);

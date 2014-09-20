@@ -43,11 +43,9 @@ void IOConsole::setLock(int pos){
 }
 
 void IOConsole::addText(QString text, bool ro = true){
-    qDebug() << "Printing " << text;
     setText(toPlainText() + text);
-    lockPosition += text.length();
+    setLockAtEnd();
     setReadOnly(ro);
-    qDebug() << "Locked at " << lockPosition;
     inputTrace.append(text);
 }
 
@@ -56,8 +54,11 @@ int IOConsole::getLockPosition(){
 }
 
 void IOConsole::setLockAtEnd(){
-    lockPosition = toPlainText().length();
+    QTextCursor currentCur = textCursor();
+    currentCur.movePosition(QTextCursor::End);
+    lockPosition = currentCur.position();
     qDebug() << "Locked at " << lockPosition;
+    onCursorChanged();
 }
 
 QString IOConsole::getInputAt(int index){
@@ -86,30 +87,27 @@ void IOConsole::setReadingLimit(int val = -1){
 void IOConsole::keyPressEvent(QKeyEvent *e){
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter){
         QTextCursor cursor = textCursor();
-        if (lockPosition != 0)
-            cursor.setPosition(lockPosition - 1);
+        if (lockPosition >= 0)
+            cursor.setPosition(lockPosition);
         else
             cursor.setPosition(0);
-        cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
         QString inputText = cursor.selectedText();
-        qDebug() << inputText;
+        //qDebug() << "Line: " << inputText;
         setReadOnly(true);
-        setLock(lockPosition + inputText.length());
+        setLockAtEnd();
         inputTrace.append(inputText);        
         switch (requestNumber) {
         case READ_INTEGER:
-            //qDebug() << "Sending number: " << inputText.trimmed().toInt();
             emit sendInt(inputText.trimmed().toInt());
             break;
         case READ_STRING:
-            //qDebug() << "Sending text: " << inputText;
             if (readingLimt == -1 || inputText.length() < readingLimt)
                 emit sendString(inputText + "\0");
             else
                 emit sendString(inputText.mid(0, readingLimt) + "\0");
             break;
         case READ_CHARACTER:
-            //qDebug() << "Sending char" << ((inputText.length() > 0)?inputText.mid(0, 1):"Null");
             if (inputText.length() >= 1)
                 emit sendChar(inputText.mid(0, 1));
             else
@@ -118,6 +116,9 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
         default:
             break;
         }
+        QTextEdit::keyPressEvent(e);
+        setLockAtEnd();
+        return;
 
     }else if (e->key() == Qt::Key_Backspace){
         if (textCursor().position() <= lockPosition){
@@ -125,7 +126,7 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
             return;
         }
     }
-    QTextEdit::keyPressEvent(e);
+    QTextEdit::keyPressEvent(e);    
 }
 
 void IOConsole::inputRequest(int val){
@@ -140,7 +141,9 @@ void IOConsole::inputRequest(int val){
 }
 
 void IOConsole::enableEditing(bool ro){
-    setReadOnly(ro);
+    setReadOnly(!ro);
+    if (ro)
+        setFocus();
 }
 
 void IOConsole::getInput(){
@@ -149,7 +152,8 @@ void IOConsole::getInput(){
 
 void IOConsole::clearConsole(){
     clear();
-    lockPosition = 0;
+    setLockAtEnd();
+    qDebug() << "End " << lockPosition;
 }
 
 void IOConsole::copyAll(){

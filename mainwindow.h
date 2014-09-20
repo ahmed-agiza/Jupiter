@@ -99,6 +99,7 @@ public:
 
     ~MainWindow();
 
+    void disconnectSimulator();
 private slots:
     void resizeDataColumns();
     void resizeTextColumns();

@@ -1908,6 +1908,10 @@ int Assembler::numberOfErrors(){
     return errorList.size();
 }
 
+bool Assembler::isWaiting(){
+    return waiting;
+}
+
 inline void Assembler::executeFunction()
 {
     if (waiting)

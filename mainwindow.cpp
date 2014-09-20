@@ -838,11 +838,13 @@ void MainWindow::resumeSimulation(bool resume = true)
     if (!simulationThread.isRunning())
         simulationThread.start();
     timer->start();
-    if (console->toPlainText().trimmed() != "")
+    if (console->toPlainText().trimmed() != "" && !resume)
         console->addText("\n", true);
-    if (resume)
+    if (resume){
+        if (assem->isWaiting())
+            console->enableEditing(true);
         emit resumeSimulationSignal();
-    else
+    }else
         emit simulateSignal();
 
     statusBar()->showMessage("Simulating");
@@ -1387,8 +1389,8 @@ void MainWindow::appendErrorMessage(int lineNumber, QString msg, QString segment
 
 }
 
-void MainWindow::pauseSimulation(){
-
+void MainWindow::disconnectSimulator()
+{
     QObject::disconnect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
     QObject::disconnect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
@@ -1407,7 +1409,7 @@ void MainWindow::pauseSimulation(){
     QObject::disconnect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int,QString, QString)));
     QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
 
-
+    qDebug() << "Disable";
     console->enableEditing(false);
 
     timer->stop();
@@ -1415,6 +1417,12 @@ void MainWindow::pauseSimulation(){
     refreshModels();
 
     resizeColumns();
+}
+
+void MainWindow::pauseSimulation(){
+
+    disconnectSimulator();
+    console->enableEditing(false);
 
     statusBar()->clearMessage();
     statusBar()->showMessage("Paused", 2000);
@@ -1828,7 +1836,7 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
 void MainWindow::simulationComplete(){
     simulating = false;
     simulationPaused = false;
-    timer->stop();
+    disconnectSimulator();
     refreshActions();
 
     simulationThread.quit();
@@ -1846,6 +1854,7 @@ void MainWindow::simulationComplete(){
 }
 
 void MainWindow::assemblyComplete(){
+
     qDebug() << "Assembled";
     assembling = false;
     refreshActions();
