@@ -115,7 +115,8 @@ CodeEditor::CodeEditor(QWidget *parent) :
             << "$t9"
             << "$gp"
             << "$fp"
-            << "$ra";
+            << "$ra"
+            << "$sp";
 
     compList << "blt"  <<  "bgt"
              <<  "ble"

@@ -30,8 +30,12 @@ IOConsole::IOConsole(QWidget *parent) :
     requestNumber = 0;
     readingLimt = -1;
     setTextInteractionFlags(Qt::TextEditable);
-    setReadOnly(true);   
+    setUndoRedoEnabled(false);
+    setReadOnly(true);
+
 }
+
+
 
 void IOConsole::setLock(int pos){
     lockPosition = pos;
@@ -39,6 +43,7 @@ void IOConsole::setLock(int pos){
 }
 
 void IOConsole::addText(QString text, bool ro = true){
+    qDebug() << "Printing " << text;
     setText(toPlainText() + text);
     lockPosition += text.length();
     setReadOnly(ro);
@@ -99,9 +104,9 @@ void IOConsole::keyPressEvent(QKeyEvent *e){
         case READ_STRING:
             //qDebug() << "Sending text: " << inputText;
             if (readingLimt == -1 || inputText.length() < readingLimt)
-                emit sendString(inputText + "\\0");
+                emit sendString(inputText + "\0");
             else
-                emit sendString(inputText.mid(0, readingLimt) + "\\0");
+                emit sendString(inputText.mid(0, readingLimt) + "\0");
             break;
         case READ_CHARACTER:
             //qDebug() << "Sending char" << ((inputText.length() > 0)?inputText.mid(0, 1):"Null");

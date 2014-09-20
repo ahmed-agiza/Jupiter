@@ -15,6 +15,7 @@ public:
     void setLabels(QStringList);
     CodeEditorWindow* getMainWindow();
     void activateMainWindow();
+    bool isAllSaved();
 
     QMdiSubWindow* addSubWindow(QWidget *, Qt::WindowFlags = 0);
 private:

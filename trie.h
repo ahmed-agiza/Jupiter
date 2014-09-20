@@ -21,7 +21,7 @@ public:
 	void insert(string s)
 	{
 		element *l = &root;
-		for (int i = 0; i < s.size(); i++){
+        for (unsigned int i = 0; i < s.size(); i++){
 			if (l->childrenIndex == -1){
 				children.push_back(vector<element>(26));
 				l->childrenIndex = children.size() - 1;
@@ -35,7 +35,7 @@ public:
 	bool search(string s)
 	{
 		element *l = &root;
-		for (int i = 0; i < s.size(); i++){
+        for (unsigned int i = 0; i < s.size(); i++){
 			if (l->childrenIndex == -1)
 				return false;
 			l = &children[l->childrenIndex][s[i] - 'a'];
@@ -45,7 +45,7 @@ public:
 	int wordsWithPrefix(string s)
 	{
 		element *l = &root;
-		for (int i = 0; i < s.size(); i++){
+        for (unsigned int i = 0; i < s.size(); i++){
 			if (l->childrenIndex == -1)
 				return 0;
 			l = &children[l->childrenIndex][s[i] - 'a'];

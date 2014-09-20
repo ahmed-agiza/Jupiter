@@ -22,10 +22,11 @@ class Error
 {
 public:
     Error(){}
-    Error(QString s,int l):lineNumber(l),description(s){}
+    Error(QString s, int l, QString se = "-"):lineNumber(l),description(s),segment(se){}
 
     int lineNumber;
     QString description;
+    QString segment;
 };
 
 class MainWindow;
@@ -132,7 +133,7 @@ signals:
     void printToConsole(QString);
     void logStringSignal(QString);
     void logDataSignal(QStringList); //For testing.
-    void sendErrorMessage(int, QString);
+    void sendErrorMessage(int, QString, QString);
     void executingInstruction(int);
     void executingLine(int);
     void instructionExecuted();

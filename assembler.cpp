@@ -286,6 +286,9 @@ QRegExp R(registerFormat, Qt::CaseInsensitive), M(memoryFormat, Qt::CaseInsensit
 QRegExp PR(pRegisterFormat, Qt::CaseInsensitive), PRIL(pRILFormat, Qt::CaseInsensitive), PL(pLabelFormat, Qt::CaseInsensitive), PZ(pZlabelFormat, Qt::CaseInsensitive), PSI(pSingleimmFormat, Qt::CaseInsensitive), PDR(pDoubleRegisterFormat, Qt::CaseInsensitive), PSR(pSingleRegisterFormat, Qt::CaseInsensitive), PI(pImmFormat, Qt::CaseInsensitive);
 QRegExp invalidR(invalidRegisterFormat, Qt::CaseInsensitive), invalidM(invalidMemoryFormat, Qt::CaseInsensitive), invalidI(invalidImmediateFormat, Qt::CaseInsensitive), invalidSh(invalidShiftFormat, Qt::CaseInsensitive);
 
+#define TEXT_ERROR "Text"
+#define DATA_ERROR "Data"
+
 Assembler::Assembler(Memory *memory, QVector<int> * mRegisters, MainWindow * mainW)
 {
     this->mainW = mainW;
@@ -301,7 +304,7 @@ Assembler::Assembler(Memory *memory, QVector<int> * mRegisters, MainWindow * mai
 
 void Assembler::parseDataSegment(QStringList* stringList)
 {
-    "(align|asciiz?|byte|double|float|half|space|word)";
+    //"(align|asciiz?|byte|double|float|half|space|word)";
     QSet<QString> validDirectives;
     validDirectives.insert("align");
     validDirectives.insert("ascii");
@@ -332,12 +335,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         address = ((address + factor - 1) / factor ) * factor;
                         if(labelName.size()){
                             if(dataLabels.contains(labelName)){
-                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, DATA_ERROR));
                             }
                             dataLabels[labelName] = address;
                         }
                     }else{
-                        errorList.append(Error(".align directive must be followed by a number between 0 and 4", lineNumber));
+                        errorList.append(Error(".align directive must be followed by a number between 0 and 4", lineNumber, DATA_ERROR));
                     }
                 }else if(directiveName == "ascii" || directiveName == "asciiz"){
                     QRegExp cStrReg(cstringsRegex);
@@ -357,17 +360,17 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         if(labelName.size()){
 
                             if(dataLabels.contains(labelName)){
-                                errorList.append(Error("Label \"" + labelName + "\" is already defined.", lineNumber));
+                                errorList.append(Error("Label \"" + labelName + "\" is already defined.", lineNumber, DATA_ERROR));
                             }
                             dataLabels[labelName] = address;
 
                         }
                         address = i;
-                        if(directiveName.endsWith("z")) mem->storeByte(address++ + mem->dataSegmentBaseAddress , NULL);
+                        if(directiveName.endsWith("z")) mem->storeByte(address++ + mem->dataSegmentBaseAddress , 0);
                     }else if(QRegExp(invalidCstringsRegex).indexIn(parameters) == 0){
-                        errorList.append(Error("Invalid string, missing closing quote", lineNumber));
+                        errorList.append(Error("Invalid string, missing closing quote", lineNumber, DATA_ERROR));
                     }else{
-                        errorList.append(Error("Invalid string", lineNumber));
+                        errorList.append(Error("Invalid string", lineNumber, DATA_ERROR));
                     }
                 }else if(directiveName == "half" || directiveName == "word"){
                     parameters.remove(' ');
@@ -376,7 +379,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     address = ((address + factor - 1) / factor ) * factor;
                     if(labelName.size()){
                         if(dataLabels.contains(labelName)){
-                            errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                            errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, DATA_ERROR));
                         }
                         dataLabels[labelName] = address;
                     }
@@ -384,7 +387,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         int start = getNumber(parameters.mid(0,parameters.indexOf(':')));
                         int end = getNumber(parameters.mid(parameters.indexOf(':')+1));
                         if(end > 0xffff && directiveName == "half"){
-                            errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber));
+                            errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber, DATA_ERROR));
                         }
                         for(int i=0; i<(end-start+1); i++){
                             if (directiveName == "half")
@@ -402,12 +405,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                                 mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
                             address += ((directiveName == "half")? 2:4);
                             if(getNumber(immediateNumber) > 0xffff && directiveName == "half"){
-                                errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber));
+                                errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber, DATA_ERROR));
                             }
                         }
                     }else if(numberRegExp.indexIn(parameters) == 0){
                         if(getNumber(parameters) > 0xffff && directiveName == "half"){
-                            errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber));
+                            errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber, DATA_ERROR));
                         }
                         if (directiveName == "half")
                             mem->storeHWord(mem->dataSegmentBaseAddress + address, getNumber(parameters));
@@ -415,12 +418,12 @@ void Assembler::parseDataSegment(QStringList* stringList)
                             mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(parameters));
                         address += ((directiveName == "half")? 2:4);
                     }else{
-                        errorList.append(Error("Syntax error", lineNumber));
+                        errorList.append(Error("Syntax error", lineNumber, DATA_ERROR));
                     }
                 }else if(directiveName == "byte"){
                     if(labelName.size()){
                         if(dataLabels.contains(labelName)){
-                            errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                            errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, DATA_ERROR));
                         }
                         dataLabels[labelName] = address;
                     }
@@ -428,7 +431,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         int start = getNumber(parameters.mid(0,parameters.indexOf(':')));
                         int end = getNumber(parameters.mid(parameters.indexOf(':')+1));
                         if(end > 0xff){
-                            errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber));
+                            errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber, DATA_ERROR));
                         }
                         for(int i=0; i<=(end-start+1); i++){
                             mem->storeByte(mem->dataSegmentBaseAddress + address, start + i);
@@ -449,15 +452,15 @@ void Assembler::parseDataSegment(QStringList* stringList)
                             }else if(numberRegExp.indexIn(immediateNumber) == 0)
                                 mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
                             else
-                                errorList.append(Error("Syntax error", lineNumber));
+                                errorList.append(Error("Syntax error", lineNumber, DATA_ERROR));
                             address++;
                             if(getNumber(immediateNumber) > 0xff){
-                                errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber));
+                                errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber, DATA_ERROR));
                             }
                         }
                     }else if(numberRegExp.indexIn(parameters) == 0){
                         if(getNumber(parameters) > 0xff){
-                            errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber));
+                            errorList.append(Error("Byte value out of range. use .half or .word instead of .byte", lineNumber, DATA_ERROR));
                         }
                         mem->storeByte(mem->dataSegmentBaseAddress + address, getNumber(parameters));
                         address++;
@@ -471,26 +474,26 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         mem->storeByte(mem->dataSegmentBaseAddress + address, parameters.toStdString()[1]);
                         address++;
                     }else{
-                        errorList.append(Error("Syntax error", lineNumber));
+                        errorList.append(Error("Syntax error", lineNumber, DATA_ERROR));
                     }
                 }else if(directiveName == "space"){
                     int spaceNumber = getNumber(parameters);
                     if(numberRegExp.indexIn(parameters) == 0){
                         if(labelName.size()){
                             if(dataLabels.contains(labelName)){
-                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, DATA_ERROR));
                             }
                             dataLabels[labelName] = address;
                         }
                         address += spaceNumber;
                     }else{
-                        errorList.append(Error(".space directive must be followed by the number of bytes to reserve", lineNumber));
+                        errorList.append(Error(".space directive must be followed by the number of bytes to reserve", lineNumber, DATA_ERROR));
                     }
                 }else if(directiveName == "float" || directiveName == "double"){
                     qDebug() << "FPU not yet implemented";
                 }
             }else{
-                errorList.push_back(Error("Invalid type specifier \""+directiveName+"\"", lineNumber));
+                errorList.push_back(Error("Invalid type specifier \""+directiveName+"\"", lineNumber, DATA_ERROR));
             }
         }else if((CMT.indexIn(line, 0)) == -1 && WHITSPACE.indexIn(line, 0) == -1 && line.size() != 0){
 
@@ -498,12 +501,13 @@ void Assembler::parseDataSegment(QStringList* stringList)
         lineNumber++;
     }
 
-    for (int i = 0; i<errorList.size(); i++)
+    /*for (int i = 0; i<errorList.size(); i++)
     {
-        emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description);
+        if (errorList.at(i).segment == DATA_ERROR)
+            emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description, errorList.at(i).segment);
         //mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         //qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
-    }
+    }*/
 
 }
 
@@ -519,7 +523,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             //qDebug()<<R.cap(1)<<" "<<R.cap(2)<<" "<<R.cap(3)<<" "<<R.cap(4)<<" "<<R.cap(5)<<"\n";
             if(R.cap(1).size()){
                 if(labels.contains(R.cap(1))){
-                    errorList.append(Error("Label \""+R.cap(1)+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+R.cap(1)+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[R.cap(1)] = address;
             }
@@ -530,7 +534,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = M.cap(1);
             if(M.cap(1).size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -544,7 +548,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = I.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -561,7 +565,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = L.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -575,7 +579,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = SR.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -586,7 +590,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = SI.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -600,7 +604,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = DR.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -617,7 +621,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = J.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -628,7 +632,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             QString labelName = SA.cap(1);
             if(labelName.size()){
                 if(labels.contains(labelName)){
-                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                    errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
                 }
                 labels[labelName] = address;
             }
@@ -699,19 +703,19 @@ void Assembler::parseTextSegment(QStringList* stringList)
                         ){
                     if(registerRegExp.indexIn(threeArgsInstruction.cap(3)) == -1){
                         if(threeArgsInstruction.cap(3)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                            errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(registerRegExp.indexIn(threeArgsInstruction.cap(4)) == -1){
                         if(threeArgsInstruction.cap(4)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("Second argument must be a register",lineNumber));
+                            errorList.push_back(Error("Second argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(registerRegExp.indexIn(threeArgsInstruction.cap(5)) == -1){
                         if(threeArgsInstruction.cap(5)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(5)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(5)+"\"",lineNumber, TEXT_ERROR));
                         }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != -1 &&
                                  (
                                      instructionName == "add"    ||
@@ -729,7 +733,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                 instructionName = instructionName.mid(0,instructionName.size()-1);
                                 uFlag = true;
                             }
-                            errorList.push_back(Error("Third operand must be a register, use \""+instructionName+"i"+(uFlag? "u":"")+"\" instead of \""+instructionName+(uFlag? "u":"")+"\"",lineNumber));
+                            errorList.push_back(Error("Third operand must be a register, use \""+instructionName+"i"+(uFlag? "u":"")+"\" instead of \""+instructionName+(uFlag? "u":"")+"\"",lineNumber, TEXT_ERROR));
 
                         }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != -1 &&
                                  (
@@ -737,13 +741,13 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                      instructionName == "srlv"   ||
                                      instructionName == "srav"
                                      )){
-                            errorList.push_back(Error("Third operand must be a register, use \""+instructionName.remove(instructionName.size()-1,1)+"\" instead of \""+instructionName+"v\"",lineNumber));
+                            errorList.push_back(Error("Third operand must be a register, use \""+instructionName.remove(instructionName.size()-1,1)+"\" instead of \""+instructionName+"v\"",lineNumber, TEXT_ERROR));
 
                         }else{
-                            errorList.push_back(Error("Third argument must be a register",lineNumber));
+                            errorList.push_back(Error("Third argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else{
-                        errorList.push_back(Error("Syntax Error",lineNumber));
+                        errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
                     }
                 }else if(
                          instructionName == "addi"    ||
@@ -771,15 +775,15 @@ void Assembler::parseTextSegment(QStringList* stringList)
                          ){
                     if(registerRegExp.indexIn(threeArgsInstruction.cap(3)) == -1){
                         if(threeArgsInstruction.cap(3)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                            errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(registerRegExp.indexIn(threeArgsInstruction.cap(4)) == -1){
                         if(threeArgsInstruction.cap(4)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("Second argument must be a register",lineNumber));
+                            errorList.push_back(Error("Second argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != 0){
                         if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
@@ -797,7 +801,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                 ){
                             QString instructionName2 = instructionName;
                             instructionName.remove(instructionName.indexOf("i"),1);
-                            errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"\" instead of \""+instructionName2+"\"",lineNumber));
+                            errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"\" instead of \""+instructionName2+"\"",lineNumber, TEXT_ERROR));
                         }else if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
                                  (
                                      instructionName == "sll"    ||
@@ -805,7 +809,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                      instructionName == "sra"
                                      )
                                  ){
-                            errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"v\" instead of \""+instructionName+"\"",lineNumber));
+                            errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"v\" instead of \""+instructionName+"\"",lineNumber, TEXT_ERROR));
                         }else if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
                                  (
                                      instructionName == "beq"     ||
@@ -820,7 +824,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                      instructionName == "bgeu"
                                      )
                                  ){
-                            errorList.push_back(Error("Branch value cannot be a register, use a label or a number",lineNumber));
+                            errorList.push_back(Error("Branch value cannot be a register, use a label or a number",lineNumber, TEXT_ERROR));
                         }else if(
                                  instructionName == "beq"     ||
                                  instructionName == "bne"     ||
@@ -833,11 +837,11 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                  instructionName == "bleu"    ||
                                  instructionName == "bgeu"
                                  ){
-                            errorList.push_back(Error("Invalid label \""+threeArgsInstruction.cap(5)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
+                            errorList.push_back(Error("Invalid label \""+threeArgsInstruction.cap(5)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber, TEXT_ERROR));
                         }
                     }
                 }else if(instructionSet.search(instructionName.toStdString())){
-                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take three arguments",lineNumber));
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take three arguments",lineNumber, TEXT_ERROR));
                 }else{
                     int i;
                     for(i=0; i<instructionList.size(); i++){
@@ -845,9 +849,9 @@ void Assembler::parseTextSegment(QStringList* stringList)
                             break;
                     }
                     if(i == instructionList.size())
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber, TEXT_ERROR));
                     else
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber, TEXT_ERROR));
                 }
             }else if((twoArgsInstruction.indexIn(line, 0)) != -1){
                 QString instructionName = twoArgsInstruction.cap(2).toLower();
@@ -863,18 +867,18 @@ void Assembler::parseTextSegment(QStringList* stringList)
                         ){
                     if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
                         if(twoArgsInstruction.cap(3)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                            errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) == -1){
                         if(twoArgsInstruction.cap(4)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(4)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(4)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("Second argument must be a register",lineNumber));
+                            errorList.push_back(Error("Second argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else{
-                        errorList.push_back(Error("Syntax Error",lineNumber));
+                        errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
                     }
                 }else if(
                          instructionName == "lui"   ||
@@ -884,22 +888,22 @@ void Assembler::parseTextSegment(QStringList* stringList)
                          ){
                     if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
                         if(twoArgsInstruction.cap(3)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                            errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(numberRegExp.indexIn(twoArgsInstruction.cap(4)) != 0){
                         if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) != -1){
                             if(instructionName == "rol" || instructionName == "ror"){
-                                errorList.push_back(Error("Second Argument must be a number, cannot rotate by a register",lineNumber));
+                                errorList.push_back(Error("Second Argument must be a number, cannot rotate by a register",lineNumber, TEXT_ERROR));
                             }else{
-                                errorList.push_back(Error("Second argument must be a number, use \"move\" instead of \""+instructionName+"\"",lineNumber));
+                                errorList.push_back(Error("Second argument must be a number, use \"move\" instead of \""+instructionName+"\"",lineNumber, TEXT_ERROR));
                             }
                         }else{
-                            errorList.push_back(Error("Second argument must be a number",lineNumber));
+                            errorList.push_back(Error("Second argument must be a number",lineNumber, TEXT_ERROR));
                         }
                     }else{
-                        errorList.push_back(Error("Syntax Error",lineNumber));
+                        errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
                     }
                 }else if(
                          instructionName == "beqz"  ||
@@ -912,17 +916,17 @@ void Assembler::parseTextSegment(QStringList* stringList)
                          ){
                     if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
                         if(twoArgsInstruction.cap(3)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                            errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) != -1){
-                        errorList.push_back(Error("Branch value cannot be a register, use a label instead",lineNumber));
+                        errorList.push_back(Error("Branch value cannot be a register, use a label instead",lineNumber, TEXT_ERROR));
                     }else{
-                        errorList.push_back(Error("Invalid label \""+twoArgsInstruction.cap(4)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
+                        errorList.push_back(Error("Invalid label \""+twoArgsInstruction.cap(4)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber, TEXT_ERROR));
                     }
                 }else if(instructionSet.search(instructionName.toStdString())){
-                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take two arguments",lineNumber));
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take two arguments",lineNumber, TEXT_ERROR));
                 }else{
                     int i;
                     for(i=0; i<instructionList.size(); i++){
@@ -930,9 +934,9 @@ void Assembler::parseTextSegment(QStringList* stringList)
                             break;
                     }
                     if(i == instructionList.size())
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber, TEXT_ERROR));
                     else
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber, TEXT_ERROR));
 
                 }
 
@@ -949,20 +953,20 @@ void Assembler::parseTextSegment(QStringList* stringList)
                         ){
                     if(registerRegExp.indexIn(oneArgInstruction.cap(3)) == -1){
                         if(oneArgInstruction.cap(3)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+oneArgInstruction.cap(3)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+oneArgInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                            errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else{
-                        errorList.push_back(Error("Syntax Error",lineNumber));
+                        errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
                     }
                 }else if(
                          instructionName == "j"     ||
                          instructionName == "jal"
                          ){
-                    errorList.push_back(Error("Invalid label \""+oneArgInstruction.cap(3)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber));
+                    errorList.push_back(Error("Invalid label \""+oneArgInstruction.cap(3)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber, TEXT_ERROR));
                 }else if(instructionSet.search(instructionName.toStdString())){
-                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take one argument",lineNumber));
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" does not take one argument",lineNumber, TEXT_ERROR));
                 }else{
                     int i;
                     for(i=0; i<instructionList.size(); i++){
@@ -970,9 +974,9 @@ void Assembler::parseTextSegment(QStringList* stringList)
                             break;
                     }
                     if(i == instructionList.size())
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber, TEXT_ERROR));
                     else
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber, TEXT_ERROR));
 
                 }
             }else if((memoryArgsInstruction.indexIn(line, 0)) != -1){
@@ -981,28 +985,28 @@ void Assembler::parseTextSegment(QStringList* stringList)
                 if(QRegExp(memoryInstructions, Qt::CaseInsensitive).indexIn(instructionName,0) != -1){
                     if(registerRegExp.indexIn(memoryArgsInstruction.cap(3)) == -1){
                         if(memoryArgsInstruction.cap(3)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+memoryArgsInstruction.cap(3)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+memoryArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("First argument must be a register",lineNumber));
+                            errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else if(numberRegExp.indexIn(memoryArgsInstruction.cap(4)) != 0){
                         if(registerRegExp.indexIn(memoryArgsInstruction.cap(4)) != -1){
-                            errorList.push_back(Error("Memory offset cannot be a register, use an immediate value instead",lineNumber));
+                            errorList.push_back(Error("Memory offset cannot be a register, use an immediate value instead",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("Memory offset must be an immediate value",lineNumber));
+                            errorList.push_back(Error("Memory offset must be an immediate value",lineNumber, TEXT_ERROR));
                         }
                     }else if(registerRegExp.indexIn(memoryArgsInstruction.cap(5)) == -1){
                         if(memoryArgsInstruction.cap(5)[0] == '$'){
-                            errorList.push_back(Error("Invalid register \""+memoryArgsInstruction.cap(5)+"\"",lineNumber));
+                            errorList.push_back(Error("Invalid register \""+memoryArgsInstruction.cap(5)+"\"",lineNumber, TEXT_ERROR));
                         }else{
-                            errorList.push_back(Error("Memory base address must be stored in a register",lineNumber));
+                            errorList.push_back(Error("Memory base address must be stored in a register",lineNumber, TEXT_ERROR));
                         }
                     }else{
                         qDebug() << "shit";
-                        errorList.push_back(Error("Syntax Error",lineNumber));
+                        errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
                     }
                 }else if(instructionSet.search(instructionName.toStdString())){
-                    errorList.push_back(Error("Instruction \""+instructionName+"\" is not a memory instruction",lineNumber));
+                    errorList.push_back(Error("Instruction \""+instructionName+"\" is not a memory instruction",lineNumber, TEXT_ERROR));
                 }else{
                     int i;
                     for(i=0; i<instructionList.size(); i++){
@@ -1010,12 +1014,12 @@ void Assembler::parseTextSegment(QStringList* stringList)
                             break;
                     }
                     if(i == instructionList.size())
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber, TEXT_ERROR));
                     else
-                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber));
+                        errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber, TEXT_ERROR));
                 }
             }else{
-                errorList.push_back(Error("Syntax Error",lineNumber));
+                errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
             }
         }
         address++;
@@ -1028,7 +1032,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         if(labels.contains(lbl.second)){
             instructions[lbl.first.first].setImm(labels[lbl.second]-lbl.first.first-1);
         } else {
-            errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second));
+            errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
     }
     for (int i=0; i<missingJumpLabels.size(); i++)
@@ -1037,7 +1041,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         if(labels.contains(lbl.second)){
             instructions[lbl.first.first].setImm((labels[lbl.second]&0xfffffff));
         } else {
-            errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second));
+            errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
     }
 
@@ -1050,14 +1054,13 @@ void Assembler::parseTextSegment(QStringList* stringList)
         QObject::connect(&(instructions[i]), SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }
 
-
-    for (int i = 0; i<errorList.size(); i++)
-    {
-        emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description);
-        qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
+    qDebug() << "S: "  << errorList.size();
+    for (int i = 0; i<errorList.size(); i++){
+            emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description, errorList.at(i).segment);
     }
 
-    getLineMapping();
+    if (errorList.size() == 0)
+        getLineMapping();
 
     emit assemblyComplete();
 }
@@ -1321,7 +1324,7 @@ void Assembler::handlePR(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1335,7 +1338,7 @@ void Assembler::handlePR(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1349,7 +1352,7 @@ void Assembler::handlePR(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1373,7 +1376,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1394,7 +1397,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1416,7 +1419,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1437,7 +1440,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1457,7 +1460,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1478,7 +1481,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1500,7 +1503,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1521,7 +1524,7 @@ void Assembler::handlePRIL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1545,7 +1548,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1563,7 +1566,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1581,7 +1584,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1599,7 +1602,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1617,7 +1620,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1635,7 +1638,7 @@ void Assembler::handlePL(QRegExp m, QString line)
         QString labelName = m.cap(1);
         if(labelName.size()){
             if(labels.contains(labelName)){
-                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber));
+                errorList.append(Error("Label \""+labelName+"\" is already defined.", lineNumber, TEXT_ERROR));
             }
             labels[labelName] = address;
         }
@@ -1760,7 +1763,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
             instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0, addrrr >> 16,0,IFormat));
             instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,addrrr & 0xffff,0,IFormat));
         }else{
-            errorList.push_back(Error("Invalid label \""+ datalbl +"\".", lineNumber));
+            errorList.push_back(Error("Invalid label \""+ datalbl +"\".", lineNumber, TEXT_ERROR));
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
@@ -1991,9 +1994,10 @@ inline void Assembler::executeFunction()
         case PRINT_CHARACTER:
             qDebug() << "Print character";
             //Print character
-
-            strByte[0] = (char) mem->loadByte((*registers)[4]);
+            strByte[0] = (char) ((*registers)[4]);
+            qDebug() << "Byte: " << strByte;
             msg = QString::fromLatin1(strByte);
+            qDebug() << "Msg: " << msg;
             emit printToConsole(msg);
             PC += 4;
             break;
@@ -2282,7 +2286,7 @@ void Assembler::initializeRegisters()
     for (int i = 0; i < registers->size(); i++)
         (*registers)[i] = 0;
     (*registers)[28] = 0x10008000;
-    (*registers)[29] = 0x7FFFEFFC;
+    (*registers)[29] = 0x001FFFFC;
 
 
 }

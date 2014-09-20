@@ -57,6 +57,16 @@ void CodeMDIArea::activateMainWindow(){
         setActiveSubWindow(mainWindow);
 }
 
+bool CodeMDIArea::isAllSaved(){
+    foreach(QMdiSubWindow *window, subWindowList()){
+        CodeEditorWindow* currentWindow = dynamic_cast<CodeEditorWindow *>(window);
+        if (currentWindow)
+            if (currentWindow->isModified())
+                return false;
+    }
+    return true;
+}
+
 QMdiSubWindow *CodeMDIArea::addSubWindow(QWidget *widget, Qt::WindowFlags flags){
     QMdiSubWindow *tempWindow = QMdiArea::addSubWindow(widget, flags);
     setLabels(globalLabels);

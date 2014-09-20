@@ -192,6 +192,8 @@ private slots:
 
     void on_actionStepForwared_triggered();
 
+    void on_tableLog_doubleClicked(const QModelIndex &index);
+
 public slots:
     void printToConsole(QString);
 
@@ -211,7 +213,7 @@ public slots:
     void assemblingProgress(int);
     void simulationProgress();
 
-    void appendErrorMessage(int, QString);
+    void appendErrorMessage(int, QString, QString);
 
     void pauseSimulation();
     void resumeSimulation(bool);

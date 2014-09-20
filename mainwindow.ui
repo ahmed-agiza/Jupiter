@@ -89,8 +89,6 @@
      </layout>
     </widget>
    </widget>
-   <zorder>dockCode</zorder>
-   <zorder>verticalLayoutWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -211,7 +209,7 @@
      <item>
       <widget class="QTabWidget" name="tabsProject">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabProjectFiles">
         <attribute name="title">
@@ -333,7 +331,7 @@
             <bool>true</bool>
            </property>
            <property name="columnCount">
-            <number>2</number>
+            <number>3</number>
            </property>
            <column>
             <property name="text">
@@ -343,6 +341,11 @@
            <column>
             <property name="text">
              <string>Error</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Segment</string>
             </property>
            </column>
           </widget>
@@ -369,7 +372,7 @@
         <bool>true</bool>
        </property>
        <property name="currentIndex">
-        <number>5</number>
+        <number>1</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>

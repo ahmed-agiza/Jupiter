@@ -147,6 +147,16 @@ void MainWindow::assembleAction(int speed){
         return;
     }
 
+    if (!codeArea->isAllSaved()){
+        if (QMessageBox::information(this, "Save", "Do you want to save modified file(s) before assembling?", QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes){
+            foreach (QMdiSubWindow *window, codeArea->subWindowList()) {
+                CodeEditorWindow* currentWindow = dynamic_cast<CodeEditorWindow *>(window);
+                if (currentWindow)
+                    currentWindow->saveFile();
+            }
+        }
+    }
+
 
     QStringList textInstrs;
     QStringList dataInstrs;
@@ -185,7 +195,7 @@ void MainWindow::assembleAction(int speed){
     QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
     QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-    QObject::connect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
+    QObject::connect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int, QString, QString)));
     QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
     simulationThread.start();
     assembling = true;
@@ -1358,16 +1368,17 @@ void MainWindow::renameFileWindow(QString fileName, QString newName){
 
 }
 
-void MainWindow::appendErrorMessage(int lineNumber, QString msg){
-    qDebug() << "Err " << lineNumber << msg;
+void MainWindow::appendErrorMessage(int lineNumber, QString msg, QString segment){
     QTableWidgetItem *numItm = new QTableWidgetItem(QString::number(lineNumber));
     QTableWidgetItem *errorItm = new QTableWidgetItem(msg);
+    QTableWidgetItem *segItm = new QTableWidgetItem(segment);
 
     ui->tableLog->setSortingEnabled(false);
     int itemPosition = ui->tableLog->rowCount();
     ui->tableLog->insertRow(itemPosition);
     ui->tableLog->setItem(itemPosition,0 , numItm);
     ui->tableLog->setItem(itemPosition, 1, errorItm);
+    ui->tableLog->setItem(itemPosition, 2, segItm);
 
     ui->tableLog->setSortingEnabled(true);
     ui->tableLog->resizeColumnsToContents();
@@ -1393,7 +1404,7 @@ void MainWindow::pauseSimulation(){
     QObject::disconnect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
     QObject::disconnect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
     QObject::disconnect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
-    QObject::disconnect(assem, SIGNAL(sendErrorMessage(int,QString)), this, SLOT(appendErrorMessage(int,QString)));
+    QObject::disconnect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int,QString, QString)));
     QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
 
 
@@ -1965,7 +1976,7 @@ void MainWindow::initRegs(){
         mainProcessorRegisters.append(0);
     }
     mainProcessorRegisters[28] = 0x10008000;
-    mainProcessorRegisters[29] = 0x7FFFFFFC;
+    mainProcessorRegisters[29] = 0x001FFFFC;
 }
 
 void MainWindow::connectActions(){
@@ -2072,4 +2083,52 @@ void MainWindow::on_actionDelayedSimulation_triggered(){
 }
 
 void MainWindow::on_actionStepForwared_triggered(){
+}
+
+void MainWindow::on_tableLog_doubleClicked(const QModelIndex &index){
+    if (!index.isValid() || index.row() >= ui->tableLog->rowCount() || index.column() > 2)
+        return;
+    QTableWidgetItem *clickedItmSegment = ui->tableLog->item(index.row(), 2);
+    QString clickedSegment = clickedItmSegment->text();
+
+    QTableWidgetItem *clickedItmLine = ui->tableLog->item(index.row(), 0);
+    int clickedLine = clickedItmLine->text().toInt();
+    if (clickedSegment == "Data"){
+        QTreeWidgetItemIterator it(treeWidget);
+        while (*it) {
+            if ((*it)->text(0).trimmed() == MainWindow::projectDataFile){
+                on_treeFiles_itemDoubleClicked((*it), 0);
+                break;
+            }
+            ++it;
+        }
+        CodeEditorWindow *dataWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
+        if (dataWindow){
+            QTextCursor curs = dataWindow->codeEditor()->textCursor();
+            curs.clearSelection();
+            curs.setPosition(0);
+            curs.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, clickedLine);
+            dataWindow->codeEditor()->setTextCursor(curs);
+        }
+
+
+    }else if (clickedSegment == "Text"){
+        QTreeWidgetItemIterator it(treeWidget);
+        while (*it) {
+            if ((*it)->text(0).trimmed() == MainWindow::projectMainFile){
+                on_treeFiles_itemDoubleClicked((*it), 0);
+                break;
+            }
+            ++it;
+        }
+
+        CodeEditorWindow *textWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
+        if (textWindow){
+            QTextCursor curs = textWindow->codeEditor()->textCursor();
+            curs.clearSelection();
+            curs.setPosition(0);
+            curs.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, clickedLine);
+            textWindow->codeEditor()->setTextCursor(curs);
+        }
+    }
 }
