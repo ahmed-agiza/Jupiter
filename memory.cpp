@@ -581,7 +581,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
     if(segmentsToLoad[2]){
         int byteNumber = 0;
         Uint32 loadedNumber = 0;
-        const int maxRange = 32767;
+        Uint32 previousLoadedNumber = 0;
         uint liBaseAddress = this->backgroundTileSetBaseAddress;
         if(dynamic){
             dynamicOutFileList.append("# Dumping background tileset");
@@ -597,9 +597,16 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
                 }else{
                     loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
                 }if(byteNumber%4 == 3){
-                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
-                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
-                    loadedNumber = 0;
+                    if(loadedNumber == 0){
+                        dynamicOutFileList.append(QString("\tsw\t$zero, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    }else{
+                        if(loadedNumber != previousLoadedNumber){
+                            dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                            previousLoadedNumber = loadedNumber;
+                        }
+                        dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                        loadedNumber = 0;
+                    }
                 }
                 byteNumber++;
 
@@ -615,7 +622,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
     if(segmentsToLoad[3]){
         int byteNumber = 0;
         Uint32 loadedNumber = 0;
-        const int maxRange = 32767;
+        Uint32 previousLoadedNumber = 0;
         uint liBaseAddress = this->spritesTileSetBaseAddress;
         if(dynamic){
             dynamicOutFileList.append("# Dumping sprites tileset");
@@ -631,11 +638,19 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
                 }else{
                     loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
                 }if(byteNumber%4 == 3){
-                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
-                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
-                    loadedNumber = 0;
+                    if(loadedNumber == 0){
+                        dynamicOutFileList.append(QString("\tsw\t$zero, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    }else{
+                        if(loadedNumber != previousLoadedNumber){
+                            dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                            previousLoadedNumber = loadedNumber;
+                        }
+                        dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                        loadedNumber = 0;
+                    }
                 }
                 byteNumber++;
+
             }else{
                 storeByte(spritesTileSetBaseAddress + i, *byte);
             }if(count %1024 == 0)
@@ -648,7 +663,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
     if(segmentsToLoad[4]){
         int byteNumber = 0;
         Uint32 loadedNumber = 0;
-        const int maxRange = 32767;
+        Uint32 previousLoadedNumber = 0;
         uint liBaseAddress = this->tileMapBaseAddress;
         if(dynamic){
             dynamicOutFileList.append("# Dumping tile maps");
@@ -664,9 +679,16 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
                 }else{
                     loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
                 }if(byteNumber%4 == 3){
-                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
-                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
-                    loadedNumber = 0;
+                    if(loadedNumber == 0){
+                        dynamicOutFileList.append(QString("\tsw\t$zero, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    }else{
+                        if(loadedNumber != previousLoadedNumber){
+                            dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                            previousLoadedNumber = loadedNumber;
+                        }
+                        dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                        loadedNumber = 0;
+                    }
                 }
                 byteNumber++;
 
@@ -682,7 +704,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
     if(segmentsToLoad[5]){
         int byteNumber = 0;
         Uint32 loadedNumber = 0;
-        const int maxRange = 32767;
+        Uint32 previousLoadedNumber = 0;
         uint liBaseAddress = this->spriteRamBaseAddress;
         if(dynamic){
             dynamicOutFileList.append("# Dumping OAM");
@@ -697,9 +719,16 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
                 }else{
                     loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
                 }if(byteNumber%4 == 3){
-                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
-                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
-                    loadedNumber = 0;
+                    if(loadedNumber == 0){
+                        dynamicOutFileList.append(QString("\tsw\t$zero, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    }else{
+                        if(loadedNumber != previousLoadedNumber){
+                            dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                            previousLoadedNumber = loadedNumber;
+                        }
+                        dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                        loadedNumber = 0;
+                    }
                 }
                 byteNumber++;
 
@@ -715,7 +744,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
     if(segmentsToLoad[6]){
         int byteNumber = 0;
         Uint32 loadedNumber = 0;
-        const int maxRange = 32767;
+        Uint32 previousLoadedNumber = 0;
         uint liBaseAddress = this->paletteBaseAddress;
         if(dynamic){
             dynamicOutFileList.append("# Dumping palette");
@@ -730,9 +759,16 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
                 }else{
                     loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
                 }if(byteNumber%4 == 3){
-                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
-                    dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
-                    loadedNumber = 0;
+                    if(loadedNumber == 0){
+                        dynamicOutFileList.append(QString("\tsw\t$zero, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                    }else{
+                        if(loadedNumber != previousLoadedNumber){
+                            dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
+                            previousLoadedNumber = loadedNumber;
+                        }
+                        dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(byteNumber-3,10)+QString("($t0)"));
+                        loadedNumber = 0;
+                    }
                 }
                 byteNumber++;
 
@@ -780,58 +816,3 @@ void Memory::updateKey(int keyCode, int controllerId, bool value)
         inputMemory[controllerId] = inputMemory[controllerId] & mask;
     }
 }
-
-/*
-bool Memory::isValidWordL(int addr, int off) const
-{
-    if (addr - off > MemoryLimit)
-    {
-       // emit raiseException(OUT_OF_RANGE_EX_NO);
-        return false;
-    }
-    return true;
-
-}
-bool Memory::isValidWordR(int addr, int off) const
-{
-    if (addr + off > MemoryLimit)
-    {
-        //emit raiseException(OUT_OF_RANGE_EX_NO);
-        return false;
-    }
-    return true;
-
-}
-
-int Memory::loadWordL(int addr, int off) const
-{
-    if (!isValidWordL(addr, off))
-        return 0;
-    return (int) (memBytes[addr - off] << 8 |  memBytes[addr - off + 1]);
-}
-
-int Memory::loadWordR(int addr, int off) const
-{
-    if (!isValidWordR(addr, off))
-        return 0;
-    return (int) (memBytes[addr + off] << 8 |  memBytes[addr + off - 1] << 8);
-}
-
-void Memory::storeWordL(int addr, int off, int data)
-{
-    if (!isValidWordL(addr, off))
-        return;
-    memBytes[addr - off] = (data << 24) & 0xFF;
-    memBytes[addr - off + 1] = (data << 16) & 0xFF;
-}
-
-void Memory::storeWordR(int addr, int off, int data)
-{
-    if (!isValidWordR(addr, off))
-        return;
-    memBytes[addr + off - 1] = (data << 8) & 0xFF;
-    memBytes[addr + off] = data  & 0xFF;
-}
-*/
-
-
