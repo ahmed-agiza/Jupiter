@@ -363,9 +363,9 @@ void Assembler::parseDataSegment(QStringList* stringList)
                                 errorList.append(Error("Label \"" + labelName + "\" is already defined.", lineNumber, DATA_ERROR));
                             }
                             dataLabels[labelName] = address;
-
                         }
-                        address = i;
+
+                        address = i;   
                         if(directiveName.endsWith("z")) mem->storeByte(address++ + mem->dataSegmentBaseAddress , 0);
                     }else if(QRegExp(invalidCstringsRegex).indexIn(parameters) == 0){
                         errorList.append(Error("Invalid string, missing closing quote", lineNumber, DATA_ERROR));
@@ -508,7 +508,6 @@ void Assembler::parseDataSegment(QStringList* stringList)
         //mainW->appendErrorMessage(QString::number(errorList.at(i).lineNumber) + " " + errorList.at(i).description);
         //qDebug() << errorList[i].lineNumber << " " << errorList[i].description;
     }*/
-
 }
 
 void Assembler::parseTextSegment(QStringList* stringList)
@@ -1755,7 +1754,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
     {
         QString datalbl = m.cap(4);
         if(dataLabels.contains(datalbl)){
-            int addrrr = mem->dataSegmentBaseAddress+(labels[datalbl]<<2);
+            int addrrr = mem->dataSegmentBaseAddress+(dataLabels[datalbl]);
             instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0, addrrr >> 16,0,IFormat));
             instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,addrrr & 0xffff,0,IFormat));
         }else if(labels.contains(datalbl)){
