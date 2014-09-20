@@ -1,14 +1,15 @@
+#include <QDebug>
 #include "tileengine.h"
 
 bool saved = 0;
 #define TILE_SIZE 16
 TileEngine::TileEngine(QWidget* parent, const QPoint& position, const QSize& size, Memory* mem, QVector<int> *mRegisters) : QRenderWindow(parent, position, size, 20)
 {
-    this->setWindowTitle("Game Screen");
+    setWindowTitle("Game Screen");
     memory = mem;
     verticalScroll = &((*mRegisters)[25]);
     horizontalScroll = &((*mRegisters)[24]);
-    connect(memory, SIGNAL(renderNow()), this, SLOT(repaint()));
+    QObject::connect(memory, SIGNAL(renderNow()), this, SLOT(repaint()));
 }
 
 void TileEngine::initialize()
@@ -35,7 +36,6 @@ void TileEngine::renderFrame()
         for (unsigned int j = (*horizontalScroll) / TILE_SIZE; j < ceil(((*horizontalScroll) + float(screenSize.x)) / float(TILE_SIZE)); j++){
             Vector2f spritePosition(Vector2f(j * TILE_SIZE - (*horizontalScroll), i * TILE_SIZE - (*verticalScroll)));
             Vector2f spriteOrigin(0,0);
-
             if(j * TILE_SIZE < (*horizontalScroll)){
                 spritePosition.x = ((j + 1) * TILE_SIZE - (*horizontalScroll) - 1);
                 spriteOrigin.x = TILE_SIZE - 1;
@@ -46,6 +46,7 @@ void TileEngine::renderFrame()
             }
             memory->backgroundMatrix[i][j].setPosition(spritePosition);
             memory->backgroundMatrix[i][j].setOrigin(spriteOrigin);
+
             RenderWindow::draw(memory->backgroundMatrix[i][j]);
         }
 

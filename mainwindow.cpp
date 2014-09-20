@@ -114,6 +114,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     assem = new Assembler(memory, &mainProcessorRegisters, this);
 
+    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory, &mainProcessorRegisters);
+    memory->setTileEngine(engine);
+
     refreshActions();
     refreshEditActions();
     connectActions();
@@ -935,8 +938,7 @@ void MainWindow::on_actionSimulate_triggered(){
             if(engine->isVisible())
                 engine->hide();
         }
-    engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory, &this->mainProcessorRegisters);
-    memory->setTileEngine(engine);
+
     if(ui->actionEnable_Graphics_Engine->isChecked())
         engine->show();
 
