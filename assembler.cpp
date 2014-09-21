@@ -1031,6 +1031,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             Instruction tempBreakpoint("nop",registers,0,0,0,0,0,0,RFormat);
             tempBreakpoint.setFunc(nop);
             tempBreakpoint.setBreakpoint(true);
+            tempBreakpoint.setLineNumber(lineNumber);
             instructions.push_back(tempBreakpoint);
         }
         address++;
