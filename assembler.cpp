@@ -1021,9 +1021,23 @@ void Assembler::parseTextSegment(QStringList* stringList)
                 errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
             }
         }
+
+
+        if (!instructions.isEmpty() && line.trimmed() != "" && !line.trimmed().endsWith(":")){
+            instructions.last().setLineNumber(lineNumber);
+            if (bps.contains(lineNumber))
+                instructions.last().setBreakpoint(true);
+        }else if ((line.trimmed() == "" || line.trimmed().endsWith(":")) && bps.contains(lineNumber)){
+            Instruction tempBreakpoint("nop",registers,0,0,0,0,0,0,RFormat);
+            tempBreakpoint.setFunc(nop);
+            tempBreakpoint.setBreakpoint(true);
+            instructions.push_back(tempBreakpoint);
+        }
         address++;
         lineNumber++;
     }
+
+
 
     for (int i=0; i<missingBranchLabels.size(); i++)
     {
@@ -1058,8 +1072,8 @@ void Assembler::parseTextSegment(QStringList* stringList)
             emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description, errorList.at(i).segment);
     }
 
-    if (errorList.size() == 0)
-        getLineMapping();
+    //if (errorList.size() == 0)
+        //getLineMapping();
 
     emit assemblyComplete();
 }
@@ -1921,9 +1935,14 @@ inline void Assembler::executeFunction()
 
     activePC = PC/4;
     emit executingInstruction(activePC);
-    if (simulationSpeed > 0 && lineMapping.contains(activePC)){
+    if (simulationSpeed > 0 && instructions.at(activePC).getLineNumber() > -1/*lineMapping.contains(activePC)*/){
         if (!instructions.at(activePC).isFromAssembler())
-          emit executingLine(lineMapping[activePC]);
+          emit executingLine(instructions.at(activePC).getLineNumber());
+        //emit executingLine(lineMapping[activePC]);
+    }
+    if (instructions.at(activePC).isBreakpoint() && !skipBP){
+        emit pauseRequest();
+        return;
     }
 
     if (instructions[activePC].getName() == "syscall"){
@@ -2022,6 +2041,7 @@ inline void Assembler::executeFunction()
     instructions[activePC].execute(PC);
     (*registers)[0] = 0;
     (*registers)[34] = PC;
+    skipBP = false;
     emit instructionExecuted();
 
 }
@@ -2147,6 +2167,10 @@ void Assembler::simulate()
 void Assembler::resumeSimulation(){
     resumeFlag = true;
     simulate();
+}
+
+void Assembler::stepForward(){
+    skipBP = true;
 }
 
 void Assembler::readInt(int value){
@@ -2334,9 +2358,14 @@ void Assembler::reset(){
     errorList.clear();
     labels.clear();
     dataLabels.clear();
+    bps.clear();
 
     mem->clearAll();
 
+}
+
+void Assembler::setBPs(const QList<int> &list){
+    bps = list;
 }
 
 int Assembler::stringDistance(std::string s, std::string t){

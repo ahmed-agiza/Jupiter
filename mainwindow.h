@@ -311,6 +311,8 @@ private:
 
     bool simulationStopped;
 
+    int simulationSpeed;
+
     void assembleAction(int);
 
     void getProjectLabels(bool);

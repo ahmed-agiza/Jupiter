@@ -61,6 +61,7 @@ public:
 
 
     QMap<int, int> getLineMapping();
+    QList<int> getBPs();
 
     bool isMainFile();
     void setMainFile(bool);

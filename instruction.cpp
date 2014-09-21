@@ -30,6 +30,7 @@ Instruction::Instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
     func = NULL;
     fromAssembler = false;
     lineNumber = -1;
+    breakpoint = false;
 
 }
 
@@ -48,7 +49,8 @@ Instruction::Instruction(const Instruction &inst)
     format(inst.format),
     instructionWord(inst.instructionWord),
     fromAssembler(inst.fromAssembler),
-    lineNumber(inst.lineNumber)
+    lineNumber(inst.lineNumber),
+    breakpoint(inst.breakpoint)
 {}
 
 Instruction::Instruction()
@@ -99,6 +101,14 @@ void Instruction::setLineNumber(int line){
 
 int Instruction::getLineNumber() const{
     return lineNumber;
+}
+
+void Instruction::setBreakpoint(bool val){
+    breakpoint = val;
+}
+
+bool Instruction::isBreakpoint() const{
+    return breakpoint;
 }
 
 
@@ -231,12 +241,6 @@ void Instruction::execute(int &inPC)
         x = (* func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
     else
         qDebug() << "Null function!";
-
-//    qDebug() << "After excecuting " << this->name;
-//    for (int i = 0; i < registers->size(); i++){
-//        qDebug() << i << ": " << registers->at(i);
-//    }
-//    qDebug() << "------------------";
 
    if(x != 0)
        emit raiseException(x);

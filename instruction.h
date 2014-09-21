@@ -57,6 +57,9 @@ public:
     void setLineNumber(int);
     int getLineNumber() const;
 
+    void setBreakpoint(bool);
+    bool isBreakpoint() const;
+
 signals:
     void raiseException(int exceptionNumber);
 
@@ -80,6 +83,8 @@ private:
     bool fromAssembler;
     QString rawString;
     int lineNumber;
+
+    bool breakpoint;
 };
 
 #endif // INSTRUCTION_H

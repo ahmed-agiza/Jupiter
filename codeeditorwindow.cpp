@@ -250,6 +250,10 @@ QMap<int, int> CodeEditorWindow::getLineMapping(){
     return linesMapping;
 }
 
+QList<int> CodeEditorWindow::getBPs(){
+    return linesCounter->getBreakPoints();
+}
+
 bool CodeEditorWindow::isMainFile(){
     return mainFile;
 }

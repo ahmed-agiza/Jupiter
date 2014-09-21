@@ -41,6 +41,7 @@ private:
     QMap<QString, int> dataLabels;
     QMap<QString, int> opcode;
     QMap<QString, int (*)(fParam2)> functionsMap;
+    QList<int> bps;
     QStringList strippedInstrs;
     QStringList rawLines;
 
@@ -51,6 +52,8 @@ private:
     TileEngine *engine;
 
     bool waiting;
+    bool breakP;
+    bool skipBP;
 
     int address;
     int lineNumber;
@@ -97,6 +100,8 @@ public:
 
     void reset();
 
+    void setBPs(const QList<int>&);
+
     void setSimulationSpeed(int);
 
     void setLineMapping(QMap<int, int>);
@@ -121,12 +126,14 @@ public slots:
     void assemble(QStringList dataFileStringList, QStringList textFileStringList);
     void simulate();
     void resumeSimulation();
+    void stepForward();
     void readInt(int);
     void readString(QString);
     void readCharacter(QString);
 
 signals:
     void buttonPressed(int, int, bool);
+    void pauseRequest();
     void simulationComplete();
     void assemblyComplete();
     void progressUpdate(int);

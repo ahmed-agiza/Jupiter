@@ -16,6 +16,7 @@ public:
     CodeEditorWindow* getMainWindow();
     void activateMainWindow();
     bool isAllSaved();
+    QList<int> getMainBPs();
 
     QMdiSubWindow* addSubWindow(QWidget *, Qt::WindowFlags = 0);
 private:

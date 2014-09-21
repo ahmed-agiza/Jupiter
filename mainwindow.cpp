@@ -167,7 +167,7 @@ void MainWindow::assembleAction(int speed){
             }
         }
     }
-
+    simulationSpeed = speed;
 
     QStringList textInstrs;
     QStringList dataInstrs;
@@ -197,6 +197,7 @@ void MainWindow::assembleAction(int speed){
     }
     ui->tabsProject->setCurrentIndex(1);
     assem->reset();
+    assem->setBPs(codeArea->getMainBPs());
     assem->setSimulationSpeed(speed);
     assem->setRawList(rawInstrs);
 
@@ -207,7 +208,7 @@ void MainWindow::assembleAction(int speed){
     QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
     QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
     QObject::connect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int, QString, QString)));
-    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
+
     simulationThread.start();
     assembling = true;
     emit assembleSignal(dataInstrs, textInstrs);
@@ -856,6 +857,8 @@ void MainWindow::resumeSimulation(bool resume = true)
     QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
     QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
     QObject::connect(assem, SIGNAL(instructionExecuted()), this, SLOT(refreshModels()));
+    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()));
+    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
 
     simulating = true;
     simulationPaused = false;
@@ -999,7 +1002,8 @@ void MainWindow::on_actionNew_triggered(){
 
 
 void MainWindow::on_actionAssemble_triggered(){
-    assembleAction(0);
+    simulationSpeed = 0;
+    assembleAction(simulationSpeed);
 }
 
 void MainWindow::on_actionClose_triggered(){
@@ -1433,6 +1437,7 @@ void MainWindow::disconnectSimulator()
     QObject::disconnect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
     QObject::disconnect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int,QString, QString)));
     QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
+    QObject::disconnect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()));
 
     console->enableEditing(false);
 
@@ -1629,7 +1634,7 @@ void MainWindow::refreshActions(){
     ui->actionPause_Simulation->setEnabled(simulating && !simulationPaused);
     ui->actionResumeSimulation->setEnabled(simulationPaused);
     ui->actionStepForwared->setEnabled(simulationPaused);
-    ui->actionStepBackward->setEnabled(simulationPaused);
+    ui->actionStepForwared->setEnabled(simulationPaused);
     ui->actionStopSimulation->setEnabled(simulating);
 
     ui->actionClose->setEnabled(value);
@@ -2118,13 +2123,18 @@ void MainWindow::on_actionDelayedSimulation_triggered(){
     QPointer<DealyedSimulationDialog> simDlg = new DealyedSimulationDialog(this);
 
     if (simDlg->exec() == QDialog::Accepted){
-        int speed = simDlg->getSpeed();
+        simulationSpeed = simDlg->getSpeed();
         simulateAfterAssembling = true;
-        assembleAction(speed);
+        assembleAction(simulationSpeed);
     }
 }
 
 void MainWindow::on_actionStepForwared_triggered(){
+      if(simulating){
+          assem->stepForward();
+          resumeSimulation(true);
+      }else
+          qDebug() << "Not simulating";
 }
 
 void MainWindow::on_tableLog_doubleClicked(const QModelIndex &index){

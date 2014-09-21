@@ -67,6 +67,12 @@ bool CodeMDIArea::isAllSaved(){
     return true;
 }
 
+QList<int> CodeMDIArea::getMainBPs(){
+    if (hasMainFile && mainWindow)
+        return mainWindow->getBPs();
+    return QList<int>();
+}
+
 QMdiSubWindow *CodeMDIArea::addSubWindow(QWidget *widget, Qt::WindowFlags flags){
     QMdiSubWindow *tempWindow = QMdiArea::addSubWindow(widget, flags);
     setLabels(globalLabels);
