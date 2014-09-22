@@ -91,6 +91,9 @@ MainWindow::MainWindow(QWidget *parent) :
     treeWidget = ui->treeFiles;
     treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    recDialog = new ReconfigureProjectDialog(this);
+    recDialog->hide();
+
     memory = new Memory(this);
 
     timer = new QTimer(this);
@@ -803,6 +806,9 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
         menu->addAction(ui->actionOpen);
     }
     if (itm &&(itm->getItemType() == PROJECT_TITLE)){
+        QAction *reconfAction = new QAction("Reconfigure", this);
+        QObject::connect(reconfAction, SIGNAL(triggered()), this, SLOT(reconfigureProject()), Qt::UniqueConnection);
+        menu->addAction(reconfAction);
         menu->addAction(ui->actionClose);
     }
 
@@ -2217,4 +2223,39 @@ void MainWindow::on_actionClearBreakpoints_triggered(){
 void MainWindow::on_actionStepSimulation_triggered(){
     simulateAfterAssembling = true;
     assembleAction(simulationSpeed, true);
+}
+
+void MainWindow::reconfigureProject(){
+    recDialog->setParams(getProjectTitle(), isGFXEnabled(), isLittleEndian(), getTileMapWidth(), getTileMapHeight());
+    int retCode = recDialog->exec();
+    qDebug() << retCode;
+    qDebug() << (retCode == QDialog::Accepted);
+    if (retCode == QDialog::Accepted){
+        MainWindow::projectTitle = recDialog->getTitle();
+        if (recDialog->getLEndianState())
+            MainWindow::projectConf["Endianness"] = "little";
+        else
+            MainWindow::projectConf["Endianness"] = "big";
+        if (recDialog->getGFXState())
+            MainWindow::projectConf["EnableGFX"] = "true";
+        else
+            MainWindow::projectConf["EnableGFX"] = "false";
+
+
+         MainWindow::projectConf["TileMapWidth"] = QString::number(recDialog->getTileWidth());
+         MainWindow::projectConf["TileMapHeight"] = QString::number(recDialog->getTileHeight());
+
+         rebuildProjectFile();
+
+         applyProjectSettings();
+
+         loadProjectTree();
+
+         setWindowTitle("Mirage - " + MainWindow::projectTitle);
+
+    }
+
+
+
+
 }

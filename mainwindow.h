@@ -28,6 +28,9 @@
 #include "gpumemorydump.h"
 #include "baseconverter.h"
 #include "logiccalculator.h"
+#include "reconfigureprojectdialog.h"
+
+class ReconfigureProjectDialog;
 
 namespace Ui {
 class MainWindow;
@@ -201,6 +204,7 @@ private slots:
     void on_actionClearBreakpoints_triggered();
 
     void on_actionStepSimulation_triggered();
+    void reconfigureProject();
 
 public slots:
     void printToConsole(QString);
@@ -257,7 +261,7 @@ private:
     QTreeWidget *treeWidget;
     QStringList lastTextInstrs;
     QStringList lastDataInstrs;
-
+    ReconfigureProjectDialog *recDialog;
 
     QString getActiveFileContent(QString, bool = true);
 
