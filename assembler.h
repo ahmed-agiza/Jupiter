@@ -55,6 +55,8 @@ private:
     bool breakP;
     bool skipBP;
 
+    bool stepped;
+
     int address;
     int lineNumber;
 
@@ -77,6 +79,7 @@ private:
     int activePC;
     bool exitExec;
     bool resumeFlag;
+    bool startFlag;
 
     QMap<int, int> lineMapping;
 
@@ -121,12 +124,15 @@ public:
     bool isWaiting();
 
     inline void executeFunction();
+
+    void setStepped(bool);
+    bool isStepped() const;
 public slots:
     void exceptionHandler(int);
     void assemble(QStringList dataFileStringList, QStringList textFileStringList);
     void simulate();
     void resumeSimulation();
-    void stepForward();
+    void stepForward(bool);
     void readInt(int);
     void readString(QString);
     void readCharacter(QString);
@@ -134,7 +140,7 @@ public slots:
 signals:
     void buttonPressed(int, int, bool);
     void pauseRequest();
-    void simulationComplete();
+    void simulationComplete(int);
     void assemblyComplete();
     void progressUpdate(int);
     void simulationActive();

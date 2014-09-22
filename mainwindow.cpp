@@ -108,6 +108,7 @@ MainWindow::MainWindow(QWidget *parent) :
     simulating = false;
     simulateAfterAssembling = false;
     simulationPaused = true;
+    simulationSpeed = 0;
 
     initRegs();
     initMemoryModels(false);
@@ -138,8 +139,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableMemory->setCurrentIndex(1);
 
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(simulationProgress()));
-
-
+    thread()->setPriority(QThread::HighestPriority);
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *e){
@@ -151,7 +151,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e){
 
 }
 
-void MainWindow::assembleAction(int speed){
+void MainWindow::assembleAction(int speed, bool stepped = false){
 
     if(MainWindow::getProjectMainFile() == ""){
         QMessageBox::critical(this, "Error", "Cannot find main text file");
@@ -185,6 +185,8 @@ void MainWindow::assembleAction(int speed){
     ui->actionAssemble->setEnabled(false);
     ui->actionSimulate->setEnabled(false);
     ui->actionAssemble_and_Simulate->setEnabled(false);
+    ui->actionDelayedSimulation->setEnabled(false);
+    ui->actionStepSimulation->setEnabled(false);
     if(assemblerInitialized || assem){
         ui->tableLog->clearContents();
         ui->tableLog->setRowCount(0);
@@ -198,6 +200,7 @@ void MainWindow::assembleAction(int speed){
     ui->tabsProject->setCurrentIndex(1);
     assem->reset();
     assem->setBPs(codeArea->getMainBPs());
+    assem->setStepped(stepped);
     assem->setSimulationSpeed(speed);
     assem->setRawList(rawInstrs);
 
@@ -210,6 +213,7 @@ void MainWindow::assembleAction(int speed){
     QObject::connect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int, QString, QString)));
 
     simulationThread.start();
+    simulationThread.setPriority(QThread::HighPriority);
     assembling = true;
     emit assembleSignal(dataInstrs, textInstrs);
     if (simulationBar == NULL)
@@ -843,22 +847,24 @@ void MainWindow::consoleMenuRequested(QPoint loc){
 
 void MainWindow::resumeSimulation(bool resume = true)
 {
+
+    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()), Qt::BlockingQueuedConnection);
     QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
     QObject::connect(this, SIGNAL(resumeSimulationSignal()), assem, SLOT(resumeSimulation()));
-    QObject::connect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
+    QObject::connect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)), Qt::BlockingQueuedConnection);
     QObject::connect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
     QObject::connect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
     QObject::connect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
     QObject::connect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
-    QObject::connect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
-    QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
-    QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
-    QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
-    QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)));
-    QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)));
-    QObject::connect(assem, SIGNAL(instructionExecuted()), this, SLOT(refreshModels()));
-    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()));
-    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
+    QObject::connect(assem, SIGNAL(simulationComplete(int)), this, SLOT(simulationComplete(int)));
+    QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)), Qt::BlockingQueuedConnection);
+    QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)), Qt::BlockingQueuedConnection);
+    QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)), Qt::BlockingQueuedConnection);
+    QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)), Qt::BlockingQueuedConnection);
+    QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)), Qt::BlockingQueuedConnection);
+    QObject::connect(assem, SIGNAL(instructionExecuted()), this, SLOT(refreshModels()), Qt::BlockingQueuedConnection);
+    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()), Qt::BlockingQueuedConnection);
+    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)), Qt::BlockingQueuedConnection);
 
     simulating = true;
     simulationPaused = false;
@@ -981,14 +987,15 @@ void MainWindow::on_actionSimulate_triggered(){
         CodeEditorWindow *mainWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
         if (mainWindow){
             mainWindow->disableEditing();
-            QObject::connect(assem, SIGNAL(simulationComplete()), mainWindow, SLOT(enableEditing()));
+            QObject::connect(assem, SIGNAL(simulationComplete(int)), mainWindow, SLOT(enableEditing()));
         }
 
 
         ui->actionAssemble->setEnabled(false);
         ui->actionSimulate->setEnabled(false);
         ui->actionAssemble_and_Simulate->setEnabled(false);        
-
+        ui->actionStepSimulation->setEnabled(false);
+        ui->actionDelayedSimulation->setEnabled(false);
         resumeSimulation(false);
     }
 
@@ -1312,6 +1319,7 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
                     simulating = false;
                     simulateAfterAssembling = false;
                     simulationPaused = true;
+                    simulationSpeed = 0;
 
                     applyProjectSettings();
 
@@ -1425,7 +1433,7 @@ void MainWindow::disconnectSimulator()
     QObject::disconnect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
     QObject::disconnect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
     QObject::disconnect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)));
-    QObject::disconnect(assem, SIGNAL(simulationComplete()), this, SLOT(simulationComplete()));
+    QObject::disconnect(assem, SIGNAL(simulationComplete(int)), this, SLOT(simulationComplete(int)));
     QObject::disconnect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)));
     QObject::disconnect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)));
     QObject::disconnect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)));
@@ -1438,8 +1446,8 @@ void MainWindow::disconnectSimulator()
     QObject::disconnect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int,QString, QString)));
     QObject::disconnect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)));
     QObject::disconnect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()));
-
     console->enableEditing(false);
+
 
     timer->stop();
 
@@ -1449,7 +1457,7 @@ void MainWindow::disconnectSimulator()
 }
 
 void MainWindow::pauseSimulation(){
-
+    simulationPaused = true;
     disconnectSimulator();
     console->enableEditing(false);
 
@@ -1457,7 +1465,7 @@ void MainWindow::pauseSimulation(){
     statusBar()->showMessage("Paused", 2000);
 
 
-    simulationPaused = true;
+
     refreshActions();
 }
 
@@ -1629,12 +1637,15 @@ void MainWindow::refreshActions(){
         ui->actionAssemble->setEnabled(value);
         ui->actionAssemble_and_Simulate->setEnabled(value);
         ui->actionSimulate->setEnabled(value);
+        ui->actionDelayedSimulation->setEnabled(value);
+        ui->actionStepSimulation->setEnabled(value);
     }
 
     ui->actionPause_Simulation->setEnabled(simulating && !simulationPaused);
-    ui->actionResumeSimulation->setEnabled(simulationPaused);
-    ui->actionStepForwared->setEnabled(simulationPaused);
-    ui->actionStepForwared->setEnabled(simulationPaused);
+    ui->actionResumeSimulation->setEnabled(simulating && simulationPaused);
+
+    ui->actionStepForwared->setEnabled(simulating && (simulationPaused));
+    ui->actionStepBackward->setEnabled(simulating && (simulationPaused));
     ui->actionStopSimulation->setEnabled(simulating);
 
     ui->actionClose->setEnabled(value);
@@ -1862,9 +1873,11 @@ void MainWindow::on_actionEnable_Graphics_Engine_triggered(){
 
 
 
-void MainWindow::simulationComplete(){
-    simulating = false;
-    simulationPaused = false;
+void MainWindow::simulationComplete(int code = 0){
+    if (code == 0){
+        simulating = false;
+        simulationPaused = false;
+    }
     disconnectSimulator();
     refreshActions();
 
@@ -1877,9 +1890,14 @@ void MainWindow::simulationComplete(){
     resizeColumns();
 
     statusBar()->clearMessage();
-    statusBar()->showMessage("Simulated!", 2000);
-    qDebug() << "Simulated.";
-
+    if (code == 0){
+        statusBar()->showMessage("Simulated!", 2000);
+        qDebug() << "Simulated.";
+    }else if (code == 1){
+        statusBar()->showMessage("Breakpoint", 2000);
+    }else if (code == 2){
+        statusBar()->showMessage("Stepped", 500);
+    }
 }
 
 void MainWindow::assemblyComplete(){
@@ -2040,7 +2058,7 @@ void MainWindow::connectActions(){
     QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
     QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()));
     QObject::connect(this, SIGNAL(simulateSignal()), codeArea, SLOT(disableMainFileEditing()));
-    QObject::connect(assem, SIGNAL(simulationComplete()), codeArea, SLOT(enableMainFileEditing()));
+    QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing()));
 }
 
 void MainWindow::setupColumnsResize(){
@@ -2131,7 +2149,7 @@ void MainWindow::on_actionDelayedSimulation_triggered(){
 
 void MainWindow::on_actionStepForwared_triggered(){
       if(simulating){
-          assem->stepForward();
+          assem->stepForward(true);
           resumeSimulation(true);
       }else
           qDebug() << "Not simulating";
@@ -2195,4 +2213,9 @@ void MainWindow::on_actionClearBreakpoints_triggered(){
     CodeEditorWindow *activeWin = dynamic_cast<CodeEditorWindow *> (codeArea->activeSubWindow());
     if (activeWin)
         activeWin->clearBPs();
+}
+
+void MainWindow::on_actionStepSimulation_triggered(){
+    simulateAfterAssembling = true;
+    assembleAction(simulationSpeed, true);
 }

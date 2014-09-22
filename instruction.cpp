@@ -31,6 +31,7 @@ Instruction::Instruction(QString n, QVector<__int32> *b, int o, int s, int t, in
     fromAssembler = false;
     lineNumber = -1;
     breakpoint = false;
+    fake = false;
 
 }
 
@@ -109,6 +110,14 @@ void Instruction::setBreakpoint(bool val){
 
 bool Instruction::isBreakpoint() const{
     return breakpoint;
+}
+
+void Instruction::setFake(bool val){
+    fake = val;
+}
+
+bool Instruction::isFake() const{
+    return fake;
 }
 
 

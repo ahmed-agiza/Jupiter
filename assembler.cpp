@@ -299,6 +299,7 @@ Assembler::Assembler(Memory *memory, QVector<int> * mRegisters, MainWindow * mai
     totalCount = 0;
     currentProgress = 0;
     simulationSpeed = 0;
+    stepped = false;
 
 }
 
@@ -1031,6 +1032,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
             Instruction tempBreakpoint("nop",registers,0,0,0,0,0,0,RFormat);
             tempBreakpoint.setFunc(nop);
             tempBreakpoint.setBreakpoint(true);
+            tempBreakpoint.setFake(true);
             tempBreakpoint.setLineNumber(lineNumber);
             instructions.push_back(tempBreakpoint);
         }
@@ -1063,18 +1065,16 @@ void Assembler::parseTextSegment(QStringList* stringList)
     unsigned int addr = mem->textSegmentBaseAddress;
     for (int i = 0; i < instructions.size(); i++){
         instructions[i].setMem(mem);
+        if (instructions.at(i).isFake())
+            continue;
         mem->storeWord(addr,instructions[i].getWord());
         addr += 4;
         QObject::connect(&(instructions[i]), SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
     }
 
-    qDebug() << "S: "  << errorList.size();
     for (int i = 0; i<errorList.size(); i++){
             emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description, errorList.at(i).segment);
     }
-
-    //if (errorList.size() == 0)
-        //getLineMapping();
 
     emit assemblyComplete();
 }
@@ -1930,21 +1930,20 @@ inline void Assembler::executeFunction()
 {
     if (waiting)
         return;
-
     if (simulationSpeed > 0)
         thread()->msleep(simulationSpeed);
-
     activePC = PC/4;
     emit executingInstruction(activePC);
-    if (simulationSpeed > 0 && instructions.at(activePC).getLineNumber() > -1/*lineMapping.contains(activePC)*/){
+    if ((simulationSpeed > 0 || stepped) && instructions.at(activePC).getLineNumber() > -1/*lineMapping.contains(activePC)*/){
         if (!instructions.at(activePC).isFromAssembler())
           emit executingLine(instructions.at(activePC).getLineNumber());
-        //emit executingLine(lineMapping[activePC]);
     }
     if (instructions.at(activePC).isBreakpoint() && !skipBP){
+        breakP = true;
         emit pauseRequest();
         return;
     }
+
 
     if (instructions[activePC].getName() == "syscall"){
         int functionNumber = (*registers)[2];
@@ -2043,15 +2042,28 @@ inline void Assembler::executeFunction()
     (*registers)[0] = 0;
     (*registers)[34] = PC;
     skipBP = false;
+    breakP = false;
     emit instructionExecuted();
 
+    if (stepped)
+        emit pauseRequest();
+
+
+}
+
+void Assembler::setStepped(bool val){
+    stepped = val;
+}
+
+bool Assembler::isStepped() const{
+    return stepped;
 }
 
 void Assembler::simulate()
 {
 
-    QStringList logData;
-    if (!resumeFlag){
+    if (!startFlag){
+        startFlag = false;
         PC = 0;
         activePC = 0;
         exitExec = false;
@@ -2145,22 +2157,26 @@ void Assembler::simulate()
             }
         }
 
-        if (waiting || mainW->isSimulationPaused())
+        if (waiting || mainW->isSimulationPaused()){
             break;
+        }
 
         if (mainW->isSimulationStopped()){
             waiting = false;
             break;
         }
-
         executeFunction();
 
-        i++;
 
+        i++;
     }
     if (!waiting){
-        emit simulationComplete();
-        emit logDataSignal(logData);
+        if (breakP)
+            emit simulationComplete(1);
+        else if (stepped && (PC/4) < instructions.size() && !exitExec)
+            emit simulationComplete(2);
+        else
+            emit simulationComplete(0);
     }
 
 }
@@ -2170,8 +2186,8 @@ void Assembler::resumeSimulation(){
     simulate();
 }
 
-void Assembler::stepForward(){
-    skipBP = true;
+void Assembler::stepForward(bool bpVal = true){
+    skipBP = bpVal;
 }
 
 void Assembler::readInt(int value){
@@ -2351,6 +2367,8 @@ void Assembler::reset(){
     waiting = false;
     resumeFlag = false;
     exitExec = false;
+    stepped = false;
+    startFlag = true;
 
     strippedInstrs.clear();
     lineMapping.clear();

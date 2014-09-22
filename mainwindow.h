@@ -165,7 +165,7 @@ private slots:
     void on_actionSave_triggered();
     void on_actionEnable_Graphics_Engine_triggered();
 
-    void simulationComplete();
+    void simulationComplete(int);
     void assemblyComplete();
 
     void on_btnClearLog_clicked();
@@ -199,6 +199,8 @@ private slots:
     void on_actionInsert_Breakpoint_triggered();
 
     void on_actionClearBreakpoints_triggered();
+
+    void on_actionStepSimulation_triggered();
 
 public slots:
     void printToConsole(QString);
@@ -313,7 +315,7 @@ private:
 
     int simulationSpeed;
 
-    void assembleAction(int);
+    void assembleAction(int, bool);
 
     void getProjectLabels(bool);
     QStringList getFileLabels(QString, bool = true);

@@ -60,6 +60,9 @@ public:
     void setBreakpoint(bool);
     bool isBreakpoint() const;
 
+    void setFake(bool);
+    bool isFake() const;
+
 signals:
     void raiseException(int exceptionNumber);
 
@@ -85,6 +88,7 @@ private:
     int lineNumber;
 
     bool breakpoint;
+    bool fake;
 };
 
 #endif // INSTRUCTION_H
