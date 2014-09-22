@@ -73,8 +73,6 @@ private:
     int minimum4(int, int, int, int);
 
 
-    QStringList logData;
-
     int PC;
     int activePC;
     bool exitExec;

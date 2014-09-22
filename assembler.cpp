@@ -2378,6 +2378,8 @@ void Assembler::reset(){
     labels.clear();
     dataLabels.clear();
     bps.clear();
+    missingBranchLabels.clear();
+    missingJumpLabels.clear();
 
     mem->clearAll();
 

@@ -181,7 +181,6 @@ void MainWindow::assembleAction(int speed, bool stepped = false){
         dataInstrs = stripContent(getActiveFileContent(MainWindow::projectDataFile), tempMap);
         lastDataInstrs = dataInstrs;
     }
-
     ui->actionAssemble->setEnabled(false);
     ui->actionSimulate->setEnabled(false);
     ui->actionAssemble_and_Simulate->setEnabled(false);
