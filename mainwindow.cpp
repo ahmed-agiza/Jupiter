@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent) :
     console = new IOConsole(ui->tabConsole);
     console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->consoleHLayout->addWidget(console);
-    QObject::connect(console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(consoleMenuRequested(QPoint)));
+    QObject::connect(console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(consoleMenuRequested(QPoint)), Qt::UniqueConnection);
 
     treeWidget = ui->treeFiles;
     treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -138,7 +138,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabsProject->setCurrentIndex(0);
     ui->tableMemory->setCurrentIndex(1);
 
-    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(simulationProgress()));
+    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(simulationProgress()), Qt::UniqueConnection);
     thread()->setPriority(QThread::HighestPriority);
 }
 
@@ -207,10 +207,10 @@ void MainWindow::assembleAction(int speed, bool stepped = false){
 
     assemblerInitialized = false;
 
-    QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)));
-    QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)));
-    QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()));
-    QObject::connect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int, QString, QString)));
+    QObject::connect(this, SIGNAL(assembleSignal(QStringList,QStringList)), assem, SLOT(assemble(QStringList,QStringList)), Qt::UniqueConnection);
+    QObject::connect(assem, SIGNAL(progressUpdate(int)), this, SLOT(assemblingProgress(int)), Qt::UniqueConnection);
+    QObject::connect(assem, SIGNAL(assemblyComplete()), this, SLOT(assemblyComplete()), Qt::UniqueConnection);
+    QObject::connect(assem, SIGNAL(sendErrorMessage(int, QString, QString)), this, SLOT(appendErrorMessage(int, QString, QString)), Qt::UniqueConnection);
 
     simulationThread.start();
     simulationThread.setPriority(QThread::HighPriority);
@@ -381,15 +381,15 @@ void MainWindow::addEditorWindow(QString file, QString title, MirageFileType typ
 {
     CodeEditorWindow *editorWindow = new CodeEditorWindow(codeArea, editorFont, type);
     if(editorWindow->openFile(file, title)){
-        QObject::connect(editorWindow->codeEditor(), SIGNAL(textChanged()), this, SLOT(getLabels()));
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(textChanged()), this, SLOT(getLabels()), Qt::UniqueConnection);
         codeArea->addSubWindow(editorWindow);
         if (MainWindow::projectMainFile.trimmed()!= "" && editorWindow->getTitle() == MainWindow::projectMainFile)
             codeArea->setMainWindow(editorWindow);
         editorWindow->codeEditor()->setContextMenuPolicy(Qt::CustomContextMenu);
-        QObject::connect(editorWindow->codeEditor(), SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(editorWindowMenuRequested(QPoint)));
-        QObject::connect(editorWindow->codeEditor(), SIGNAL(copyAvailable(bool)), this, SLOT(enableCopyCutDelete(bool)));
-        QObject::connect(editorWindow->codeEditor(), SIGNAL(undoAvailable(bool)), this, SLOT(enableUndo(bool)));
-        QObject::connect(editorWindow->codeEditor(), SIGNAL(redoAvailable(bool)), this, SLOT(enableRedo(bool)));
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(editorWindowMenuRequested(QPoint)), Qt::UniqueConnection);
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(copyAvailable(bool)), this, SLOT(enableCopyCutDelete(bool)), Qt::UniqueConnection);
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(undoAvailable(bool)), this, SLOT(enableUndo(bool)), Qt::UniqueConnection);
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(redoAvailable(bool)), this, SLOT(enableRedo(bool)), Qt::UniqueConnection);
     }else{
         editorWindow->hide();
         QMessageBox::critical(this, "Error", "Failed to open the file " + file);
@@ -749,8 +749,8 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
         QAction *openAction = new QAction(this);
         QSignalMapper *openMapper = new QSignalMapper(this);
         openMapper->setMapping(openAction, (QObject *) rawItem);
-        QObject::connect(openAction, SIGNAL(triggered()), openMapper, SLOT(map()));
-        QObject::connect(openMapper, SIGNAL(mapped(QObject*)), this, SLOT(openTreeItem(QObject*)));
+        QObject::connect(openAction, SIGNAL(triggered()), openMapper, SLOT(map()), Qt::UniqueConnection);
+        QObject::connect(openMapper, SIGNAL(mapped(QObject*)), this, SLOT(openTreeItem(QObject*)), Qt::UniqueConnection);
         openAction->setText("Open");
         menu->addAction(openAction);
 
@@ -758,13 +758,13 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
             QAction *setMainAction = new QAction(this);
             QSignalMapper *setMainMapper = new QSignalMapper(this);
             setMainMapper->setMapping(setMainAction, rawItem->text(0).trimmed());
-            QObject::connect(setMainAction, SIGNAL(triggered()), setMainMapper, SLOT(map()));
-            QObject::connect(setMainMapper, SIGNAL(mapped(QString)), this, SLOT(setMainProjectFile(QString)));
+            QObject::connect(setMainAction, SIGNAL(triggered()), setMainMapper, SLOT(map()), Qt::UniqueConnection);
+            QObject::connect(setMainMapper, SIGNAL(mapped(QString)), this, SLOT(setMainProjectFile(QString)), Qt::UniqueConnection);
             setMainAction->setText("Set as Main File");
             menu->addAction(setMainAction);
         }else if (itm->getItemType() == TEXT_MAIN){
             QAction *unsetMainAction = new QAction(this);
-            QObject::connect(unsetMainAction, SIGNAL(triggered()), this, SLOT(unsetMainProjectFile()));
+            QObject::connect(unsetMainAction, SIGNAL(triggered()), this, SLOT(unsetMainProjectFile()), Qt::UniqueConnection);
             unsetMainAction->setText("Unset Main File");
             menu->addAction(unsetMainAction);
         }
@@ -772,27 +772,27 @@ void MainWindow::projectExplorerMenuRequested(QPoint loc){
         QAction *renameAction = new QAction(this);
         QSignalMapper *renameMapper = new QSignalMapper(this);
         renameMapper->setMapping(renameAction, (rawItem->text(0).trimmed()));
-        QObject::connect(renameAction, SIGNAL(triggered()), renameMapper, SLOT(map()));
+        QObject::connect(renameAction, SIGNAL(triggered()), renameMapper, SLOT(map()), Qt::UniqueConnection);
         renameAction->setText("Rename");
 
         QAction *removeAction = new QAction(this);
         QSignalMapper *removeMapper = new QSignalMapper(this);
         removeMapper->setMapping(removeAction, (rawItem->text(0).trimmed()));
-        QObject::connect(removeAction, SIGNAL(triggered()), removeMapper, SLOT(map()));
+        QObject::connect(removeAction, SIGNAL(triggered()), removeMapper, SLOT(map()), Qt::UniqueConnection);
         removeAction->setText("Remove");
 
 
 
         if (itm){
             if (itm->getItemType() == TEXT_CHILD){
-                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameTextItem(QString)));
-                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeTextFile(QString)));
+                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameTextItem(QString)), Qt::UniqueConnection);
+                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeTextFile(QString)), Qt::UniqueConnection);
             }else if (itm->getItemType() == TEXT_MAIN){
-                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameMainTextItem(QString)));
-                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeMainTextFile(QString)));
+                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameMainTextItem(QString)), Qt::UniqueConnection);
+                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeMainTextFile(QString)), Qt::UniqueConnection);
             }else if (itm->getItemType() == DATA_CHILD){
-                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameDataItem(QString)));
-                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeDataFile(QString)));
+                QObject::connect(renameMapper, SIGNAL(mapped(QString)), this, SLOT(renameDataItem(QString)), Qt::UniqueConnection);
+                QObject::connect(removeMapper, SIGNAL(mapped(QString)), this, SLOT(removeDataFile(QString)), Qt::UniqueConnection);
             }
         }
 
@@ -834,10 +834,10 @@ void MainWindow::consoleMenuRequested(QPoint loc){
     QAction *copyConsoleAction = new QAction ("Copy", this);
     QAction *copyAllConsoleAction = new QAction("Copy All", this);
     QAction *clearConsoleAction = new QAction("Clear", this);
-    QObject::connect(exportConsoleAction, SIGNAL(triggered()), this, SLOT(on_btnExportConsole_clicked()));
-    QObject::connect(copyConsoleAction, SIGNAL(triggered()), console, SLOT(copy()));
-    QObject::connect(copyAllConsoleAction, SIGNAL(triggered()), console, SLOT(copyAll()));
-    QObject::connect(clearConsoleAction, SIGNAL(triggered()), console, SLOT(clearConsole()));
+    QObject::connect(exportConsoleAction, SIGNAL(triggered()), this, SLOT(on_btnExportConsole_clicked()), Qt::UniqueConnection);
+    QObject::connect(copyConsoleAction, SIGNAL(triggered()), console, SLOT(copy()), Qt::UniqueConnection);
+    QObject::connect(copyAllConsoleAction, SIGNAL(triggered()), console, SLOT(copyAll()), Qt::UniqueConnection);
+    QObject::connect(clearConsoleAction, SIGNAL(triggered()), console, SLOT(clearConsole()), Qt::UniqueConnection);
     menu->addAction(exportConsoleAction);
     menu->addAction(copyConsoleAction);
     menu->addAction(copyAllConsoleAction);
@@ -848,23 +848,23 @@ void MainWindow::consoleMenuRequested(QPoint loc){
 void MainWindow::resumeSimulation(bool resume = true)
 {
 
-    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()), Qt::BlockingQueuedConnection);
-    QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()));
-    QObject::connect(this, SIGNAL(resumeSimulationSignal()), assem, SLOT(resumeSimulation()));
-    QObject::connect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)), Qt::BlockingQueuedConnection);
-    QObject::connect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()));
-    QObject::connect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()));
-    QObject::connect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()));
-    QObject::connect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()));
-    QObject::connect(assem, SIGNAL(simulationComplete(int)), this, SLOT(simulationComplete(int)));
-    QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)), Qt::BlockingQueuedConnection);
-    QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)), Qt::BlockingQueuedConnection);
-    QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)), Qt::BlockingQueuedConnection);
-    QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)), Qt::BlockingQueuedConnection);
+    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()), (Qt::ConnectionType)((Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection)));
+    QObject::connect(this, SIGNAL(simulateSignal()), assem, SLOT(simulate()), Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(resumeSimulationSignal()), assem, SLOT(resumeSimulation()), Qt::UniqueConnection);
+    QObject::connect(assem, SIGNAL(setReadingLimit(int)), console, SLOT(setReadingLimit(int)), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
+    QObject::connect(assem, SIGNAL(inputRequired(int)), this, SLOT(waitingInput()), Qt::UniqueConnection);
+    QObject::connect(console, SIGNAL(sendChar(QString)), this, SLOT(inputReceived()), Qt::UniqueConnection);
+    QObject::connect(console, SIGNAL(sendInt(int)), this, SLOT(inputReceived()), Qt::UniqueConnection);
+    QObject::connect(console, SIGNAL(sendString(QString)), this, SLOT(inputReceived()), Qt::UniqueConnection);
+    QObject::connect(assem, SIGNAL(simulationComplete(int)), this, SLOT(simulationComplete(int)), Qt::UniqueConnection);
+    QObject::connect(assem, SIGNAL(printToConsole(QString)), this, SLOT(printToConsole(QString)), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
+    QObject::connect(assem, SIGNAL(inputRequired(int)), console, SLOT(inputRequest(int)), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
+    QObject::connect(console, SIGNAL(sendChar(QString)), assem, SLOT(readCharacter(QString)), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
+    QObject::connect(console, SIGNAL(sendInt(int)), assem, SLOT(readInt(int)), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
     QObject::connect(console, SIGNAL(sendString(QString)), assem, SLOT(readString(QString)), Qt::BlockingQueuedConnection);
-    QObject::connect(assem, SIGNAL(instructionExecuted()), this, SLOT(refreshModels()), Qt::BlockingQueuedConnection);
-    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()), Qt::BlockingQueuedConnection);
-    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)), Qt::BlockingQueuedConnection);
+    QObject::connect(assem, SIGNAL(instructionExecuted()), this, SLOT(refreshModels()), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
+    QObject::connect(assem, SIGNAL(pauseRequest()), this, SLOT(pauseSimulation()), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
+    QObject::connect(assem, SIGNAL(executingLine(int)), this, SLOT(selectLine(int)), (Qt::ConnectionType)(Qt::BlockingQueuedConnection | Qt::UniqueConnection));
 
     simulating = true;
     simulationPaused = false;
@@ -987,7 +987,7 @@ void MainWindow::on_actionSimulate_triggered(){
         CodeEditorWindow *mainWindow = dynamic_cast<CodeEditorWindow *>(codeArea->activeSubWindow());
         if (mainWindow){
             mainWindow->disableEditing();
-            QObject::connect(assem, SIGNAL(simulationComplete(int)), mainWindow, SLOT(enableEditing()));
+            QObject::connect(assem, SIGNAL(simulationComplete(int)), mainWindow, SLOT(enableEditing()), Qt::UniqueConnection);
         }
 
 
@@ -2044,21 +2044,21 @@ void MainWindow::initRegs(){
 }
 
 void MainWindow::connectActions(){
-    QObject::connect(ui->actionEnable_Graphics_Engine, SIGNAL(toggled(bool)), this,SLOT(refreshGraphicsAction()));
-    QObject::connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)));
+    QObject::connect(ui->actionEnable_Graphics_Engine, SIGNAL(toggled(bool)), this,SLOT(refreshGraphicsAction()), Qt::UniqueConnection);
+    QObject::connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectExplorerMenuRequested(QPoint)), Qt::UniqueConnection);
     QObject::connect(codeArea,SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(refreshEditActions()));
-    QObject::connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(activeWindowCopy()));
-    QObject::connect(ui->actionCut, SIGNAL(triggered()), this, SLOT(activeWindowCut()));
-    QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(activeWindowPaste()));
-    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(activeWindowUndo()));
-    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(activeWindowRedo()));
-    QObject::connect(ui->actionSelect_All, SIGNAL(triggered()), this, SLOT(activeWindowSelectAll()));
-    QObject::connect(ui->actionQuickFind, SIGNAL(triggered()), this, SLOT(activeWindowQuickFind()));
-    QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()));
-    QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()));
-    QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()));
-    QObject::connect(this, SIGNAL(simulateSignal()), codeArea, SLOT(disableMainFileEditing()));
-    QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing()));
+    QObject::connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(activeWindowCopy()), Qt::UniqueConnection);
+    QObject::connect(ui->actionCut, SIGNAL(triggered()), this, SLOT(activeWindowCut()), Qt::UniqueConnection);
+    QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(activeWindowPaste()), Qt::UniqueConnection);
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(activeWindowUndo()), Qt::UniqueConnection);
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(activeWindowRedo()), Qt::UniqueConnection);
+    QObject::connect(ui->actionSelect_All, SIGNAL(triggered()), this, SLOT(activeWindowSelectAll()), Qt::UniqueConnection);
+    QObject::connect(ui->actionQuickFind, SIGNAL(triggered()), this, SLOT(activeWindowQuickFind()), Qt::UniqueConnection);
+    QObject::connect(ui->actionFindandReplace, SIGNAL(triggered()), this, SLOT(activeWindowFindAndReplace()), Qt::UniqueConnection);
+    QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()), Qt::UniqueConnection);
+    QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()), Qt::UniqueConnection);
+    QObject::connect(this, SIGNAL(simulateSignal()), codeArea, SLOT(disableMainFileEditing()), Qt::UniqueConnection);
+    QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing())), Qt::UniqueConnection;
 }
 
 void MainWindow::setupColumnsResize(){
@@ -2074,24 +2074,24 @@ void MainWindow::setupColumnsResize(){
     minRegsTableWidth1 = ui->tableMainRegisters->columnWidth(1) + 10;
     resizeColumns();
 
-    QObject::connect(ui->dataAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
-    QObject::connect(ui->dataMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
-    QObject::connect(ui->dataMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()));
+    QObject::connect(ui->dataAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->dataMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->dataMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()), Qt::UniqueConnection);
 
-    QObject::connect(ui->textAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
-    QObject::connect(ui->textMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
-    QObject::connect(ui->textMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()));
+    QObject::connect(ui->textAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->textMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->textMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeTextColumns()), Qt::UniqueConnection);
 
-    QObject::connect(ui->heapAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
-    QObject::connect(ui->heapMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
-    QObject::connect(ui->heapMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()));
+    QObject::connect(ui->heapAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->heapMemoryMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->heapMemoryBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeHeapColumns()), Qt::UniqueConnection);
 
-    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
-    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
-    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()));
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->stackAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeStackColumns()), Qt::UniqueConnection);
 
-    QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
-    QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()));
+    QObject::connect(ui->registersNaming, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()), Qt::UniqueConnection);
+    QObject::connect(ui->registersBase, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeRegsColumns()), Qt::UniqueConnection);
 }
 
 QStringList MainWindow::stripContent(QString rawText, QMap<int, int> &mapping){
