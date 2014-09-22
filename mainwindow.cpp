@@ -1759,7 +1759,6 @@ void MainWindow::rebuildProjectFile(){
             writer << "</Configure>" << endl;
             writer << "</MirageProject>";
             tempProject.close();
-            qDebug() << "Rebuilt";
         }else
             QMessageBox::critical(this, "Error", "Could not save the project file");
     }else
@@ -2228,8 +2227,6 @@ void MainWindow::on_actionStepSimulation_triggered(){
 void MainWindow::reconfigureProject(){
     recDialog->setParams(getProjectTitle(), isGFXEnabled(), isLittleEndian(), getTileMapWidth(), getTileMapHeight());
     int retCode = recDialog->exec();
-    qDebug() << retCode;
-    qDebug() << (retCode == QDialog::Accepted);
     if (retCode == QDialog::Accepted){
         MainWindow::projectTitle = recDialog->getTitle();
         if (recDialog->getLEndianState())
