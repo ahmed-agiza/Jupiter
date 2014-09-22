@@ -4,11 +4,10 @@
 #include <QDebug>
 
 ProjectCreator::ProjectCreator(MainWindow *parent) :
-    QDialog(parent),
+    QDialog(parent), p(parent),
     ui(new Ui::ProjectCreator)
 {
     ui->setupUi(this);
-    p = parent;
 
     ui->lblTitle->setBuddy(ui->txtTitle);
     ui->lblPath->setBuddy(ui->txtPath);
@@ -153,7 +152,7 @@ void ProjectCreator::on_btnCreate_clicked(){
             }
             QString fileName = tempDir.absolutePath() + "/" + projectTitle + ".mpro";
             buildProject(fileName);
-            this->hide();
+            hide();
         }else
             QMessageBox::critical(this, "Error", "Could not create the project directory");
 

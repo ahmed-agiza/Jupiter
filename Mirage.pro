@@ -63,7 +63,8 @@ SOURCES += main.cpp\
     baseconverter.cpp \
     logiccalculator.cpp \
     dealyedsimulationdialog.cpp \
-    codemdiarea.cpp
+    codemdiarea.cpp \
+    reconfigureprojectdialog.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -117,7 +118,8 @@ HEADERS  += mainwindow.h \
     baseconverter.h \
     logiccalculator.h \
     dealyedsimulationdialog.h \
-    codemdiarea.h
+    codemdiarea.h \
+    reconfigureprojectdialog.h
 
 
 FORMS    += \
@@ -139,7 +141,8 @@ FORMS    += \
     findandreplacedialog.ui \
     baseconverter.ui \
     logiccalculator.ui \
-    dealyedsimulationdialog.ui
+    dealyedsimulationdialog.ui \
+    reconfigureprojectdialog.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \
