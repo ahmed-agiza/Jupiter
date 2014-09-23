@@ -65,7 +65,8 @@ public:
 
 signals:
     void raiseException(int exceptionNumber);
-
+    void scrollingRegistersModified();
+    void writeToTimer();
 private:
     //QVector<QBitArray> *registers;
     QVector <__int32> *registers;

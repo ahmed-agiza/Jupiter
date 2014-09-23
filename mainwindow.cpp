@@ -2043,8 +2043,8 @@ void MainWindow::initRegs(){
     for (int i = 0; i < 35; i++){
         mainProcessorRegisters.append(0);
     }
-    mainProcessorRegisters[28] = 0x10008000;
-    mainProcessorRegisters[29] = 0x001FFFFC;
+    mainProcessorRegisters[28] = memory->heapSegmentBaseAddress;
+    mainProcessorRegisters[29] = memory->heapSegmentBaseAddress + memory->heapSegmentPhysicalSize - 4;/*0x001FFFFC;*/
 }
 
 void MainWindow::connectActions(){
@@ -2062,7 +2062,7 @@ void MainWindow::connectActions(){
     QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()), Qt::UniqueConnection);
     QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()), Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(simulateSignal()), codeArea, SLOT(disableMainFileEditing()), Qt::UniqueConnection);
-    QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing())), Qt::UniqueConnection;
+    QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing()), Qt::UniqueConnection);
 }
 
 void MainWindow::setupColumnsResize(){

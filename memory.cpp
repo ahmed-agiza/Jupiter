@@ -137,6 +137,13 @@ Memory::Memory(QObject *parent): QObject(parent),
     for(int i=0; i<spriteRam.size(); i++)
         spriteRam[i].setTileSet(&spritesTileSet);
 
+    screenSize.x = 512;
+    screenSize.y = 384;
+}
+
+void Memory::setScrollingRegusters(uint* v, uint* h){
+    verticalScroll = v;
+    horizontalScroll = h;
 }
 
 void Memory::resizeTileMap()
@@ -249,7 +256,8 @@ void Memory::storeByte(unsigned int addr, char data)
         tileMap[r][c] = data;
         backgroundMatrix[r][c].setTexture(backgroundTileSet[(unsigned char)tileMap[r][c]].getTexture());
         backgroundTileSet[(unsigned char)tileMap[r][c]].addSprite(&backgroundMatrix[r][c]);
-        //emit renderNow();
+        updateTilemapsDisplay();
+        emit renderNow();
     }else if(segment == BG_TILE_SET){
         backgroundTileSet[(addr >> 8)&0xff].storeByte(addr, data);
         emit renderNow();
@@ -1038,7 +1046,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
     }
 
     if(dynamic){
-        qDebug() << "hello";
+        qDebug() << "dynamic dumping";
         ofstream myFile("D:/testFile.txt");
         for(QString line: dynamicOutFileList ){
             myFile << line.toStdString() << std::endl;
@@ -1072,4 +1080,28 @@ void Memory::updateKey(int keyCode, int controllerId, bool value)
         Uint16 mask = ~(Uint16(1) << keyCode);
         inputMemory[controllerId] = inputMemory[controllerId] & mask;
     }
+}
+
+void Memory::updateTilemapsDisplay()
+{
+    for (unsigned int i = (*verticalScroll) / TILE_SIZE; i < ceil(((*verticalScroll) + float(screenSize.y)) / float(TILE_SIZE)); i++)
+        for (unsigned int j = (*horizontalScroll) / TILE_SIZE; j < ceil(((*horizontalScroll) + float(screenSize.x)) / float(TILE_SIZE)); j++){
+            Vector2f spritePosition(Vector2f(j * TILE_SIZE - (*horizontalScroll), i * TILE_SIZE - (*verticalScroll)));
+            Vector2f spriteOrigin(0,0);
+            if(j * TILE_SIZE < (*horizontalScroll)){
+                spritePosition.x = ((j + 1) * TILE_SIZE - (*horizontalScroll) - 1);
+                spriteOrigin.x = TILE_SIZE - 1;
+            }
+            if(i * TILE_SIZE < (*verticalScroll)){
+                spritePosition.y = ((i + 1) * TILE_SIZE - (*verticalScroll) - 1);
+                spriteOrigin.y = TILE_SIZE - 1;
+            }
+            backgroundMatrix[i][j].setPosition(spritePosition);
+            backgroundMatrix[i][j].setOrigin(spriteOrigin);
+        }
+}
+
+void Memory::updateScrolling()
+{
+    updateTilemapsDisplay();
 }

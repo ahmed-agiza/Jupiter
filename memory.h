@@ -50,6 +50,8 @@ public:
     void saveMemory(QString, QVector<bool>);
     void resizeTileMap();
 
+    void updateTilemapsDisplay();
+    void setScrollingRegusters(uint*, uint*);
     void clearText();
     void clearData();
     void clearHeap();
@@ -93,6 +95,7 @@ signals:
 
 public slots:
     void updateKey(int, int, bool);
+    void updateScrolling();
 private:
     QByteArray textSegment;
     QByteArray dataSegment;
@@ -102,6 +105,7 @@ private:
     QVector<unsigned short> inputMemory;
     TileEngine* engine;
     int claculateLoadSize(const QVector<bool>&);
+    Vector2i screenSize;
 public:
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
@@ -129,6 +133,8 @@ public:
 
     const unsigned int screenWidth;
     const unsigned int screenHeight;
+
+    uint *verticalScroll, *horizontalScroll;
 };
 
 #endif // MEMORY_H

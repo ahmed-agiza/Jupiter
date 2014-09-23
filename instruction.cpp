@@ -246,8 +246,13 @@ void Instruction::execute(int &inPC)
 //    qDebug() << "------------------";
 
     int x = -1;
-    if (func != NULL)
+    if (func != NULL){
         x = (* func)(registers, rs, rt, rd, imm, shamt, inPC, mem);
+        if(((rd == 24 || rd == 25) && format == RFormat) || ((rt == 24 || rt == 25) && format == IFormat))
+            emit scrollingRegistersModified();
+        if((rd == 30 && format == RFormat) || (rt == 30 && format == IFormat))
+            emit writeToTimer();
+    }
     else
         qDebug() << "Null function!";
 

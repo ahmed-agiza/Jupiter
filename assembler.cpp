@@ -1070,6 +1070,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         mem->storeWord(addr,instructions[i].getWord());
         addr += 4;
         QObject::connect(&(instructions[i]), SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
+        QObject::connect(&(instructions[i]), SIGNAL(scrollingRegistersModified()), mem, SLOT(updateScrolling()));
     }
 
     for (int i = 0; i<errorList.size(); i++){
