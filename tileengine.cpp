@@ -20,6 +20,7 @@ void TileEngine::initialize()
 
 void TileEngine::update()
 {
+    qDebug() << "render now";
     RenderWindow::clear(Color(0, 128, 128));
     renderFrame();
 }

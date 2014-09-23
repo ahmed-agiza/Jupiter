@@ -121,11 +121,11 @@ MainWindow::MainWindow(QWidget *parent) :
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory, &mainProcessorRegisters);
     engine->hide();
     memory->setTileEngine(engine);
-    memory->setParent(assem);
+    //memory->setParent(assem);
 
 
     assem->moveToThread(&simulationThread);
-    memory->moveToThread(&simulationThread);
+    //memory->moveToThread(&simulationThread);
 
 
     refreshActions();
@@ -959,7 +959,7 @@ void MainWindow::on_actionSimulate_triggered(){
     QStringList tempTextInstrs = stripContent(getActiveFileContent(MainWindow::projectMainFile), tempMap);
     QStringList tempDataInstrs = stripContent(getActiveFileContent(MainWindow::projectDataFile), tempMap);
     if (tempTextInstrs != lastTextInstrs || tempDataInstrs != lastDataInstrs){
-        if (QMessageBox::question(this, "Re-assemble", "The assembled files have been modified, to you want to reassemble?", QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes){
+        if (QMessageBox::question(this, "Re-assemble", "The assembled files have been modified, do you want to reassemble?", QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes){
             on_actionAssemble_and_Simulate_triggered();
         }
 
@@ -2250,6 +2250,7 @@ void MainWindow::reconfigureProject(){
 
          setWindowTitle("Mirage - " + MainWindow::projectTitle);
 
+         memory->resizeTileMap();
     }
 
 

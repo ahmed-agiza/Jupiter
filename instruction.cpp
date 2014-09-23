@@ -251,9 +251,9 @@ void Instruction::execute(int &inPC)
     else
         qDebug() << "Null function!";
 
-   if(x != 0)
+   if(x != 0){
        emit raiseException(x);
-
+   }
 }
 
 int Instruction::getWord()

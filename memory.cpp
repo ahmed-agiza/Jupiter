@@ -249,7 +249,7 @@ void Memory::storeByte(unsigned int addr, char data)
         tileMap[r][c] = data;
         backgroundMatrix[r][c].setTexture(backgroundTileSet[(unsigned char)tileMap[r][c]].getTexture());
         backgroundTileSet[(unsigned char)tileMap[r][c]].addSprite(&backgroundMatrix[r][c]);
-        emit renderNow();
+        //emit renderNow();
     }else if(segment == BG_TILE_SET){
         backgroundTileSet[(addr >> 8)&0xff].storeByte(addr, data);
         emit renderNow();
