@@ -160,6 +160,8 @@ CONFIG += c++11
 
 QMAKE_CFLAGS += -Wno-unused
 QMAKE_CFLAGS += -Wno-unused-parameter
+QMAKE_CFLAGS += -Wno-Wunused-parameter
+QMAKE_CFLAGS += -Wno-unused-variable
 
 #win32:RC_ICONS += :/icons/icons/appicon.ico
 win32:RC_ICONS += appicon.ico

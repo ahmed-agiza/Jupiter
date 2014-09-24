@@ -326,6 +326,7 @@ private:
 
     CodeMDIArea *codeArea;
     QStringList globalLabels;
+    QMap<QString, QMap<int, QString>> globalLabelsMap;
 signals:
     void assembleSignal(QStringList, QStringList);
     void simulateSignal();

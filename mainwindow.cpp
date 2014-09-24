@@ -87,7 +87,6 @@ MainWindow::MainWindow(QWidget *parent) :
     console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->consoleHLayout->addWidget(console);
     QObject::connect(console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(consoleMenuRequested(QPoint)), Qt::UniqueConnection);
-
     treeWidget = ui->treeFiles;
     treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -270,7 +269,8 @@ QStringList MainWindow::getFileLabels(QString file, bool checkClosed){
         if (line.trimmed() == "")
             continue;
         labelsRegEx.indexIn(line);
-        labelsList << labelsRegEx.cap(0);
+        QString label = labelsRegEx.cap(0);
+        labelsList << label;
     }
     return labelsList;
 }
@@ -383,7 +383,7 @@ void MainWindow::addEditorWindow(QString file, QString title, MirageFileType typ
 {
     CodeEditorWindow *editorWindow = new CodeEditorWindow(codeArea, editorFont, type);
     if(editorWindow->openFile(file, title)){
-        QObject::connect(editorWindow->codeEditor(), SIGNAL(textChanged()), this, SLOT(getLabels()), Qt::UniqueConnection);
+       ;// QObject::connect(editorWindow->codeEditor(), SIGNAL(textChanged()), this, SLOT(getLabels()), Qt::UniqueConnection);
         codeArea->addSubWindow(editorWindow);
         if (MainWindow::projectMainFile.trimmed()!= "" && editorWindow->getTitle() == MainWindow::projectMainFile)
             codeArea->setMainWindow(editorWindow);
@@ -1671,7 +1671,8 @@ void MainWindow::refreshEditActions(){
         ui->actionUndo->setEnabled(false);
         ui->actionRedo->setEnabled(false);
         ui->actionDeleteSelection->setEnabled(false);
-    }
+    }else
+        ui->actionPaste->setEnabled(true);
     ui->actionFindandReplace->setEnabled(activeWindow);
     ui->actionQuickFind->setEnabled(activeWindow);
     ui->actionSave->setEnabled(activeWindow);
@@ -2062,7 +2063,8 @@ void MainWindow::connectActions(){
     QObject::connect(ui->actionDeleteSelection, SIGNAL(triggered()), this, SLOT(activeWindowDelete()), Qt::UniqueConnection);
     QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()), Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(simulateSignal()), codeArea, SLOT(disableMainFileEditing()), Qt::UniqueConnection);
-    QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing())), Qt::UniqueConnection;
+    QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing()), Qt::UniqueConnection);
+
 }
 
 void MainWindow::setupColumnsResize(){

@@ -10,6 +10,8 @@ class LinesCounter : public QTextEdit
 public:
     explicit LinesCounter(QWidget *parent = 0);
     int getLineNumber(QPoint);
+    int getMaxLine() const;
+    void setMinLine(int);
     void boldLines(int, int);
     QList<int> getBreakPoints();
 
@@ -18,7 +20,7 @@ private:
     QTextCharFormat boldFormat;
     QScrollBar *vbar;
     QList<int> bps;
-    int lastLine;
+    int lastLine, firstLine;
 
 protected:
     bool eventFilter(QObject *, QEvent *);

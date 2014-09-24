@@ -10,7 +10,14 @@
 LinesCounter::LinesCounter(QWidget *parent) :
     QTextEdit(parent){
     installEventFilter(this);
-
+    QPalette pal = palette();
+    pal.setColor(QPalette::Disabled, QPalette::Text, QColor(Qt::white));
+    pal.setColor(QPalette::Active, QPalette::Text, QColor(Qt::white));
+    pal.setColor(QPalette::Inactive, QPalette::Text, QColor(Qt::white));
+    pal.setColor(QPalette::Disabled, QPalette::WindowText, QColor(Qt::white));
+    pal.setColor(QPalette::Active, QPalette::WindowText, QColor(Qt::white));
+    pal.setColor(QPalette::Inactive, QPalette::WindowText, QColor(Qt::white));
+    setPalette(pal);
     QFont defaultFont = font();
     defaultFont.setFamily("Consolas");
     defaultFont.setPointSize(10);
@@ -20,13 +27,18 @@ LinesCounter::LinesCounter(QWidget *parent) :
     setFont(defaultFont);
     defaultFormat = currentCharFormat();
     defaultFormat.setFont(defaultFont);
+    defaultFormat.setForeground(QColor(Qt::white));
     setCurrentCharFormat(defaultFormat);
 
     boldFormat = defaultFormat;
     boldFormat.setFont(boldFont);
     vbar = verticalScrollBar();
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    lastLine = 0;
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    firstLine = lastLine = 0;
+    //setLineWrapMode(QPlainTextEdit::NoWrap);
+
+
 
     //QObject::connect(this, SIGNAL(textChanged()), this, SLOT(setMaxLine()));
 }
@@ -37,7 +49,16 @@ int LinesCounter::getLineNumber(QPoint linePos){
     return cur.selectedText().trimmed().toInt();
 }
 
+int LinesCounter::getMaxLine() const{
+    return lastLine;
+}
+
 void LinesCounter::boldLines(int start, int end){
+//    int tempStart = start;
+//    start -= firstLine;
+//    end = start + tempStart - end;
+    //qDebug() << "Start: " << start;
+    //qDebug() << "End: " << end;
     QTextCursor defaultCursor = textCursor();
     defaultCursor.select(QTextCursor::Document);
     defaultCursor.setCharFormat(defaultFormat);
@@ -99,6 +120,7 @@ bool LinesCounter::eventFilter(QObject *o, QEvent *e)
 
 void LinesCounter::scrollWithEditor(int val){
     if (vbar){
+        qDebug() << "Got: " << val;
         vbar->setValue(val);
     }
 
@@ -161,6 +183,9 @@ void LinesCounter::setMaxLine(int num){
     trimBPs();
 
 }
+
+
+
 
 void LinesCounter::trimBPs(){
     bool trimmed = false;

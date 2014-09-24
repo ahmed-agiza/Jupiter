@@ -58,7 +58,7 @@ bool CodeEditorWindow::openFile(QString fileName, QString fileTitle){
             fileData.append(stream.readLine() + "\n");
         }
         file.close();
-        editor->setText(fileData);
+        editor->setPlainText(fileData);
         //editor->setText(fileData);
         setWindowTitle(title);
         edited = false;
@@ -298,12 +298,13 @@ void CodeEditorWindow::init(){
     QObject::connect(editor, SIGNAL(updateScroll(int)), linesCounter, SLOT(scrollWithEditor(int)));
 
     editor->setObjectName("CodeE");
-    //newCode->setFont(editorFont);
 
     linesCounter->setEnabled(false);
     linesCounter->setMinimumSize(10, 10);
-    linesCounter->setMaximumSize(40, linesCounter->maximumSize().height());
-    linesCounter->setText("0");
+    linesCounter->setMaximumWidth(60);
+    linesCounter->setMaximumHeight(linesCounter->maximumSize().height());
+    //linesCounter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    linesCounter->setPlainText("0");
     editor->setCounter(linesCounter);
     QObject::connect(linesCounter, SIGNAL(startSelection(int)), editor, SLOT(startSelection(int)));
     QObject::connect(linesCounter, SIGNAL(selectLines(int)), editor, SLOT(addSelectedLines(int)));
