@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <QMap>
+#include <QTime>
 #include <QSet>
 #include <QTextEdit>
 #include <QStringList>
@@ -44,7 +45,7 @@ private:
     QList<int> bps;
     QStringList strippedInstrs;
     QStringList rawLines;
-
+    //QTimer timeRegisterTimer;
 
 
     Memory *mem;

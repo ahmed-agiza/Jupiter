@@ -20,6 +20,7 @@ void TileEngine::initialize()
 
 void TileEngine::update()
 {
+    qDebug() << "render now";
     RenderWindow::clear(Color(0, 128, 128));
     renderFrame();
 }
@@ -34,7 +35,7 @@ void TileEngine::renderFrame()
 
     for (unsigned int i = (*verticalScroll) / TILE_SIZE; i < ceil(((*verticalScroll) + float(screenSize.y)) / float(TILE_SIZE)); i++)
         for (unsigned int j = (*horizontalScroll) / TILE_SIZE; j < ceil(((*horizontalScroll) + float(screenSize.x)) / float(TILE_SIZE)); j++){
-            Vector2f spritePosition(Vector2f(j * TILE_SIZE - (*horizontalScroll), i * TILE_SIZE - (*verticalScroll)));
+            /*Vector2f spritePosition(Vector2f(j * TILE_SIZE - (*horizontalScroll), i * TILE_SIZE - (*verticalScroll)));
             Vector2f spriteOrigin(0,0);
             if(j * TILE_SIZE < (*horizontalScroll)){
                 spritePosition.x = ((j + 1) * TILE_SIZE - (*horizontalScroll) - 1);
@@ -45,7 +46,7 @@ void TileEngine::renderFrame()
                 spriteOrigin.y = TILE_SIZE - 1;
             }
             memory->backgroundMatrix[i][j].setPosition(spritePosition);
-            memory->backgroundMatrix[i][j].setOrigin(spriteOrigin);
+            memory->backgroundMatrix[i][j].setOrigin(spriteOrigin);*/
 
             RenderWindow::draw(memory->backgroundMatrix[i][j]);
 

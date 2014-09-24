@@ -495,6 +495,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                 }
             }else{
                 errorList.push_back(Error("Invalid type specifier \""+directiveName+"\"", lineNumber, DATA_ERROR));
+
             }
         }else if((CMT.indexIn(line, 0)) == -1 && WHITSPACE.indexIn(line, 0) == -1 && line.size() != 0){
 
@@ -704,18 +705,23 @@ void Assembler::parseTextSegment(QStringList* stringList)
                     if(registerRegExp.indexIn(threeArgsInstruction.cap(3)) == -1){
                         if(threeArgsInstruction.cap(3)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else if(registerRegExp.indexIn(threeArgsInstruction.cap(4)) == -1){
                         if(threeArgsInstruction.cap(4)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("Second argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else if(registerRegExp.indexIn(threeArgsInstruction.cap(5)) == -1){
                         if(threeArgsInstruction.cap(5)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(5)+"\"",lineNumber, TEXT_ERROR));
+
                         }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != -1 &&
                                  (
                                      instructionName == "add"    ||
@@ -745,9 +751,11 @@ void Assembler::parseTextSegment(QStringList* stringList)
 
                         }else{
                             errorList.push_back(Error("Third argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else{
                         errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
+
                     }
                 }else if(
                          instructionName == "addi"    ||
@@ -776,14 +784,18 @@ void Assembler::parseTextSegment(QStringList* stringList)
                     if(registerRegExp.indexIn(threeArgsInstruction.cap(3)) == -1){
                         if(threeArgsInstruction.cap(3)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else if(registerRegExp.indexIn(threeArgsInstruction.cap(4)) == -1){
                         if(threeArgsInstruction.cap(4)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+threeArgsInstruction.cap(4)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("Second argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else if(numberRegExp.indexIn(threeArgsInstruction.cap(5)) != 0){
                         if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
@@ -802,6 +814,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                             QString instructionName2 = instructionName;
                             instructionName.remove(instructionName.indexOf("i"),1);
                             errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"\" instead of \""+instructionName2+"\"",lineNumber, TEXT_ERROR));
+
                         }else if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
                                  (
                                      instructionName == "sll"    ||
@@ -810,6 +823,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                      )
                                  ){
                             errorList.push_back(Error("Third operand must be a number, use \""+instructionName+"v\" instead of \""+instructionName+"\"",lineNumber, TEXT_ERROR));
+
                         }else if((registerRegExp.indexIn(threeArgsInstruction.cap(5)) != -1) &&
                                  (
                                      instructionName == "beq"     ||
@@ -825,6 +839,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                      )
                                  ){
                             errorList.push_back(Error("Branch value cannot be a register, use a label or a number",lineNumber, TEXT_ERROR));
+
                         }else if(
                                  instructionName == "beq"     ||
                                  instructionName == "bne"     ||
@@ -838,20 +853,25 @@ void Assembler::parseTextSegment(QStringList* stringList)
                                  instructionName == "bgeu"
                                  ){
                             errorList.push_back(Error("Invalid label \""+threeArgsInstruction.cap(5)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber, TEXT_ERROR));
+
                         }
                     }
                 }else if(instructionSet.search(instructionName.toStdString())){
                     errorList.push_back(Error("Instruction \""+instructionName+"\" does not take three arguments",lineNumber, TEXT_ERROR));
+
                 }else{
                     int i;
                     for(i=0; i<instructionList.size(); i++){
                         if(stringDistance(instructionName.toStdString(), instructionList[i].toStdString()) == 1)
                             break;
                     }
-                    if(i == instructionList.size())
+                    if(i == instructionList.size()){
                         errorList.push_back(Error("Unknown instruction \""+instructionName+"\"",lineNumber, TEXT_ERROR));
-                    else
+
+                    }else{
                         errorList.push_back(Error("Unknown instruction \""+instructionName+"\", did you mean \""+instructionList[i]+"\"?",lineNumber, TEXT_ERROR));
+
+                    }
                 }
             }else if((twoArgsInstruction.indexIn(line, 0)) != -1){
                 QString instructionName = twoArgsInstruction.cap(2).toLower();
@@ -868,17 +888,22 @@ void Assembler::parseTextSegment(QStringList* stringList)
                     if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
                         if(twoArgsInstruction.cap(3)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) == -1){
                         if(twoArgsInstruction.cap(4)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(4)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("Second argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else{
                         errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
+
                     }
                 }else if(
                          instructionName == "lui"   ||
@@ -889,21 +914,27 @@ void Assembler::parseTextSegment(QStringList* stringList)
                     if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
                         if(twoArgsInstruction.cap(3)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else if(numberRegExp.indexIn(twoArgsInstruction.cap(4)) != 0){
                         if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) != -1){
                             if(instructionName == "rol" || instructionName == "ror"){
                                 errorList.push_back(Error("Second Argument must be a number, cannot rotate by a register",lineNumber, TEXT_ERROR));
+
                             }else{
                                 errorList.push_back(Error("Second argument must be a number, use \"move\" instead of \""+instructionName+"\"",lineNumber, TEXT_ERROR));
+
                             }
                         }else{
                             errorList.push_back(Error("Second argument must be a number",lineNumber, TEXT_ERROR));
+
                         }
                     }else{
                         errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
+
                     }
                 }else if(
                          instructionName == "beqz"  ||
@@ -917,11 +948,14 @@ void Assembler::parseTextSegment(QStringList* stringList)
                     if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
                         if(twoArgsInstruction.cap(3)[0] == '$'){
                             errorList.push_back(Error("Invalid register \""+twoArgsInstruction.cap(3)+"\"",lineNumber, TEXT_ERROR));
+
                         }else{
                             errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
+
                         }
                     }else if(registerRegExp.indexIn(twoArgsInstruction.cap(4)) != -1){
                         errorList.push_back(Error("Branch value cannot be a register, use a label instead",lineNumber, TEXT_ERROR));
+
                     }else{
                         errorList.push_back(Error("Invalid label \""+twoArgsInstruction.cap(4)+"\", labels must start with a latin character and can only contain characters, digits and underscores",lineNumber, TEXT_ERROR));
                     }
@@ -1070,6 +1104,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         mem->storeWord(addr,instructions[i].getWord());
         addr += 4;
         QObject::connect(&(instructions[i]), SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
+        QObject::connect(&(instructions[i]), SIGNAL(scrollingRegistersModified()), mem, SLOT(updateScrolling()));
     }
 
     for (int i = 0; i<errorList.size(); i++){
@@ -1767,6 +1802,7 @@ void Assembler::handlePZ(QRegExp m, QString line)
     }
     else if(m.cap(2) == "la")
     {
+        bool f=true;
         QString datalbl = m.cap(4);
         if(dataLabels.contains(datalbl)){
             int addrrr = mem->dataSegmentBaseAddress+(dataLabels[datalbl]);
@@ -1778,10 +1814,12 @@ void Assembler::handlePZ(QRegExp m, QString line)
             instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,addrrr & 0xffff,0,IFormat));
         }else{
             errorList.push_back(Error("Invalid label \""+ datalbl +"\".", lineNumber, TEXT_ERROR));
+            f = false;
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
         address++;
-        instructions[instructions.size()-1].setFromAssembler(true);
+        if(f)
+            instructions[instructions.size()-1].setFromAssembler(true);
     }
 }
 
@@ -1884,7 +1922,7 @@ void Assembler::setRawList(QStringList list){
 void Assembler::getLineMapping(){
     if (rawLines.isEmpty() || strippedInstrs.isEmpty()){
         lineMapping.clear();
-        return;
+
     }
     lineMapping.clear();
 
@@ -1929,7 +1967,7 @@ bool Assembler::isWaiting(){
 inline void Assembler::executeFunction()
 {
     if (waiting)
-        return;
+
     if (simulationSpeed > 0)
         thread()->msleep(simulationSpeed);
     activePC = PC/4;
@@ -1941,7 +1979,7 @@ inline void Assembler::executeFunction()
     if (instructions.at(activePC).isBreakpoint() && !skipBP){
         breakP = true;
         emit pauseRequest();
-        return;
+
     }
 
 
@@ -2073,90 +2111,6 @@ void Assembler::simulate()
     int i = 0;
     while (PC != -1 && ((PC/4) < instructions.size() && !exitExec /*&& i < 150*/))
     {
-        if(mainW->isGFXEnabled()){
-            sf::Event event;
-            while(mem->getTileEngine()->pollEvent(event))
-            {
-                if(event.type == sf::Event::KeyPressed){
-                    qDebug() << event.key.code << " pressed";
-                    switch(event.key.code){
-                    case Keyboard::Down:
-                        emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::Left:
-                        emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::Right:
-                        emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::Up:
-                        emit Assembler::buttonPressed(UP_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::Z:
-                        emit Assembler::buttonPressed(A_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::X:
-                        emit Assembler::buttonPressed(B_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::D:
-                        Assembler::buttonPressed(R_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::A:
-                        emit Assembler::buttonPressed(L_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::Return:
-                        emit Assembler::buttonPressed(START_KEY_INDEX,0, true);
-                        break;
-                    case Keyboard::BackSpace:
-                        emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, true);
-                        break;
-                    default:
-                        qDebug() << "Another button was pressed";
-                    }
-                } else if(event.type == sf::Event::KeyReleased){
-                    qDebug() << event.key.code << " released";
-                    switch(event.key.code){
-                    case Keyboard::Down:
-                        emit Assembler::buttonPressed(DOWN_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::Left:
-                        emit Assembler::buttonPressed(LEFT_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::Right:
-                        emit Assembler::buttonPressed(RIGHT_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::Up:
-                        emit Assembler::buttonPressed(UP_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::Z:
-                        emit Assembler::buttonPressed(A_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::X:
-                        emit Assembler::buttonPressed(B_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::D:
-                        emit Assembler::buttonPressed(R_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::A:
-                        emit Assembler::buttonPressed(L_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::Return:
-                        emit Assembler::buttonPressed(START_KEY_INDEX,0, false);
-                        break;
-                    case Keyboard::BackSpace:
-                        emit Assembler::buttonPressed(SELECT_KEY_INDEX,0, false);
-                        break;
-                    default:
-                        qDebug() << "Another button was released";
-                    }
-                } else if(event.type == sf::Event::JoystickButtonPressed){
-                    qDebug() << event.joystickButton.button << " pressed";
-                } else if(event.type == sf::Event::JoystickButtonReleased){
-                    qDebug() << event.joystickButton.button << " released";
-                }
-            }
-        }
-
         if (waiting || mainW->isSimulationPaused()){
             break;
         }
@@ -2433,7 +2387,6 @@ void Assembler::assemble(QStringList dataFileStringList, QStringList textFileStr
     initializeRegisters();
     initializeFunctions();
 
-    connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
     totalCount = dataFileStringList.size() + textFileStringList.size();
     currentProgress = 0;
     PC = 0;
