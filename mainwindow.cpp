@@ -2064,10 +2064,6 @@ void MainWindow::connectActions(){
     QObject::connect(ui->actionPause_Simulation, SIGNAL(triggered()), this, SLOT(pauseSimulation()), Qt::UniqueConnection);
     QObject::connect(this, SIGNAL(simulateSignal()), codeArea, SLOT(disableMainFileEditing()), Qt::UniqueConnection);
     QObject::connect(assem, SIGNAL(simulationComplete(int)), codeArea, SLOT(enableMainFileEditing()), Qt::UniqueConnection);
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
 }
 
 void MainWindow::setupColumnsResize(){
