@@ -30,6 +30,7 @@ QString InvalidRegisterRegex = "\\$(?!(?:[12]?[\\d])|(?:3[012])|(?:zero)|(?:at)|
 QString commentRegex = "#.+";
 // Matches labels
 QString labelRegex = "[a-zA-Z_]\\w*";
+QRegExp labelRegExp(labelRegex,Qt::CaseInsensitive);
 QString labelRegexCapture = "(" + labelRegex +"):";
 QString labelRegexCaptureAlone = "^[\\t ]*(" + labelRegex +"):[\\t ]*$";
 // Matches invalid labels (start with a number or an invalid character)
@@ -137,11 +138,11 @@ QString singleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + sing
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //  instruction $register, $register
-//      jalr
 //      mult
 //      multu
 //      div
 //      divu
+//      jalr
 
 QString doubleRegisterInstructions = "(mult|multu|div|divu|jalr)";
 QString doubleRegisterFormat = "(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + doubleRegisterInstructions + "[ \\t]+" + registerRegex + "[ \\t]*,[ \\t]*" + registerRegex + "(?:[ \\t]+" + commentRegex + ")?$";
@@ -400,10 +401,28 @@ void Assembler::parseDataSegment(QStringList* stringList)
                     }else if(parameters.contains(',')){
                         QStringList variables = parameters.remove(' ').remove('\t').split(',', QString::SkipEmptyParts);
                         foreach (QString immediateNumber, variables) {
-                            if (directiveName == "half")
-                                mem->storeHWord(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
-                            else
-                                mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
+                            if (directiveName == "half"){
+                                if(numberRegExp.indexIn(immediateNumber) == 0)
+                                    mem->storeHWord(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
+                                else{
+                                    errorList.append(Error("Syntax error", lineNumber, DATA_ERROR));
+                                }
+
+                            }else{
+                                if(numberRegExp.indexIn(immediateNumber) == 0)
+                                    mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(immediateNumber));
+                                else if(labelRegExp.indexIn(immediateNumber) == 0){
+                                    if(dataLabels.contains(immediateNumber)){
+                                        mem->storeWord(mem->dataSegmentBaseAddress + address, dataLabels[immediateNumber]);
+                                    }else if(labels.contains(immediateNumber)){
+                                        mem->storeWord(mem->dataSegmentBaseAddress + address, labels[immediateNumber]);
+                                    }else{
+                                        missingDataLabels.push_back(qMakePair(qMakePair(mem->dataSegmentBaseAddress + address,lineNumber),immediateNumber));
+                                    }
+                                }else{
+                                    errorList.append(Error("Syntax error", lineNumber, DATA_ERROR));
+                                }
+                            }
                             address += ((directiveName == "half")? 2:4);
                             if(getNumber(immediateNumber) > 0xffff && directiveName == "half"){
                                 errorList.append(Error("Half word value out of range. use .word instead of .half", lineNumber, DATA_ERROR));
@@ -418,6 +437,8 @@ void Assembler::parseDataSegment(QStringList* stringList)
                         else
                             mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(parameters));
                         address += ((directiveName == "half")? 2:4);
+                    }else if(labelRegExp.indexIn(parameters) == 0){
+                        missingDataLabels.push_back(qMakePair(qMakePair(mem->dataSegmentBaseAddress + address,lineNumber),parameters));
                     }else{
                         errorList.append(Error("Syntax error", lineNumber, DATA_ERROR));
                     }
@@ -883,6 +904,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                         instructionName == "not"    ||
                         instructionName == "neg"    ||
                         instructionName == "move"   ||
+                        instructionName == "jalr"   ||
                         instructionName == "abs"
                         ){
                     if(registerRegExp.indexIn(twoArgsInstruction.cap(3)) == -1){
@@ -978,7 +1000,6 @@ void Assembler::parseTextSegment(QStringList* stringList)
                 QString instructionName = oneArgInstruction.cap(2).toLower();
                 if(
                         instructionName == "jr"     ||
-                        instructionName == "jalr"   ||
                         instructionName == "mfhi"   ||
                         instructionName == "mflo"   ||
                         instructionName == "mtlo"   ||
@@ -992,7 +1013,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
                             errorList.push_back(Error("First argument must be a register",lineNumber, TEXT_ERROR));
                         }
                     }else{
-                        errorList.push_back(Error("Syntax Error",lineNumber, TEXT_ERROR));
+                        errorList.push_back(Error("Instruction "+instructionName+" does not take one argument.",lineNumber, TEXT_ERROR));
                     }
                 }else if(
                          instructionName == "j"     ||
@@ -1094,7 +1115,17 @@ void Assembler::parseTextSegment(QStringList* stringList)
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
     }
-
+    for (int i=0; i<missingDataLabels.size(); i++)
+    {
+        QPair<QPair<int,int>,QString> lbl = missingDataLabels[i];
+        if(labels.contains(lbl.second)){
+            mem->storeWord(lbl.first.first,labels[lbl.second]);
+        } else if(dataLabels.contains(lbl.second)){
+            mem->storeWord(lbl.first.first,dataLabels[lbl.second]);
+        } else {
+            errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
+        }
+    }
 
     unsigned int addr = mem->textSegmentBaseAddress;
     for (int i = 0; i < instructions.size(); i++){
@@ -2291,8 +2322,8 @@ void Assembler::initializeRegisters()
 
     for (int i = 0; i < registers->size(); i++)
         (*registers)[i] = 0;
-    (*registers)[28] = 0x10008000;
-    (*registers)[29] = 0x001FFFFC;
+    (*registers)[28] = mem->heapSegmentBaseAddress;
+    (*registers)[29] = mem->heapSegmentBaseAddress + mem->heapSegmentPhysicalSize - 4;
 
 
 }
