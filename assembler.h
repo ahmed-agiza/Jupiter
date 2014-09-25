@@ -70,6 +70,7 @@ private:
     QVector< QPair<QPair<int,int>,QString> > missingBranchLabels;
     QVector< QPair<QPair<int,int>,QString> > missingJumpLabels;
     QVector< QPair<QPair<int,int>,QString> > missingDataLabels;
+    QVector< QPair<QPair<int,int>,QString> > missingLaLabels;
 
     int stringDistance(std::string, std::string);
     int minimum4(int, int, int, int);

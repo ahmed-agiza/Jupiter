@@ -1095,17 +1095,19 @@ void Assembler::parseTextSegment(QStringList* stringList)
         lineNumber++;
     }
 
-
-
     for (int i=0; i<missingBranchLabels.size(); i++)
     {
         QPair<QPair<int,int>,QString> lbl = missingBranchLabels[i];
         if(labels.contains(lbl.second)){
-            instructions[lbl.first.first].setImm(labels[lbl.second]-lbl.first.first-1);
+            if(lbl.first.first < instructions.size() && lbl.first.first>0)
+                instructions[lbl.first.first].setImm(labels[lbl.second]-lbl.first.first-1);
+            else
+                qDebug() << "Error address out of range: " << lbl.first.first;
         } else {
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
     }
+
     for (int i=0; i<missingJumpLabels.size(); i++)
     {
         QPair<QPair<int,int>,QString> lbl = missingJumpLabels[i];
@@ -1115,6 +1117,17 @@ void Assembler::parseTextSegment(QStringList* stringList)
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
     }
+
+    for (int i=0; i<missingLaLabels.size(); i++)
+    {
+        QPair<QPair<int,int>,QString> lbl = missingJumpLabels[i];
+        if(labels.contains(lbl.second)){
+            instructions[lbl.first.first].setImm((labels[lbl.second]&0xfffffff));
+        } else {
+            errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
+        }
+    }
+
     for (int i=0; i<missingDataLabels.size(); i++)
     {
         QPair<QPair<int,int>,QString> lbl = missingDataLabels[i];
@@ -1126,7 +1139,6 @@ void Assembler::parseTextSegment(QStringList* stringList)
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
     }
-
     unsigned int addr = mem->textSegmentBaseAddress;
     for (int i = 0; i < instructions.size(); i++){
         instructions[i].setMem(mem);
@@ -1137,6 +1149,7 @@ void Assembler::parseTextSegment(QStringList* stringList)
         QObject::connect(&(instructions[i]), SIGNAL(raiseException(int)), this, SLOT(exceptionHandler(int)));
         QObject::connect(&(instructions[i]), SIGNAL(scrollingRegistersModified()), mem, SLOT(updateScrolling()));
     }
+
 
     for (int i = 0; i<errorList.size(); i++){
             emit sendErrorMessage(errorList.at(i).lineNumber, errorList.at(i).description, errorList.at(i).segment);
@@ -1844,7 +1857,11 @@ void Assembler::handlePZ(QRegExp m, QString line)
             instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0, addrrr >> 16,0,IFormat));
             instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,addrrr & 0xffff,0,IFormat));
         }else{
-            errorList.push_back(Error("Invalid label \""+ datalbl +"\".", lineNumber, TEXT_ERROR));
+            //errorList.push_back(Error("Invalid label \""+ datalbl +"\".", lineNumber, TEXT_ERROR));
+            int addrrr = 0;
+            instructions.push_back(Instruction("lui",registers,opcode["lui"],0,registerIndex[m.cap(3)],0, addrrr >> 16,0,IFormat));
+            instructions.push_back(Instruction("ori",registers,opcode["ori"],registerIndex[m.cap(3)],registerIndex[m.cap(3)],0,addrrr & 0xffff,0,IFormat));
+            missingLaLabels.push_back(qMakePair(qMakePair(address,lineNumber),datalbl));
             f = false;
         }
         if(m.cap(1).size()) labels[m.cap(1)] = address;
