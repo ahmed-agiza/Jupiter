@@ -1,6 +1,6 @@
 #ifndef TILEENGINE_H
 #define TILEENGINE_H
-#include <SFML/Graphics.hpp>
+//#include <SFML/Graphics.hpp>
 #include "memory.h"
 #include "qrenderwindow.h"
 
@@ -23,6 +23,7 @@ public:
     void setMemory(Memory*);
 public slots:
     void updateNow();
+
 };
 
 #endif // TILEENGINE_H

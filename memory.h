@@ -96,6 +96,8 @@ signals:
 public slots:
     void updateKey(int, int, bool);
     void updateScrolling();
+    void setSpritePosition(int, int, Vector2f);
+    void setSpriteOrigin(int, int, Vector2f);
 private:
     QByteArray textSegment;
     QByteArray dataSegment;

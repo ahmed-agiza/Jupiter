@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <SFML/Graphics.hpp>
+#include "memory.h"
 #include <QTimer>
 
 class QRenderWindow : public QWidget, public sf::RenderWindow
@@ -19,6 +20,9 @@ public:
 private:
     QTimer myTimer;
     bool myInitialized;
+signals:
+    void setSpritePosition(int, int, Vector2f);
+    void setSpriteOrigin(int, int, Vector2f);
 
 };
 

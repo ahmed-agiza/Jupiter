@@ -54,11 +54,6 @@ int LinesCounter::getMaxLine() const{
 }
 
 void LinesCounter::boldLines(int start, int end){
-//    int tempStart = start;
-//    start -= firstLine;
-//    end = start + tempStart - end;
-    //qDebug() << "Start: " << start;
-    //qDebug() << "End: " << end;
     QTextCursor defaultCursor = textCursor();
     defaultCursor.select(QTextCursor::Document);
     defaultCursor.setCharFormat(defaultFormat);
@@ -120,7 +115,6 @@ bool LinesCounter::eventFilter(QObject *o, QEvent *e)
 
 void LinesCounter::scrollWithEditor(int val){
     if (vbar){
-        qDebug() << "Got: " << val;
         vbar->setValue(val);
     }
 

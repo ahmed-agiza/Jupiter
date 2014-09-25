@@ -120,11 +120,13 @@ MainWindow::MainWindow(QWidget *parent) :
     engine = new TileEngine(0, QPoint(0,0), QSize(512,384), memory, &mainProcessorRegisters);
     engine->hide();
     memory->setTileEngine(engine);
-    //memory->setParent(assem);
+    memory->setParent(assem);
 
-
+    simulationThread.start(QThread::HighPriority);
     assem->moveToThread(&simulationThread);
-    //memory->moveToThread(&simulationThread);
+    memory->moveToThread(&simulationThread);
+    QObject::connect(engine, SIGNAL(setSpriteOrigin(int,int,Vector2f)), memory, SLOT(setSpriteOrigin(int,int,Vector2f)), Qt::BlockingQueuedConnection);
+    QObject::connect(engine, SIGNAL(setSpritePosition(int,int,Vector2f)), memory, SLOT(setSpritePosition(int,int,Vector2f)), Qt::BlockingQueuedConnection);
 
 
     refreshActions();
@@ -383,7 +385,7 @@ void MainWindow::addEditorWindow(QString file, QString title, MirageFileType typ
 {
     CodeEditorWindow *editorWindow = new CodeEditorWindow(codeArea, editorFont, type);
     if(editorWindow->openFile(file, title)){
-       ;// QObject::connect(editorWindow->codeEditor(), SIGNAL(textChanged()), this, SLOT(getLabels()), Qt::UniqueConnection);
+        QObject::connect(editorWindow->codeEditor(), SIGNAL(textChanged()), this, SLOT(getLabels()), Qt::UniqueConnection);
         codeArea->addSubWindow(editorWindow);
         if (MainWindow::projectMainFile.trimmed()!= "" && editorWindow->getTitle() == MainWindow::projectMainFile)
             codeArea->setMainWindow(editorWindow);
@@ -917,7 +919,8 @@ void MainWindow::selectLine(int lineNumber){
 
 void MainWindow::getLabels(){
     QStringList tempLabels(globalLabels);
-    getProjectLabels(false);
+//    getProjectLabels(false);
+    getProjectLabels(true);
     if (tempLabels != globalLabels)
         codeArea->setLabels(globalLabels);
 }

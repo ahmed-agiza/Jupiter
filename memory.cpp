@@ -1073,6 +1073,8 @@ TileEngine* Memory::getTileEngine() const
 
 void Memory::updateKey(int keyCode, int controllerId, bool value)
 {
+
+
     if(value){
         Uint16 mask = (Uint16(1) << keyCode);
         inputMemory[controllerId] = inputMemory[controllerId] | mask;
@@ -1104,4 +1106,12 @@ void Memory::updateTilemapsDisplay()
 void Memory::updateScrolling()
 {
     updateTilemapsDisplay();
+}
+
+void Memory::setSpritePosition(int i, int j, Vector2f pos){
+    backgroundMatrix[i][j].setPosition(pos);
+}
+
+void Memory::setSpriteOrigin(int i, int j, Vector2f pos){
+     backgroundMatrix[i][j].setOrigin(pos);
 }
