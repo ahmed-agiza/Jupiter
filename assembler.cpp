@@ -1118,11 +1118,13 @@ void Assembler::parseTextSegment(QStringList* stringList)
         }
     }
 
+
     for (int i=0; i<missingLaLabels.size(); i++)
     {
-        QPair<QPair<int,int>,QString> lbl = missingJumpLabels[i];
+        QPair<QPair<int,int>,QString> lbl = missingLaLabels[i];
         if(labels.contains(lbl.second)){
-            instructions[lbl.first.first].setImm((labels[lbl.second]&0xfffffff));
+            instructions[lbl.first.first].setImm((labels[lbl.second]<<16));
+            instructions[lbl.first.first + 1].setImm((labels[lbl.second]&0xffff));
         } else {
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
