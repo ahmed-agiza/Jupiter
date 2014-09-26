@@ -417,6 +417,7 @@ void Assembler::parseDataSegment(QStringList* stringList)
                                     }else if(labels.contains(immediateNumber)){
                                         mem->storeWord(mem->dataSegmentBaseAddress + address, labels[immediateNumber]);
                                     }else{
+                                        qDebug() << mem->dataSegmentBaseAddress + address << " " << immediateNumber;
                                         missingDataLabels.push_back(qMakePair(qMakePair(mem->dataSegmentBaseAddress + address,lineNumber),immediateNumber));
                                     }
                                 }else{
@@ -438,7 +439,9 @@ void Assembler::parseDataSegment(QStringList* stringList)
                             mem->storeWord(mem->dataSegmentBaseAddress + address, getNumber(parameters));
                         address += ((directiveName == "half")? 2:4);
                     }else if(labelRegExp.indexIn(parameters) == 0){
+                        qDebug() << address << " " << parameters;
                         missingDataLabels.push_back(qMakePair(qMakePair(mem->dataSegmentBaseAddress + address,lineNumber),parameters));
+                        address += ((directiveName == "half")? 2:4);
                     }else{
                         errorList.append(Error("Syntax error", lineNumber, DATA_ERROR));
                     }
@@ -1118,25 +1121,25 @@ void Assembler::parseTextSegment(QStringList* stringList)
         }
     }
 
-
-    for (int i=0; i<missingLaLabels.size(); i++)
+    for (int i=0; i<missingDataLabels.size(); i++)
     {
-        QPair<QPair<int,int>,QString> lbl = missingLaLabels[i];
+        QPair<QPair<int,int>,QString> lbl = missingDataLabels[i];
+        qDebug() << lbl.second << " " << labels[lbl.second];
         if(labels.contains(lbl.second)){
-            instructions[lbl.first.first].setImm((labels[lbl.second]<<16));
-            instructions[lbl.first.first + 1].setImm((labels[lbl.second]&0xffff));
+            mem->storeWord(lbl.first.first,(labels[lbl.second]*4));
+        } else if(dataLabels.contains(lbl.second)){
+            mem->storeWord(lbl.first.first,dataLabels[lbl.second]);
         } else {
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
     }
 
-    for (int i=0; i<missingDataLabels.size(); i++)
+    for (int i=0; i<missingLaLabels.size(); i++)
     {
-        QPair<QPair<int,int>,QString> lbl = missingDataLabels[i];
+        QPair<QPair<int,int>,QString> lbl = missingLaLabels[i];
         if(labels.contains(lbl.second)){
-            mem->storeWord(lbl.first.first,labels[lbl.second]);
-        } else if(dataLabels.contains(lbl.second)){
-            mem->storeWord(lbl.first.first,dataLabels[lbl.second]);
+            instructions[lbl.first.first].setImm(((labels[lbl.second]*4)>>16));
+            instructions[lbl.first.first + 1].setImm(((labels[lbl.second]*4)&0xffff));
         } else {
             errorList.push_back(Error("Label \""+lbl.second+"\" was not found",lbl.first.second, TEXT_ERROR));
         }
