@@ -51,7 +51,7 @@ public:
     void resizeTileMap();
 
     void updateTilemapsDisplay();
-    void setScrollingRegusters(uint*, uint*);
+    void setScrollingRegisters(uint*, uint*);
     void clearText();
     void clearData();
     void clearHeap();

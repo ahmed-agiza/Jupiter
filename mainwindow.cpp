@@ -121,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
     engine->hide();
     memory->setTileEngine(engine);
     memory->setParent(assem);
+    memory->setScrollingRegisters((uint*)&mainProcessorRegisters[25], (uint*)&mainProcessorRegisters[24]);
 
     simulationThread.start(QThread::HighPriority);
     assem->moveToThread(&simulationThread);

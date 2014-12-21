@@ -141,7 +141,7 @@ Memory::Memory(QObject *parent): QObject(parent),
     screenSize.y = 384;
 }
 
-void Memory::setScrollingRegusters(uint* v, uint* h){
+void Memory::setScrollingRegisters(uint* v, uint* h){
     verticalScroll = v;
     horizontalScroll = h;
 }
@@ -252,7 +252,7 @@ void Memory::storeByte(unsigned int addr, char data)
         int w = screenWidth/TILE_SIZE * getScreensWidthCount();
         int r = (addr - tileMapBaseAddress)/w;
         int c = (addr - tileMapBaseAddress)%w;
-        backgroundTileSet[tileMap[r][c]].removeSprite(&backgroundMatrix[r][c]);
+        backgroundTileSet[(unsigned char)tileMap[r][c]].removeSprite(&backgroundMatrix[r][c]);
         tileMap[r][c] = data;
         backgroundMatrix[r][c].setTexture(backgroundTileSet[(unsigned char)tileMap[r][c]].getTexture());
         backgroundTileSet[(unsigned char)tileMap[r][c]].addSprite(&backgroundMatrix[r][c]);

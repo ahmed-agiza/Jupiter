@@ -1,5 +1,6 @@
 #include "tile.h"
 #include "gamesprite.h"
+#include <QDebug>
 
 #define TILE_SIZE 16
 Tile::Tile()
