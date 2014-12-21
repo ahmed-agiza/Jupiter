@@ -45,7 +45,7 @@ QRegExp characterRegex ("^'((?:[^'\\\\\\n\\r]|(?:\\\\['nrtb0])))'$"); //
 // Matches strings
 QString invalidCstringsRegex = "\"(?:.*[^\\\\][^\"])$";
 
-QString numberRegex = "(0x[0-9a-fA-F]+|[\\-\\d]+|0b[01]+)";
+QString numberRegex = "(0x[0-9a-fA-F]+|-?\\d+|0b[01]+)";
 QRegExp registerRegExp(registerRegex, Qt::CaseInsensitive);
 QRegExp numberRegExp(numberRegex, Qt::CaseInsensitive);
 QRegExp threeArgsInstruction = QRegExp("(?:(" + labelRegex + ")[ \\t]*:[ \\t]*)?" + "([a-z]+)" + "[ \\t]+" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "[ \\t]*,[ \\t]*" + "([\\w$]+)" + "(?:[ \\t]+" + commentRegex + ")?$");
