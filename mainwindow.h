@@ -29,6 +29,7 @@
 #include "baseconverter.h"
 #include "logiccalculator.h"
 #include "reconfigureprojectdialog.h"
+#include "initializememorydialog.h"
 
 class ReconfigureProjectDialog;
 
@@ -262,6 +263,7 @@ private:
     QStringList lastTextInstrs;
     QStringList lastDataInstrs;
     ReconfigureProjectDialog *recDialog;
+    InitializeMemoryDialog *initializeMemoryDialog;
 
     QString getActiveFileContent(QString, bool = true);
 

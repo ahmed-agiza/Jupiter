@@ -15,6 +15,7 @@
 #include "palettecolor.h"
 #include "tile.h"
 #include "gamesprite.h"
+#include <QMutex>
 
 class TileEngine;
 class Memory : public QObject
@@ -26,6 +27,7 @@ public:
     void storeByte(unsigned int, char);
     char loadByte(unsigned int) const;
     unsigned char loadByteU(unsigned int) const;
+    void initializeGPUMemory();
 
     void storeHWord(unsigned int, short);
     void storeWordL(unsigned int, short);
@@ -58,6 +60,7 @@ public:
     void clearStack();
     void clearAll();
     void clearGFX();
+
 //    bool isValidWordL(int, int) const;
 //    bool isValidWordR(int, int) const;
 //    void storeWordL(int, int, int);
@@ -87,6 +90,8 @@ public:
 
     void setTileEngine(TileEngine *);
     TileEngine *getTileEngine() const;
+
+    //QMutex mtx;
 signals:
     void raiseException(int);
     void loadingNumberChanged(int);
@@ -132,6 +137,7 @@ public:
     unsigned int tileMapPhysicalSize;
     unsigned int spritesTileSetPhysicalSize;
     unsigned int backgroundTileSetPhysicalSize;
+    unsigned int gpuTotalSize;
 
     const unsigned int screenWidth;
     const unsigned int screenHeight;

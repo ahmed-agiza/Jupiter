@@ -64,7 +64,9 @@ SOURCES += main.cpp\
     logiccalculator.cpp \
     dealyedsimulationdialog.cpp \
     codemdiarea.cpp \
-    reconfigureprojectdialog.cpp
+    reconfigureprojectdialog.cpp \
+    initializememorythread.cpp \
+    initializememorydialog.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -119,7 +121,9 @@ HEADERS  += mainwindow.h \
     logiccalculator.h \
     dealyedsimulationdialog.h \
     codemdiarea.h \
-    reconfigureprojectdialog.h
+    reconfigureprojectdialog.h \
+    initializememorythread.h \
+    initializememorydialog.h
 
 
 FORMS    += \
@@ -142,7 +146,8 @@ FORMS    += \
     baseconverter.ui \
     logiccalculator.ui \
     dealyedsimulationdialog.ui \
-    reconfigureprojectdialog.ui
+    reconfigureprojectdialog.ui \
+    initializememorydialog.ui
 
 RESOURCES += \
     qdarkstyle/style.qrc \

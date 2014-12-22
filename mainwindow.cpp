@@ -980,8 +980,9 @@ void MainWindow::on_actionSimulate_triggered(){
         }
 
     if(ui->actionEnable_Graphics_Engine->isChecked())
+    {
         engine->show();
-
+    }
 
 
     if (assemblerInitialized && assem){
@@ -1361,7 +1362,11 @@ void MainWindow::openProjectFile(QString tempProjectFileName)
 void MainWindow::applyProjectSettings(){
     if(projectFile.isOpen()){
         if(MainWindow::projectConf.contains("EnableGFX") && MainWindow::projectConf["EnableGFX"] == "true")
+        {
             ui->actionEnable_Graphics_Engine->setChecked(true);
+            initializeMemoryDialog = new InitializeMemoryDialog(this, memory);
+            initializeMemoryDialog->show();
+        }
         else
             ui->actionEnable_Graphics_Engine->setChecked(false);
         refreshGraphicsAction();

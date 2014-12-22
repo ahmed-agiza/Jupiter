@@ -17,18 +17,23 @@ TileSetViewer::TileSetViewer(QWidget *parent, Memory * memory) :
     ui->scrollArea->setWidget(tileRenderWindow);
     connect(this, SIGNAL(renderScreen()), tileRenderWindow, SLOT(repaint()));
 
+    ui->browsePushButton->hide();
+
     filePath = QDir::currentPath();
     ui->lineEdit->setText(filePath);
     palettePointer = 0;
     bool firstBlack=false;
-    for(int i=0; i<256; i++){
-        paletteSet[colorToInt(memory->palette[palettePointer].getColor())] = palettePointer;
+    for(int i=255; i>=0; i--){
+        paletteSet[colorToInt(memory->palette[i].getColor())] = i;
     }
     while(palettePointer<256 && (memory->palette[palettePointer].getColor() != sf::Color(0,0,0,0) || !firstBlack)){
         if(memory->palette[palettePointer].getColor() == sf::Color(0,0,0,0))
             firstBlack = true;
         palettePointer++;
     }
+
+
+
 }
 
 TileSetViewer::~TileSetViewer()
@@ -91,12 +96,14 @@ void TileSetViewer::on_lineEdit_editingFinished()
 
 void TileSetViewer::on_browsePushButton_clicked()
 {
-    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("Mirage Tile Image (*.mtile);; PNG File(*.png)"));
+    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("All Tile Image formats (*.mtile, *.png);; Mirage Tile Image (*.mtile);; PNG File(*.png)"));
     ui->lineEdit->setText(filePath);
 }
 
 void TileSetViewer::on_loadPushButton_clicked()
 {
+    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("All Tile Image formats (*.mtile, *.png);; Mirage Tile Image (*.mtile);; PNG File(*.png)"));
+    ui->lineEdit->setText(filePath);
     sf::Image imageToLoad;
     QVector< QVector< sf::Uint8 > > imageMatrix(16,QVector<sf::Uint8>(16, 0));
     qDebug() << filePath;
@@ -150,6 +157,7 @@ void TileSetViewer::on_loadPushButton_clicked()
                 memory->storeByte((tileBaseAddress | (tileIndex << 8) | (i<<4) | j), imageMatrix[i][j]);
             }
         }
+        emit renderScreen();
     }else if(filePath.endsWith(".mtile")){
         std::ifstream inputFile(filePath.toStdString().c_str(), std::ios::binary);
         int tileIndex = ui->horizontalSlider->value();
@@ -187,9 +195,10 @@ void TileSetViewer::on_loadPushButton_clicked()
                 memory->storeByte((tileBaseAddress | (tileIndex << 8) | (i<<4) | j), imageMatrix[i][j]);
             }
         }
+        emit renderScreen();
     }else{
         QMessageBox::information(this, tr("Tile Loader"),
-                                 tr("Failed to open tile"),
+                                 tr("Failed to open tile image"),
                                  QMessageBox::Ok);
     }
 }

@@ -102,10 +102,14 @@ Memory::Memory(QObject *parent): QObject(parent),
     screenWidth(512),
     screenHeight(384)
 {
+
     spritesTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
     backgroundTileSetPhysicalSize = 256 * TILE_SIZE * TILE_SIZE;
 
     tileMapPhysicalSize = screenHeight/TILE_SIZE * getScreensHeightCount() * screenWidth/TILE_SIZE * getScreensWidthCount();
+
+    gpuTotalSize = backgroundTileSetPhysicalSize + spritesTileSetPhysicalSize + tileMapPhysicalSize + spriteRamPhysicalSize + palettePhysicalSize;
+
     backgroundTileSet.resize(256);
     spritesTileSet.resize(256);
     tileMap.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
@@ -152,6 +156,7 @@ void Memory::resizeTileMap()
     tileMap.clear();
     tileMap.resize(screenHeight/TILE_SIZE * getScreensHeightCount());
     tileMap.fill( QVector<char>(screenWidth/TILE_SIZE * getScreensWidthCount() ));
+    gpuTotalSize = backgroundTileSetPhysicalSize + spritesTileSetPhysicalSize + tileMapPhysicalSize + spriteRamPhysicalSize + palettePhysicalSize;
 }
 
 void Memory::clearText(){
@@ -788,6 +793,7 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
     qDebug() << count;
 
     if(segmentsToLoad[4]){
+
         loadedNumber = previousLoadedNumber = consecutiveValues = 0;
         int byteNumber = 0;
         uint liBaseAddress = this->tileMapBaseAddress;
@@ -1114,4 +1120,24 @@ void Memory::setSpritePosition(int i, int j, Vector2f pos){
 
 void Memory::setSpriteOrigin(int i, int j, Vector2f pos){
      backgroundMatrix[i][j].setOrigin(pos);
+}
+
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+void Memory::initializeGPUMemory()
+{
+    int count = 0;
+    for(int i=backgroundTileSetBaseAddress; i< backgroundTileSetBaseAddress + gpuTotalSize ; i++){
+            storeByte(i, 0);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
+            count++;
+        }
+    emit loadingNumberChanged((gpuTotalSize + 1024 - 1)/1024);
 }
