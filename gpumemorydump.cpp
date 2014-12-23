@@ -10,7 +10,6 @@ GpuMemoryDump::GpuMemoryDump(QWidget *parent, Memory *mem, MainWindow *mainW) :
     this->mem = mem;
     this->mainW = mainW;
     setWindowTitle("GPU Memory Dump");
-    setModal(true);
     complete();
 }
 
@@ -118,7 +117,7 @@ void GpuMemoryDump::on_loadFromFilePushButton_clicked()
         segmentsToLoad[5] = ui->oamCheckbox->isChecked();
         segmentsToLoad[6] = ui->paletteCheckbox->isChecked();
         ui->progressBar->setMaximum((claculateMemorySize(segmentsToLoad) + 1024 - 1)/1024);
-        loadingThread = new LoadMemoryThread(this,segmentsToLoad,ui->checkBox->isChecked());
+        loadingThread = new LoadMemoryThread(this);
         loadingThread->memory = mem;
         loadingThread->filePath = filePath;
         QObject::connect(loadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));

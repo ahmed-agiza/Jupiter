@@ -2077,15 +2077,15 @@ void MainWindow::connectActions(){
 
 void MainWindow::setupColumnsResize(){
     minDataTableWidth0 = ui->dataTable->columnWidth(0);
-    minDataTableWidth1 = ui->dataTable->columnWidth(1) + 10;
+    minDataTableWidth1 = ui->dataTable->columnWidth(1) + 30;
     minTextTableWidth0 = ui->textTable->columnWidth(0);
-    minTextTableWidth1 = ui->textTable->columnWidth(1) + 10;
+    minTextTableWidth1 = ui->textTable->columnWidth(1) + 30;
     minHeapTableWidth0 = ui->heapTable->columnWidth(0);
-    minHeapTableWidth1 = ui->heapTable->columnWidth(1) + 10;
+    minHeapTableWidth1 = ui->heapTable->columnWidth(1) + 30;
     minStackTableWidth0 = ui->stackTable->columnWidth(0);
-    minStackTableWidth1 = ui->stackTable->columnWidth(1) + 10;
+    minStackTableWidth1 = ui->stackTable->columnWidth(1) + 30;
     minRegsTableWidth0 = ui->tableMainRegisters->columnWidth(0);
-    minRegsTableWidth1 = ui->tableMainRegisters->columnWidth(1) + 10;
+    minRegsTableWidth1 = ui->tableMainRegisters->columnWidth(1) + 37;
     resizeColumns();
 
     QObject::connect(ui->dataAddressMode, SIGNAL(currentIndexChanged(int)), this, SLOT(resizeDataColumns()), Qt::UniqueConnection);

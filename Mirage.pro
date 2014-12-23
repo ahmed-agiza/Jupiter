@@ -66,7 +66,8 @@ SOURCES += main.cpp\
     codemdiarea.cpp \
     reconfigureprojectdialog.cpp \
     initializememorythread.cpp \
-    initializememorydialog.cpp
+    initializememorydialog.cpp \
+    MemoryFunction.cpp
 
 
 HEADERS  += mainwindow.h \
