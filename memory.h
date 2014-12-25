@@ -16,6 +16,9 @@
 #include "tile.h"
 #include "gamesprite.h"
 #include <QMutex>
+#include <map>
+#include "countinglist.h"
+#include "MyMutex.h"
 
 class TileEngine;
 class Memory : public QObject
@@ -48,7 +51,7 @@ public:
     unsigned int getHWordSegment(unsigned int) const;
     unsigned int getWordSegment(unsigned int) const;
 
-    void loadMemory(QString, QVector<bool>, bool dynamic = false);
+    void loadMemory(QString, QVector<bool>);
     void saveMemory(QString, QVector<bool>);
     void resizeTileMap();
 
@@ -97,7 +100,8 @@ signals:
     void loadingNumberChanged(int);
     void savingNumberChanged(int);
     void renderNow();
-
+    void genratingCode();
+    void refreshInputTable();
 public slots:
     void updateKey(int, int, bool);
     void updateScrolling();
@@ -113,6 +117,9 @@ private:
     TileEngine* engine;
     int claculateLoadSize(const QVector<bool>&);
     Vector2i screenSize;
+
+    map<char, CountingList> valuesMap;
+
 public:
     const unsigned int textSegmentBaseAddress;
     const unsigned int dataSegmentBaseAddress;
@@ -143,6 +150,12 @@ public:
     const unsigned int screenHeight;
 
     uint *verticalScroll, *horizontalScroll;
+    void readTilemapToFile(QString fileName);
+    void loadTileMapsDynamically();
+    QStringList dynamicOutFileList;
+
+
+    MyMutex mtx;
 };
 
 #endif // MEMORY_H

@@ -11,12 +11,12 @@ class LoadMemoryThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit LoadMemoryThread(QObject *parent, QVector<bool>, bool dynamic = false);
+    explicit LoadMemoryThread(QObject *parent, bool dynamic = false);
     void run();
     Memory* memory;
     QString filePath;
-private:
     QVector<bool> segmentsToLoad;
+private:
     bool dynamic;
 signals:
     void loadComplete();

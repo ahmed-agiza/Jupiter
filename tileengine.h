@@ -3,6 +3,7 @@
 //#include <SFML/Graphics.hpp>
 #include "memory.h"
 #include "qrenderwindow.h"
+#include <QAtomicInt>
 
 class TileEngine: public QRenderWindow
 {
@@ -14,6 +15,8 @@ private:
 
     Vector2u screenSize;
     int *horizontalScroll, *verticalScroll;
+
+    QAtomicInt shouldRender;
 public:
     TileEngine(QWidget*, const QPoint&, const QSize&, Memory *, QVector<int> *mRegisters);
     ~TileEngine();
@@ -21,8 +24,11 @@ public:
     void update();
     void renderFrame();
     void setMemory(Memory*);
+
+    void stopRendering();
 public slots:
     void updateNow();
+
 
 };
 

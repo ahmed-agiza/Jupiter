@@ -26,7 +26,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="generalTab">
     <attribute name="title">
@@ -36,7 +36,7 @@
      <property name="geometry">
       <rect>
        <x>90</x>
-       <y>20</y>
+       <y>10</y>
        <width>91</width>
        <height>16</height>
       </rect>
@@ -49,7 +49,7 @@
      <property name="geometry">
       <rect>
        <x>190</x>
-       <y>190</y>
+       <y>200</y>
        <width>91</width>
        <height>23</height>
       </rect>
@@ -62,7 +62,7 @@
      <property name="geometry">
       <rect>
        <x>70</x>
-       <y>190</y>
+       <y>200</y>
        <width>91</width>
        <height>23</height>
       </rect>
@@ -75,12 +75,26 @@
      <property name="geometry">
       <rect>
        <x>110</x>
-       <y>50</y>
+       <y>40</y>
        <width>115</width>
-       <height>121</height>
+       <height>143</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QCheckBox" name="checkBox">
+        <property name="text">
+         <string>Select All</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QCheckBox" name="bgTilesetCheckbox">
         <property name="text">
@@ -564,7 +578,7 @@
       <string>Save project for Tiled</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="dynamicDump">
      <property name="geometry">
       <rect>
        <x>240</x>
@@ -611,12 +625,12 @@
       <rect>
        <x>20</x>
        <y>150</y>
-       <width>201</width>
+       <width>211</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Load tile map directly to memory through</string>
+      <string>Load tile map from file to memory through</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_17">

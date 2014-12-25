@@ -1,17 +1,22 @@
 #include "loadmemorythread.h"
 
-LoadMemoryThread::LoadMemoryThread(QObject *parent, QVector<bool> s, bool dynamic) :
+LoadMemoryThread::LoadMemoryThread(QObject *parent, bool dynamic) :
     QThread(parent)
 {
-    segmentsToLoad = s;
     this->dynamic = dynamic;
 }
 
 void LoadMemoryThread::run()
 {
-    //QMutex mutex;
-    qDebug() << "Started!";
-    memory->loadMemory(filePath,segmentsToLoad,dynamic);
+    if(!dynamic)
+        memory->loadMemory(filePath,segmentsToLoad);
+    else
+        memory->readTilemapToFile(filePath);
     emit loadComplete();
-    qDebug() << "Done :)\n";
+    qDebug() << "\n";
+
+    for(int i=0; i<memory->dynamicOutFileList.size(); i++)
+    {
+        qDebug() << memory->dynamicOutFileList[i];
+    }
 }

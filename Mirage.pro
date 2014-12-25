@@ -124,7 +124,9 @@ HEADERS  += mainwindow.h \
     codemdiarea.h \
     reconfigureprojectdialog.h \
     initializememorythread.h \
-    initializememorydialog.h
+    initializememorydialog.h \
+    countinglist.h \
+    MyMutex.h
 
 
 FORMS    += \

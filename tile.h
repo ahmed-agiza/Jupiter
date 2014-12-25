@@ -18,7 +18,7 @@ public:
     void save();
     char loadByte(unsigned int) const;
     void storeByte(unsigned int, char);
-    Texture getTexture() const;
+    const Texture &getTexture() const;
     Image getImage() const;
     void update();
     void addGameSprite(GameSprite *);

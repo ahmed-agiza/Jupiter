@@ -241,6 +241,7 @@ int Memory::getInputSegmentSize(){
 
 void Memory::storeByte(unsigned int addr, char data)
 {
+    MyLockGuard lck(&mtx);
     int segment = getByteSegment(addr);
     if (segment == OUT_OF_RANGE){
         //emit raiseException(OUT_OF_RANGE_EX_NO);
@@ -558,13 +559,8 @@ int Memory::claculateLoadSize(const QVector<bool>& segments)
 }
 
 
-void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dynamic)
+void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad)
 {
-    QStringList dynamicOutFileList;
-    Uint32 loadedNumber = 0;
-    Uint32 previousLoadedNumber = 0;
-    Uint32 consecutiveValues = 0;
-    Uint32 loopsCount = 0;
 
     int count = 0;
     QFile in(fileName);
@@ -625,6 +621,14 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
 
     if(segmentsToLoad[4]){
 
+        for(int i=0; i<tileMapPhysicalSize; i++){
+            *byte = 1;
+            in.getChar(byte);
+            storeByte(tileMapBaseAddress + i, *byte);
+            if(count %1024 == 0)
+                emit loadingNumberChanged(count / 1024);
+            count++;
+        }
 
     }
     qDebug() << count;
@@ -663,93 +667,82 @@ void Memory::loadMemory(QString fileName,  QVector<bool> segmentsToLoad, bool dy
 
 }
 
-void Memory::loadTileMapsDynamically(QString fileName)
+void Memory::readTilemapToFile(QString fileName)
 {
     QFile in(fileName);
     in.open(QIODevice::ReadOnly);
 
-    QStringList dynamicOutFileList;
-    Uint32 loadedNumber = 0;
-    Uint32 previousLoadedNumber = 0;
-    Uint32 consecutiveValues = 0;
-    Uint32 loopsCount = 0;
+    valuesMap.clear();
 
-    int byteNumber = 0;
-    uint liBaseAddress = this->tileMapBaseAddress;
-    dynamicOutFileList.append("# Dumping tile maps");
-    dynamicOutFileList.append(QString("\tli\t$t0, 0x")+QString::number(liBaseAddress,16)+QString("\t# tile maps base address"));
-    dynamicOutFileList.append("");
+    if(tileMapPhysicalSize != in.size())
+        return;
+    char* byte = new char;
 
-    for(int i=0; i<tileMapPhysicalSize; i++){
+    for (int i = 0; i < tileMapPhysicalSize; i++)
+    {
         *byte = 1;
         in.getChar(byte);
+        valuesMap[*byte].push_back(i);
+        if(i % 1024 == 0)
+            emit loadingNumberChanged(i / 1024);
+    }
 
-        if(MainWindow::isLittleEndian()){
-            loadedNumber |= (uint((unsigned char)(*byte))<<((byteNumber%4)*8));
-        }else{
-            loadedNumber |= (uint((unsigned char)(*byte))<<((3-(byteNumber%4))*8));
-        }if(byteNumber%4 == 3){
-            if(loadedNumber != previousLoadedNumber){
-                if(consecutiveValues > 6){
-                    Uint32 startAddress = (byteNumber-3)-(consecutiveValues * 4)+liBaseAddress;
-                    dynamicOutFileList.append("");
-                    dynamicOutFileList.append(QString("\taddiu\t$t6, $zero, 0x")+QString::number(startAddress,16));
-                    dynamicOutFileList.append(QString("loop") + QString::number(loopsCount) + QString(":") + QString("\tslti\t$t5, $t6, 0x")+QString::number(startAddress + (consecutiveValues * 4),16));
-                    dynamicOutFileList.append(QString("\tbeq\t$t5, $zero, exit") + QString::number(loopsCount));
-                    if(previousLoadedNumber == 0)
-                        dynamicOutFileList.append(QString("\tsw\t$zero, 0($t6)"));
-                    else
-                        dynamicOutFileList.append(QString("\tsw\t$t1, 0($t6)"));
-                    dynamicOutFileList.append(QString("\taddiu\t$t6, $t6, 4"));
-                    dynamicOutFileList.append(QString("\tj\tloop") + QString::number(loopsCount));
-                    dynamicOutFileList.append(QString("exit") + QString::number(loopsCount) + ":");
-                    dynamicOutFileList.append("");
-                    loopsCount++;
-                }else{
-                    Uint32 startOffset = (byteNumber-3)-(consecutiveValues * 4);
-                    for(int i=0; i<consecutiveValues+1; i++){
-                        dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(startOffset + i*4,10)+QString("($t0)"));
-                    }
+    delete byte;
+    in.close();
+    loadTileMapsDynamically();
+
+}
+
+void Memory::loadTileMapsDynamically()
+{
+    int counter = 0;
+    Uint32 loopsCounter = 1;
+    dynamicOutFileList.append("\tli\t$t7,\t0x" + QString::number(tileMapBaseAddress, 16));
+    for (map<char, CountingList>::iterator i = valuesMap.begin(); i != valuesMap.end(); i++)
+    {
+        uint value = uint(i->first);
+        const CountingList& currentList = i->second;
+        dynamicOutFileList.append("\tli\t$t5,\t" + QString::number(value));
+        for (int j = 0; j < currentList.size(); j++)
+        {
+            emit loadingNumberChanged(counter / 1024);
+            int wordsCount = currentList[j].getCount() / 4;
+            int remainingBytes = currentList[j].getCount() % 4;
+            if (wordsCount > 7) // loop
+            {
+                dynamicOutFileList.append("\taddiu\t$t0,\t$t7,\t" + QString::number(currentList[j].getValue()));
+                dynamicOutFileList.append("\tli\t$t2,\t" + QString::number((value << 24) | (value << 16) | (value << 8) | value));
+                dynamicOutFileList.append("loop" + QString::number(loopsCounter) + ":");
+                dynamicOutFileList.append("\tslti\t$t1, $t0, " + QString::number(currentList[j].getValue() + wordsCount * 4));
+                dynamicOutFileList.append("\tbeq\t$t1,\t$zero,\texloop" + QString::number(loopsCounter));
+                dynamicOutFileList.append("\tsw\t$t2,\t0($t0)");
+                dynamicOutFileList.append("\taddiu\t$t0,\t$t0,\t4");
+                dynamicOutFileList.append("\tj\tloop" + QString::number(loopsCounter));
+                dynamicOutFileList.append("exloop" + QString::number(loopsCounter) + ":");
+                loopsCounter++;
+            }
+            else if(wordsCount > 0)	// no loop
+            {
+                dynamicOutFileList.append("\tli\t$t2,\t" + QString::number((value << 24) | (value << 16) | (value << 8) | value));
+                for (int i = 0; i < wordsCount; i++)
+                {
+                    dynamicOutFileList.append("\tsw\t$t2,\t" + QString::number(currentList[j].getValue() + i * 4) + "($t7)");
                 }
-                if(loadedNumber != 0)
-                    dynamicOutFileList.append(QString("\tli\t$t1, 0x")+QString::number(loadedNumber,16));
-                previousLoadedNumber = loadedNumber;
-                consecutiveValues = 0;
-            }else{
-                consecutiveValues++;
             }
-            loadedNumber = 0;
-        }
-        byteNumber++;
 
-        if(count %1024 == 0)
-            emit loadingNumberChanged(count / 1024);
-        count++;
-    }
-
-    if(consecutiveValues > 0){
-        if(consecutiveValues > 6){
-            Uint32 startAddress = (byteNumber)-(consecutiveValues * 4)+liBaseAddress;
-            dynamicOutFileList.append("");
-            dynamicOutFileList.append(QString("\taddiu\t$t6, $zero, 0x")+QString::number(startAddress,16));
-            dynamicOutFileList.append(QString("loop") + QString::number(loopsCount) + QString(":") + QString("\tslti\t$t5, $t6, 0x")+QString::number(startAddress + (consecutiveValues * 4),16));
-            dynamicOutFileList.append(QString("\tbeq\t$t5, $zero, exit") + QString::number(loopsCount));
-            if(previousLoadedNumber == 0)
-                dynamicOutFileList.append(QString("\tsw\t$zero, 0($t6)"));
-            else
-                dynamicOutFileList.append(QString("\tsw\t$t1, 0($t6)"));
-            dynamicOutFileList.append(QString("\taddiu\t$t6, $t6, 4"));
-            dynamicOutFileList.append(QString("\tj\tloop") + QString::number(loopsCount));
-            dynamicOutFileList.append(QString("exit") + QString::number(loopsCount) + ":");
-            dynamicOutFileList.append("");
-            loopsCount++;
-        }else{
-            Uint32 startOffset = (byteNumber-3)-(consecutiveValues * 4);
-            for(int i=0; i<consecutiveValues+1; i++){
-                dynamicOutFileList.append(QString("\tsw\t$t1, ")+QString::number(startOffset + i*4,10)+QString("($t0)"));
+            if (remainingBytes)
+            {
+                for (int i = (4 * wordsCount); i < currentList[j].getCount(); i++)
+                {
+                    dynamicOutFileList.append("\tsb\t$t5,\t" + QString::number(currentList[j].getValue() + i) + "($t7)");
+                }
             }
+
+            counter += currentList[j].getCount();
+
         }
     }
+    emit loadingNumberChanged((tileMapPhysicalSize + 1023)/1024);
 }
 
 void Memory::setTileEngine(TileEngine *engine)
@@ -764,8 +757,6 @@ TileEngine* Memory::getTileEngine() const
 
 void Memory::updateKey(int keyCode, int controllerId, bool value)
 {
-
-
     if(value){
         Uint16 mask = (Uint16(1) << keyCode);
         inputMemory[controllerId] = inputMemory[controllerId] | mask;
@@ -773,6 +764,8 @@ void Memory::updateKey(int keyCode, int controllerId, bool value)
         Uint16 mask = ~(Uint16(1) << keyCode);
         inputMemory[controllerId] = inputMemory[controllerId] & mask;
     }
+
+    emit refreshInputTable();
 }
 
 void Memory::updateTilemapsDisplay()

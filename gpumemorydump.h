@@ -51,6 +51,15 @@ private slots:
 
     void on_saveTilemap_clicked();
 
+    void on_dynamicDump_clicked();
+
+    void on_checkBox_clicked();
+
+    void on_bgTilesetCheckbox_clicked();
+    void on_tilemapsCheckbox_clicked();
+    void on_spTilesetCheckbox_clicked();
+    void on_paletteCheckbox_clicked();
+    void on_oamCheckbox_clicked();
 public slots:
     void onNumberChanged(int);
     void complete();
@@ -73,6 +82,8 @@ private:
     MainWindow *mainW;
     QStringList nameList;
     int claculateMemorySize(const QVector<bool>&);
+
+    int checkedCount = 0;
 };
 
 #endif // GPUMEMORYDUMP_H

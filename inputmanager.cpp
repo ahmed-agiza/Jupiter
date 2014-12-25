@@ -30,6 +30,7 @@ InputManager::InputManager(QWidget *parent, Memory *memory) :
 
 
     connect(this,SIGNAL(buttonPressed(int,int,bool)),mem, SLOT(updateKey(int, int, bool)));
+    connect(memory, SIGNAL(refreshInputTable()), this, SLOT(refreshTable()));
     this->setWindowTitle("Input Manager");
     QPixmap pixmap;
     pixmap.load(":/joypad/icons/joypad/up.png");
@@ -126,57 +127,27 @@ InputManager::~InputManager()
 void InputManager::handleKeyPress(int key, Qt::KeyboardModifiers modifiers)
 {
     if(keyman.contains(key)){
+        qDebug() << "key: " << key << " pressed!";
         emit buttonPressed(keyman.getJoystickKeyCode(key), 0, true);
-        refreshTable();
-        //buttons[keyman.getJoystickKeyCode(key)]->setChecked(true);
     }
-/*
-    switch(key){
-    case Qt::Key_Up:
-        emit buttonPressed(UP_KEY_INDEX,0, true);
-        ui->up->setChecked(true);
-        break;
-    case Qt::Key_Down:
-        ui->down->setChecked(true);
-        break;
-    case Qt::Key_Left:
-        ui->left->setChecked(true);
-        break;
-    case Qt::Key_Right:
-        ui->right->setChecked(true);
-        break;
-    case Qt::Key_Z:
-        ui->A->setChecked(true);
-        break;
-    case Qt::Key_X:
-        ui->B->setChecked(true);
-        break;
-    case Qt::Key_A:
-        ui->l->setChecked(true);
-        break;
-    case Qt::Key_D:
-        ui->r->setChecked(true);
-        break;
-    case Qt::Key_Return:
-        ui->start->setChecked(true);
-        break;
-    case Qt::Key_Backspace:
-        ui->select->setChecked(true);
-        break;
-    }
-*/
+}
 
+void InputManager::handleKeyRelease(int key, Qt::KeyboardModifiers modifiers)
+{
+    if(keyman.contains(key)){
+        qDebug() << "key: " << key << " released!";
+        emit buttonPressed(keyman.getJoystickKeyCode(key), 0, false);
+    }
 }
 
 void InputManager::refreshTable()
 {
+    qDebug() << "Refresh table";
     unsigned int address = mem->inputMemoryBaseAddress + (joystickNumber<<1);
     Uint8 returnedbuttons0 = mem->loadByte(address);
     Uint8 returnedbuttons1 = mem->loadByte(address+1);
 
     for(int i=0; i<8; i++){
-        //ui->tableWidget->setItem(0,7-i, &items[((returnedbuttons0>>i)&1)]);
-        //ui->tableWidget->setItem(1,7-i, &items[((returnedbuttons1>>i)&1)]);
         tablePointers[0][7-i]->setText(QString::number(((returnedbuttons0>>i)&1)));
         tablePointers[1][7-i]->setText(QString::number(((returnedbuttons1>>i)&1)));
         buttons[i]->setChecked((returnedbuttons0>>i)&1);
@@ -185,47 +156,7 @@ void InputManager::refreshTable()
     buttons[9]->setChecked((returnedbuttons1>>1)&1);
 }
 
-void InputManager::handleKeyRelease(int key, Qt::KeyboardModifiers modifiers)
-{
-    if(keyman.contains(key)){
-        emit buttonPressed(keyman.getJoystickKeyCode(key), 0, false);
-        refreshTable();
-        //buttons[keyman.getJoystickKeyCode(key)]->setChecked(false);
-    }
-    /*switch(key){
-    case Qt::Key_Up:
-        ui->up->setChecked(false);
-        break;
-    case Qt::Key_Down:
-        ui->down->setChecked(false);
-        break;
-    case Qt::Key_Left:
-        ui->left->setChecked(false);
-        break;
-    case Qt::Key_Right:
-        ui->right->setChecked(false);
-        break;
-    case Qt::Key_Z:
-        ui->A->setChecked(false);
-        break;
-    case Qt::Key_X:
-        ui->B->setChecked(false);
-        break;
-    case Qt::Key_A:
-        ui->l->setChecked(false);
-        break;
-    case Qt::Key_D:
-        ui->r->setChecked(false);
-        break;
-    case Qt::Key_Return:
-        ui->start->setChecked(false);
-        break;
-    case Qt::Key_Backspace:
-        ui->select->setChecked(false);
-        break;
-    }
-*/
-}
+
 
 void InputManager::on_pushButton_pressed()
 {

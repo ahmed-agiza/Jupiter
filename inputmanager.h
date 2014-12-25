@@ -22,9 +22,10 @@ public:
     //void keyPressEvent(QKeyEvent *e);
     //void keyReleaseEvent(QKeyEvent *e);
     ~InputManager();
-    void refreshTable();
+
 private slots:
     void on_pushButton_pressed();
+    void refreshTable();
 signals:
     void buttonPressed(int,int,bool);
 private:

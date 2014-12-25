@@ -53,7 +53,8 @@ void MemoryLoading::on_pushButton_pressed()
     segmentsToLoad[5] = 1;
     segmentsToLoad[6] = 1;
     ui->progressBar->setMaximum((claculateMemorySize(segmentsToLoad) + 1024 - 1)/1024);
-    myThread = new LoadMemoryThread(this,segmentsToLoad);
+    myThread = new LoadMemoryThread(this);
+    myThread->segmentsToLoad = segmentsToLoad;
     myThread->memory = mem;
     QObject::connect(myThread, SIGNAL(loadComplete()), this, SLOT(loadComplete()));
     myThread->start();

@@ -50,7 +50,7 @@ void Tile::storeByte(unsigned int address, char byte)
     save();
 }
 
-sf::Texture Tile::getTexture() const
+const sf::Texture& Tile::getTexture() const
 {
     return texture;
 }

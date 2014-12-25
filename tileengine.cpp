@@ -14,6 +14,7 @@ TileEngine::TileEngine(QWidget* parent, const QPoint& position, const QSize& siz
     memory = mem;
     verticalScroll = &((*mRegisters)[25]);
     horizontalScroll = &((*mRegisters)[24]);
+    shouldRender = 1;
     QObject::connect(memory, SIGNAL(renderNow()), this, SLOT(repaint()));
 }
 
@@ -25,9 +26,11 @@ void TileEngine::initialize()
 
 void TileEngine::update()
 {
-    RenderWindow::clear(Color(0, 128, 128));
-    renderFrame();
-    //RenderWindow::display();
+    if(shouldRender == 1)
+    {
+        RenderWindow::clear(Color(0, 128, 128));
+        renderFrame();
+    }
 }
 
 void TileEngine::setMemory(Memory * memory)
@@ -37,6 +40,7 @@ void TileEngine::setMemory(Memory * memory)
 
 void TileEngine::renderFrame()
 {
+    MyLockGuard lck(&memory->mtx);
     qDebug() << "started";
     for (unsigned int i = (*verticalScroll) / TILE_SIZE; i < ceilDev(*verticalScroll + screenSize.y, TILE_SIZE); i++)
         for (unsigned int j = (*horizontalScroll) / TILE_SIZE; j <  ceilDev(*horizontalScroll + screenSize.x, TILE_SIZE); j++){
@@ -50,10 +54,14 @@ void TileEngine::renderFrame()
             }
         }
     qDebug() << "ended";
-
 }
 
 TileEngine::~TileEngine()
 {
 
+}
+
+void TileEngine::stopRendering()
+{
+    shouldRender = 0;
 }

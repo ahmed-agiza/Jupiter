@@ -11,6 +11,7 @@ GpuMemoryDump::GpuMemoryDump(QWidget *parent, Memory *mem, MainWindow *mainW) :
     this->mainW = mainW;
     setWindowTitle("GPU Memory Dump");
     complete();
+    checkedCount = 0;
 }
 
 GpuMemoryDump::~GpuMemoryDump()
@@ -117,7 +118,8 @@ void GpuMemoryDump::on_loadFromFilePushButton_clicked()
         segmentsToLoad[5] = ui->oamCheckbox->isChecked();
         segmentsToLoad[6] = ui->paletteCheckbox->isChecked();
         ui->progressBar->setMaximum((claculateMemorySize(segmentsToLoad) + 1024 - 1)/1024);
-        loadingThread = new LoadMemoryThread(this);
+        loadingThread = new LoadMemoryThread(this, false);
+        loadingThread->segmentsToLoad = segmentsToLoad;
         loadingThread->memory = mem;
         loadingThread->filePath = filePath;
         QObject::connect(loadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
@@ -174,7 +176,7 @@ void GpuMemoryDump::on_openPaletteViewer_clicked()
 void GpuMemoryDump::on_loadTileImages_clicked()
 {
     QString filePath = "";
-    nameList = QFileDialog::getOpenFileNames(this,tr("Open Files"),filePath,tr("Mirage Tile Images(*.mtile);; PNG File(*.png)"));
+    nameList = QFileDialog::getOpenFileNames(this,tr("Open Files"),filePath,tr("All Tile Image files(*.mtile, *.png);; Mirage Tile Images(*.mtile);; PNG File(*.png)"));
     if(nameList.size()){
         loadTilesetsThread = new LoadTilesetsThread(this,mem,ui->tilesetPushButton->text().contains("Sprites"),1,filePath,&nameList);
         QObject::connect(loadTilesetsThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
@@ -272,8 +274,107 @@ void GpuMemoryDump::on_saveTilemap_clicked()
         tilemapSavingThread = new TilemapSavingThread(this,mem,filePath);
         QObject::connect(tilemapSavingThread, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
         QObject::connect(tilemapSavingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
-        ui->progressBar->setMaximum(mem->tileMapPhysicalSize);
+        ui->progressBar->setMaximum((mem->tileMapPhysicalSize + 1023) / 1024);
         disableButtons();
         tilemapSavingThread->start();
+    }
+}
+
+
+
+void GpuMemoryDump::on_dynamicDump_clicked()
+{
+    QString filePath = "";
+    filePath = QFileDialog::getOpenFileName(this, tr("Open File"),filePath,tr("Binary File (*.bin)"));
+    if(filePath.size()){
+        QObject::connect(mem, SIGNAL(loadingNumberChanged(int)), this, SLOT(onNumberChanged(int)));
+        disableButtons();
+        ui->progressBar->setMaximum((mem->tileMapPhysicalSize + 1024 - 1)/1024);
+        loadingThread = new LoadMemoryThread(this, true);
+        loadingThread->memory = mem;
+        loadingThread->filePath = filePath;
+        QObject::connect(mem, SIGNAL(genratingCode()), this, SLOT(complete()));
+        loadingThread->start();
+    }
+}
+
+void GpuMemoryDump::on_checkBox_clicked()
+{
+    bool checked = ui->checkBox->isChecked();
+    checkedCount = (checked)? 5:0;
+    ui->bgTilesetCheckbox->setChecked(checked);
+    ui->spTilesetCheckbox->setChecked(checked);
+    ui->tilemapsCheckbox->setChecked(checked);
+    ui->paletteCheckbox->setChecked(checked);
+    ui->oamCheckbox->setChecked(checked);
+}
+
+void GpuMemoryDump::on_spTilesetCheckbox_clicked()
+{
+    if(ui->spTilesetCheckbox->isChecked() == false){
+        checkedCount--;
+        ui->checkBox->setChecked(false);
+    }
+    else{
+        checkedCount++;
+        if(checkedCount == 5){
+            ui->checkBox->setChecked(true);
+        }
+    }
+}
+
+void GpuMemoryDump::on_bgTilesetCheckbox_clicked()
+{
+    if(ui->bgTilesetCheckbox->isChecked() == false){
+        checkedCount--;
+        ui->checkBox->setChecked(false);
+    }
+    else{
+        checkedCount++;
+        if(checkedCount == 5){
+            ui->checkBox->setChecked(true);
+        }
+    }
+}
+
+void GpuMemoryDump::on_tilemapsCheckbox_clicked()
+{
+    if(ui->tilemapsCheckbox->isChecked() == false){
+        checkedCount--;
+        ui->checkBox->setChecked(false);
+    }
+    else{
+        checkedCount++;
+        if(checkedCount == 5){
+            ui->checkBox->setChecked(true);
+        }
+    }
+}
+
+void GpuMemoryDump::on_oamCheckbox_clicked()
+{
+    if(ui->oamCheckbox->isChecked() == false){
+        checkedCount--;
+        ui->checkBox->setChecked(false);
+    }
+    else{
+        checkedCount++;
+        if(checkedCount == 5){
+            ui->checkBox->setChecked(true);
+        }
+    }
+}
+
+void GpuMemoryDump::on_paletteCheckbox_clicked()
+{
+    if(ui->paletteCheckbox->isChecked() == false){
+        checkedCount--;
+        ui->checkBox->setChecked(false);
+    }
+    else{
+        checkedCount++;
+        if(checkedCount == 5){
+            ui->checkBox->setChecked(true);
+        }
     }
 }

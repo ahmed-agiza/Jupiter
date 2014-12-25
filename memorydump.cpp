@@ -61,7 +61,8 @@ void MemoryDump::on_loadFromFilePushButton_clicked()
         segmentsToLoad[0] = ui->textSegmentCheckBox->isChecked();
         segmentsToLoad[1] = ui->dataSegmentCheckBox->isChecked();
         ui->progressBar->setMaximum((claculateMemorySize(segmentsToLoad) + 1024 - 1)/1024);
-        loadingThread = new LoadMemoryThread(this,segmentsToLoad);
+        loadingThread = new LoadMemoryThread(this);
+        loadingThread->segmentsToLoad = segmentsToLoad;
         loadingThread->memory = mem;
         loadingThread->filePath = filePath;
         QObject::connect(loadingThread, SIGNAL(loadComplete()), this, SLOT(complete()));
