@@ -36,6 +36,7 @@ void TileEngine::update()
 void TileEngine::setMemory(Memory * memory)
 {
     this->memory = memory;
+    // hello
 }
 
 void TileEngine::renderFrame()
