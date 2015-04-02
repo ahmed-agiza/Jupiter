@@ -26,7 +26,7 @@ void TileEngine::initialize()
 
 void TileEngine::update()
 {
-    if(shouldRender == 1)
+    if(shouldRender.load() == 1)
     {
         RenderWindow::clear(Color(0, 128, 128));
         renderFrame();

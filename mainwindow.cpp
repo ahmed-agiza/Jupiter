@@ -67,6 +67,7 @@ QMap<int, int> tempMap;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
+
     setCentralWidget(ui->dockCode);
     installEventFilter(this);
     setMouseTracking(true);

@@ -14,7 +14,7 @@ public:
 
     void lock()
     {
-        while(x == 1);
+        while(x.load() == 1);
         x = 1;
     }
 
